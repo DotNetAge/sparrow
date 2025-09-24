@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
-	"sort"
 	"strings"
 	"time"
 
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/errs"
 	"github.com/DotNetAge/sparrow/pkg/usecase"
+	"github.com/DotNetAge/sparrow/pkg/utils"
 
 	"github.com/dgraph-io/badger/v4"
 )
@@ -748,26 +748,9 @@ func (r *BadgerRepository[T]) compareField(fieldValue interface{}, operator stri
 }
 
 // sortEntities 对实体列表进行排序
+// 使用通用的排序工具函数，简化排序逻辑
 func (r *BadgerRepository[T]) sortEntities(entities []T, sortFields []usecase.SortField) {
-	if len(sortFields) == 0 {
-		return
-	}
-
-	sort.SliceStable(entities, func(i, j int) bool {
-		for _, sortField := range sortFields {
-			fieldI := r.getFieldValue(entities[i], sortField.Field)
-			fieldJ := r.getFieldValue(entities[j], sortField.Field)
-
-			if fieldI != fieldJ {
-				if sortField.Ascending {
-					return fmt.Sprintf("%v", fieldI) < fmt.Sprintf("%v", fieldJ)
-				} else {
-					return fmt.Sprintf("%v", fieldI) > fmt.Sprintf("%v", fieldJ)
-				}
-			}
-		}
-		return false
-	})
+	utils.SortEntities(entities, sortFields, false)
 }
 
 // getFieldValue 使用反射获取字段值

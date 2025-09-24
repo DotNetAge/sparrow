@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -13,6 +12,7 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/errs"
 	"github.com/DotNetAge/sparrow/pkg/usecase"
+	"github.com/DotNetAge/sparrow/pkg/utils"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -796,62 +796,7 @@ func (r *RedisRepository[T]) getFieldValue(entityValue reflect.Value, fieldName 
 }
 
 // sortEntities 对实体进行排序
+// 使用通用的排序工具函数，简化排序逻辑
 func (r *RedisRepository[T]) sortEntities(entities []T, sortFields []usecase.SortField) {
-	if len(sortFields) == 0 {
-		// 默认按创建时间降序排序
-		sort.SliceStable(entities, func(i, j int) bool {
-			return entities[i].GetCreatedAt().After(entities[j].GetCreatedAt())
-		})
-		return
-	}
-
-	sort.SliceStable(entities, func(i, j int) bool {
-		for _, sortField := range sortFields {
-			entityIValue := reflect.ValueOf(entities[i])
-			entityJValue := reflect.ValueOf(entities[j])
-
-			if entityIValue.Kind() == reflect.Ptr {
-				entityIValue = entityIValue.Elem()
-			}
-			if entityJValue.Kind() == reflect.Ptr {
-				entityJValue = entityJValue.Elem()
-			}
-
-			fieldIValue := r.getFieldValue(entityIValue, sortField.Field)
-			fieldJValue := r.getFieldValue(entityJValue, sortField.Field)
-
-			if !fieldIValue.IsValid() || !fieldJValue.IsValid() {
-				continue
-			}
-
-			// 根据字段类型进行比较
-			var lessThan bool
-			switch fieldIValue.Kind() {
-			case reflect.String:
-				lessThan = fieldIValue.String() < fieldJValue.String()
-			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-				lessThan = fieldIValue.Int() < fieldJValue.Int()
-			case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-				lessThan = fieldIValue.Uint() < fieldJValue.Uint()
-			case reflect.Float32, reflect.Float64:
-				lessThan = fieldIValue.Float() < fieldJValue.Float()
-			case reflect.Bool:
-				lessThan = !fieldIValue.Bool() && fieldJValue.Bool()
-			case reflect.Struct:
-				// 尝试处理time.Time类型
-				if fieldIValue.Type().String() == "time.Time" && fieldJValue.Type().String() == "time.Time" {
-					timeI := fieldIValue.Interface().(time.Time)
-					timeJ := fieldJValue.Interface().(time.Time)
-					lessThan = timeI.Before(timeJ)
-				}
-			}
-
-			if sortField.Ascending && lessThan {
-				return true
-			} else if !sortField.Ascending && !lessThan {
-				return true
-			}
-		}
-		return false
-	})
+	utils.SortEntities(entities, sortFields, true)
 }

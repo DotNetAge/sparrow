@@ -9,20 +9,19 @@ import (
 
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/errs"
-	"github.com/DotNetAge/sparrow/pkg/utils"
+	"github.com/DotNetAge/sparrow/pkg/logger"
 
 	"github.com/jmoiron/sqlx"
-	"go.uber.org/zap"
 )
 
 // PostgreSQLEventStore PostgreSQL事件存储实现
 type PostgreSQLEventStore struct {
 	db     *sqlx.DB
-	logger *zap.Logger
+	logger *logger.Logger
 }
 
 // NewPostgreSQLEventStore 创建PostgreSQL事件存储实例
-func NewPostgreSQLEventStore(db *sqlx.DB, logger *zap.Logger) (*PostgreSQLEventStore, error) {
+func NewPostgreSQLEventStore(db *sqlx.DB, logger *logger.Logger) (*PostgreSQLEventStore, error) {
 	if err := createEventStoreTables(db); err != nil {
 		return nil, fmt.Errorf("failed to create event store tables: %w", err)
 	}
@@ -81,7 +80,7 @@ func (s *PostgreSQLEventStore) SaveEvents(ctx context.Context, aggregateID strin
 	defer func() {
 		if err := tx.Rollback(); err != nil && err != sql.ErrTxDone {
 			if s.logger != nil {
-				s.logger.Error("failed to rollback transaction", zap.Error(err))
+				s.logger.Error("failed to rollback transaction", "error", err)
 			}
 		}
 	}()
@@ -348,7 +347,7 @@ func (s *PostgreSQLEventStore) SaveEventsBatch(ctx context.Context, events map[s
 	defer func() {
 		if err := tx.Rollback(); err != nil && err != sql.ErrTxDone {
 			if s.logger != nil {
-				s.logger.Error("failed to rollback transaction", zap.Error(err))
+				s.logger.Error("failed to rollback transaction", "error", err)
 			}
 		}
 	}()
@@ -398,6 +397,7 @@ func (s *PostgreSQLEventStore) SaveEventsBatch(ctx context.Context, events map[s
 
 // deserializeEvents 反序列化事件数据
 func (s *PostgreSQLEventStore) deserializeEvents(eventsData []json.RawMessage) ([]entity.DomainEvent, error) {
+	// 创建结果切片
 	events := make([]entity.DomainEvent, 0, len(eventsData))
 
 	for _, data := range eventsData {
@@ -407,17 +407,9 @@ func (s *PostgreSQLEventStore) deserializeEvents(eventsData []json.RawMessage) (
 			return nil, fmt.Errorf("failed to unmarshal event data: %w", err)
 		}
 
-		// 创建符合DomainEvent接口的事件对象
-		domainEvent := &entity.BaseEvent{
-			Id:            utils.ToString(eventData["id"]),
-			AggregateID:   utils.ToString(eventData["aggregate_id"]),
-			EventType:     utils.ToString(eventData["event_type"]),
-			AggregateType: utils.ToString(eventData["aggregate_type"]),
-			Timestamp:     utils.ParseTime(eventData["timestamp"]),
-			Version:       utils.ToInt(eventData["version"]),
-			Payload:       eventData,
-		}
-		events = append(events, domainEvent)
+		// 使用通用函数创建事件对象
+	domainEvent := DecodeEventFromMap(eventData)
+	events = append(events, domainEvent)
 	}
 
 	return events, nil

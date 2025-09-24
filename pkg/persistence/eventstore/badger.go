@@ -47,15 +47,11 @@ func (s *BadgerEventStore) SaveEvents(ctx context.Context, aggregateID string, e
 		// 检查当前版本
 		currentVersion, err := s.getCurrentVersion(txn, aggregateID)
 		if err != nil {
-			return fmt.Errorf("failed to get current version: %w", err)
+			return errs.NewEventStoreError("version_check", "failed to get current version", aggregateID, err)
 		}
 
 		if expectedVersion != -1 && currentVersion != expectedVersion {
-			return &errs.EventStoreError{
-				Type:      "concurrency_conflict",
-				Message:   fmt.Sprintf("expected version %d, got %d", expectedVersion, currentVersion),
-				Aggregate: aggregateID,
-			}
+			return errs.NewConcurrencyConflictError(aggregateID, expectedVersion, currentVersion)
 		}
 
 		// 保存事件
@@ -64,7 +60,7 @@ func (s *BadgerEventStore) SaveEvents(ctx context.Context, aggregateID string, e
 
 			eventData, err := json.Marshal(evt)
 			if err != nil {
-				return fmt.Errorf("failed to marshal event: %w", err)
+				return errs.NewEventStoreError("event_marshal", "failed to marshal event", aggregateID, err)
 			}
 
 			eventKey := s.getEventKey(aggregateID, version)
@@ -79,11 +75,11 @@ func (s *BadgerEventStore) SaveEvents(ctx context.Context, aggregateID string, e
 
 			metaData, err := json.Marshal(eventMeta)
 			if err != nil {
-				return fmt.Errorf("failed to marshal event metadata: %w", err)
+				return errs.NewEventStoreError("metadata_marshal", "failed to marshal event metadata", aggregateID, err)
 			}
 
 			if err := txn.Set(eventKey, metaData); err != nil {
-				return fmt.Errorf("failed to save event: %w", err)
+				return errs.NewEventStoreError("event_save", "failed to save event", aggregateID, err)
 			}
 		}
 
@@ -91,7 +87,7 @@ func (s *BadgerEventStore) SaveEvents(ctx context.Context, aggregateID string, e
 		versionKey := s.getVersionKey(aggregateID)
 		newVersion := currentVersion + len(events)
 		if err := txn.Set(versionKey, []byte(strconv.Itoa(newVersion))); err != nil {
-			return fmt.Errorf("failed to update version: %w", err)
+			return errs.NewEventStoreError("version_update", "failed to update version", aggregateID, err)
 		}
 
 		return nil
@@ -467,77 +463,19 @@ func (s *BadgerEventStore) parseVersionFromKey(key string) (int, error) {
 	return strconv.Atoi(string(parts[lastColon+1:]))
 }
 
-// 序列化/反序列化方法
+// deserializeEvent 反序列化事件
 func (s *BadgerEventStore) deserializeEvent(data []byte) (entity.DomainEvent, error) {
-	// 这里需要根据具体的项目事件类型进行反序列化
-	// 使用BaseEvent实现DomainEvent接口
-	var eventData map[string]interface{}
-	if err := json.Unmarshal(data, &eventData); err != nil {
-		return nil, err
+	// 使用通用的DecodeEvent函数替换自己实现的反序列化逻辑
+	event, err := DecodeEvent(data)
+	if err != nil {
+		return nil, fmt.Errorf("failed to deserialize event: %w", err)
 	}
-
-	// 从eventData中提取必要的字段
-	id := ""
-	if val, ok := eventData["id"]; ok {
-		id = fmt.Sprintf("%v", val)
-	}
-
-	aggregateID := ""
-	if val, ok := eventData["aggregate_id"]; ok {
-		aggregateID = fmt.Sprintf("%v", val)
-	}
-
-	aggregateType := ""
-	if val, ok := eventData["aggregate_type"]; ok {
-		aggregateType = fmt.Sprintf("%v", val)
-	}
-
-	eventType := ""
-	if val, ok := eventData["event_type"]; ok {
-		eventType = fmt.Sprintf("%v", val)
-	}
-
-	version := 0
-	if val, ok := eventData["version"]; ok {
-		if v, ok := val.(float64); ok {
-			version = int(v)
-		}
-	}
-
-	timestamp := time.Now()
-	if val, ok := eventData["timestamp"]; ok {
-		if t, ok := val.(string); ok {
-			if parsed, err := time.Parse(time.RFC3339, t); err == nil {
-				timestamp = parsed
-			}
-		} else if t, ok := val.(time.Time); ok {
-			timestamp = t
-		}
-	}
-
-	// 返回BaseEvent，它实现了DomainEvent接口
-	return &entity.BaseEvent{
-		Id:            id,
-		AggregateID:   aggregateID,
-		AggregateType: aggregateType,
-		EventType:     eventType,
-		Version:       version,
-		Timestamp:     timestamp,
-		Payload:       eventData,
-	}, nil
+	return event, nil
 }
 
 // deserializeEvents 方法已移除，因为未被使用
 
-// EventMeta 事件元数据结构
-type EventMeta struct {
-	AggregateID   string          `json:"aggregate_id"`
-	AggregateType string          `json:"aggregate_type"`
-	EventType     string          `json:"event_type"`
-	Version       int             `json:"version"`
-	CreatedAt     time.Time       `json:"created_at"`
-	EventData     json.RawMessage `json:"event_data"`
-}
+
 
 // SnapshotMeta 快照元数据结构
 type SnapshotMeta struct {

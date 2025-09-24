@@ -9,11 +9,10 @@ import (
 
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/errs"
+	"github.com/DotNetAge/sparrow/pkg/logger"
 	"github.com/DotNetAge/sparrow/pkg/usecase"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/lib/pq"
-	"go.uber.org/zap"
 )
 
 // PostgresRepository PostgreSQL仓储实现
@@ -25,7 +24,7 @@ type PostgresRepository[T entity.Entity] struct {
 	db         *sqlx.DB
 	tableName  string
 	entityType string
-	logger     *zap.Logger
+	logger     *logger.Logger
 }
 
 // NewPostgresRepository 创建PostgreSQL仓储实例
@@ -35,7 +34,7 @@ type PostgresRepository[T entity.Entity] struct {
 //   - logger: 日志记录器
 //
 // 返回: 初始化的PostgreSQL仓储实例
-func NewPostgresRepository[T entity.Entity](db *sqlx.DB, tableName string, logger *zap.Logger) *PostgresRepository[T] {
+func NewPostgresRepository[T entity.Entity](db *sqlx.DB, tableName string, logger *logger.Logger) *PostgresRepository[T] {
 	var zero T
 	entityType := fmt.Sprintf("%T", zero)
 
@@ -61,7 +60,7 @@ func (r *PostgresRepository[T]) SaveBatch(ctx context.Context, entities []T) err
 	defer func() {
 		if err := tx.Rollback(); err != nil && err != sql.ErrTxDone {
 			if r.logger != nil {
-				r.logger.Error("Failed to rollback transaction", zap.Error(err))
+				r.logger.Error("Failed to rollback transaction", "error", err)
 			}
 		}
 	}()
@@ -70,7 +69,7 @@ func (r *PostgresRepository[T]) SaveBatch(ctx context.Context, entities []T) err
 		if entity.GetID() == "" {
 			if err := tx.Rollback(); err != nil && err != sql.ErrTxDone {
 				if r.logger != nil {
-					r.logger.Error("Failed to rollback transaction", zap.Error(err))
+					r.logger.Error("Failed to rollback transaction", "error", err)
 				}
 			}
 			return &errs.RepositoryError{
@@ -83,18 +82,18 @@ func (r *PostgresRepository[T]) SaveBatch(ctx context.Context, entities []T) err
 		exists, err := r.existsInTx(ctx, tx, entity.GetID())
 		if err != nil {
 			if rollbackErr := tx.Rollback(); rollbackErr != nil && rollbackErr != sql.ErrTxDone {
-				if r.logger != nil {
-					r.logger.Error("Failed to rollback transaction", zap.Error(rollbackErr))
-				}
+			if r.logger != nil {
+				r.logger.Error("Failed to rollback transaction", "error", rollbackErr)
 			}
-			return err
+		}
+		return err
 		}
 
 		if exists {
 			if err := r.updateInTx(ctx, tx, entity); err != nil {
 				if rollbackErr := tx.Rollback(); rollbackErr != nil && rollbackErr != sql.ErrTxDone {
 					if r.logger != nil {
-						r.logger.Error("Failed to rollback transaction", zap.Error(rollbackErr))
+						r.logger.Error("Failed to rollback transaction", "error", rollbackErr)
 					}
 				}
 				return err
@@ -103,7 +102,7 @@ func (r *PostgresRepository[T]) SaveBatch(ctx context.Context, entities []T) err
 			if err := r.insertInTx(ctx, tx, entity); err != nil {
 				if rollbackErr := tx.Rollback(); rollbackErr != nil && rollbackErr != sql.ErrTxDone {
 					if r.logger != nil {
-						r.logger.Error("Failed to rollback transaction", zap.Error(rollbackErr))
+						r.logger.Error("Failed to rollback transaction", "error", rollbackErr)
 					}
 				}
 				return err
@@ -122,17 +121,13 @@ func (r *PostgresRepository[T]) SaveBatch(ctx context.Context, entities []T) err
 // 如果实体ID已存在则执行更新，否则执行插入
 func (r *PostgresRepository[T]) Save(ctx context.Context, entity T) error {
 	if entity.GetID() == "" {
-		return &errs.RepositoryError{
-			EntityType: r.entityType,
-			Operation:  "save",
-			Message:    "entity ID cannot be empty",
-		}
+		return errs.NewRepositoryInvalidError(r.entityType, "save", "entity ID cannot be empty")
 	}
 
 	// 检查实体是否存在
 	exists, err := r.Exists(ctx, entity.GetID())
 	if err != nil {
-		return fmt.Errorf("failed to check existence: %w", err)
+		return errs.NewRepositoryError(r.entityType, entity.GetID(), "save", "failed to check existence", err)
 	}
 
 	if exists {
@@ -273,7 +268,7 @@ func (r *PostgresRepository[T]) FindByIDs(ctx context.Context, ids []string) ([]
 		ORDER BY created_at DESC`, r.tableName)
 
 	var entities []T
-	err := r.db.SelectContext(ctx, &entities, query, pq.Array(ids))
+	err := r.db.SelectContext(ctx, &entities, query, ids)
 	return entities, err
 }
 
@@ -288,7 +283,7 @@ func (r *PostgresRepository[T]) DeleteBatch(ctx context.Context, ids []string) e
 		SET deleted_at = NOW() 
 		WHERE id = ANY($1) AND deleted_at IS NULL`, r.tableName)
 
-	_, err := r.db.ExecContext(ctx, query, pq.Array(ids))
+	_, err := r.db.ExecContext(ctx, query, ids)
 	return err
 }
 
@@ -709,7 +704,7 @@ func (r *PostgresRepository[T]) buildConditionClause(condition usecase.QueryCond
 			for _, v := range slice {
 				strSlice = append(strSlice, fmt.Sprintf("%v", v))
 			}
-			return fmt.Sprintf("%s = ANY($%d)", field, paramIndex), pq.Array(strSlice)
+			return fmt.Sprintf("%s = ANY($%d)", field, paramIndex), strSlice
 		}
 		return "", nil
 	case "IS_NULL":

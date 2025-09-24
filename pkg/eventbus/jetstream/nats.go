@@ -11,9 +11,9 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/config"
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/eventbus"
+	"github.com/DotNetAge/sparrow/pkg/logger"
 
 	"github.com/nats-io/nats.go"
-	"go.uber.org/zap"
 )
 
 // jetStreamBus 基于NATS JetStream的事件总线
@@ -24,13 +24,13 @@ type jetStreamBus struct {
 	name   string
 	subs   map[string]*nats.Subscription
 	mu     sync.RWMutex
-	logger *zap.Logger
+	logger *logger.Logger
 }
 
 // 确保jetStreamBus实现了EventBus接口
 var _ eventbus.EventBus = (*jetStreamBus)(nil)
 
-// NewEventBus 创建事件总线实例
+// NewJetStreamEventBus 创建事件总线实例
 func NewJetStreamEventBus(cfg *config.NATsConfig) (eventbus.EventBus, error) {
 	// 连接到NATS服务器
 	nc, err := nats.Connect(cfg.NATSURL)
@@ -44,8 +44,15 @@ func NewJetStreamEventBus(cfg *config.NATsConfig) (eventbus.EventBus, error) {
 		return nil, fmt.Errorf("get jetstream context: %w", err)
 	}
 
-	// 创建zap logger
-	logger, _ := zap.NewProduction()
+	// 创建日志实例
+	logConfig := &config.LogConfig{
+		Level:  "info",
+		Format: "console",
+	}
+	logger, err := logger.NewLogger(logConfig)
+	if err != nil {
+		return nil, fmt.Errorf("create logger: %w", err)
+	}
 
 	return &jetStreamBus{
 		js:     js,
@@ -93,29 +100,62 @@ func (b *jetStreamBus) Sub(eventType string, handler handlers.EventHandler) erro
 		var eventData map[string]interface{}
 		if err := json.Unmarshal(msg.Data, &eventData); err != nil {
 			if err := msg.Nak(); err != nil {
-				b.logger.Error("Failed to Nak message", zap.Error(err))
+				b.logger.Error("Failed to Nak message", "error", err)
 			}
 			return
 		}
 
 		// 从事件数据中提取必要信息
-		// 注意：这里我们不尝试重建原始的事件对象，因为这需要知道具体的事件类型
-		// 在实际使用中，事件处理器应该知道如何处理这种通用的事件数据
-		ctx := context.Background()
-		if err := handler(ctx, &entity.GenericEvent{
-			Id:        eventData["id"].(string),
-			EventType: eventData["event_type"].(string),
-			Timestamp: time.Now(), // 在实际实现中，应该从eventData中解析时间
-			Payload:   eventData,
-		}); err != nil {
+		// 安全地进行类型断言
+		id, ok := eventData["id"].(string)
+		if !ok {
+			b.logger.Error("Invalid event ID format")
 			if err := msg.Nak(); err != nil {
-				b.logger.Error("Failed to Nak message", zap.Error(err))
+				b.logger.Error("Failed to Nak message", "error", err)
 			}
 			return
 		}
 
+		eventType, ok := eventData["event_type"].(string)
+		if !ok {
+			b.logger.Error("Invalid event type format")
+			if err := msg.Nak(); err != nil {
+				b.logger.Error("Failed to Nak message", "error", err)
+			}
+			return
+		}
+
+		// 从事件数据中解析时间戳
+		timestamp := time.Now()
+		if tsStr, ok := eventData["timestamp"].(string); ok {
+			if ts, err := time.Parse(time.RFC3339, tsStr); err == nil {
+				timestamp = ts
+			} else if ts, ok := eventData["timestamp"].(float64); ok {
+				timestamp = time.Unix(int64(ts), 0)
+			}
+		}
+
+		// 创建GenericEvent对象
+		event := &entity.GenericEvent{
+			Id:        id,
+			EventType: eventType,
+			Timestamp: timestamp,
+			Payload:   eventData,
+		}
+
+		// 处理事件
+		ctx := context.Background()
+		if err := handler(ctx, event); err != nil {
+			b.logger.Error("Failed to handle event", "error", err, "event_type", eventType)
+			if err := msg.Nak(); err != nil {
+				b.logger.Error("Failed to Nak message", "error", err)
+			}
+			return
+		}
+
+		// 确认消息已处理
 		if err := msg.Ack(); err != nil {
-			b.logger.Error("Failed to Ack message", zap.Error(err))
+			b.logger.Error("Failed to Ack message", "error", err)
 		}
 	}, nats.Durable(consumerName))
 
@@ -151,15 +191,13 @@ func (b *jetStreamBus) Close() error {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
-	var errs []error
+	var lastErr error
 	for name, sub := range b.subs {
 		if err := sub.Unsubscribe(); err != nil {
-			errs = append(errs, fmt.Errorf("failed to unsubscribe from %s: %w", name, err))
+			b.logger.Error("Failed to unsubscribe", "name", name, "error", err)
+			lastErr = err // 记录最后一个错误，但继续尝试关闭其他订阅
 		}
 		delete(b.subs, name)
 	}
-	if len(errs) > 0 {
-		return fmt.Errorf("close event bus: %v", errs)
-	}
-	return nil
+	return lastErr
 }

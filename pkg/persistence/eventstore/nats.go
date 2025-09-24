@@ -12,7 +12,6 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/errs"
 	"github.com/DotNetAge/sparrow/pkg/logger"
-	"github.com/DotNetAge/sparrow/pkg/utils"
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
@@ -105,15 +104,11 @@ func (s *NATSEventStore) SaveEvents(ctx context.Context, aggregateID string, eve
 	// 获取当前版本
 	currentVersion, err := s.GetAggregateVersion(ctx, aggregateID)
 	if err != nil {
-		return fmt.Errorf("failed to get current version: %w", err)
+		return errs.NewEventStoreError("version_check", "failed to get current version", aggregateID, err)
 	}
 
 	if expectedVersion != -1 && currentVersion != expectedVersion {
-		return &errs.EventStoreError{
-			Type:      "concurrency_conflict",
-			Message:   fmt.Sprintf("expected version %d, got %d", expectedVersion, currentVersion),
-			Aggregate: aggregateID,
-		}
+		return errs.NewConcurrencyConflictError(aggregateID, expectedVersion, currentVersion)
 	}
 
 	// 发布事件到JetStream
@@ -152,7 +147,7 @@ func (s *NATSEventStore) SaveEvents(ctx context.Context, aggregateID string, eve
 	newVersion := currentVersion + len(events)
 	_, err = s.bucket.Put(ctx, versionKey, []byte(strconv.Itoa(newVersion)))
 	if err != nil {
-		return fmt.Errorf("failed to update version: %w", err)
+		return errs.NewEventStoreError("version_update", "failed to update version", aggregateID, err)
 	}
 
 	return nil
@@ -180,13 +175,13 @@ func (s *NATSEventStore) getEventsFromVersion(ctx context.Context, aggregateID s
 		DeliverPolicy: jetstream.DeliverAllPolicy,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to create consumer: %w", err)
+		return nil, errs.NewEventStoreError("consumer_creation", "failed to create consumer", aggregateID, err)
 	}
 
 	// 获取消息
 	messages, err := consumer.Fetch(1000) // 限制单次获取数量
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch messages: %w", err)
+		return nil, errs.NewEventStoreError("message_fetch", "failed to fetch messages", aggregateID, err)
 	}
 
 	var events []entity.DomainEvent
@@ -202,32 +197,13 @@ func (s *NATSEventStore) getEventsFromVersion(ctx context.Context, aggregateID s
 		}
 
 		if currentVersion >= fromVersion {
-			// 解析事件数据
-			eventData := eventMsg["event_data"].(string)
-			eventType := eventMsg["event_type"].(string)
-			version := int(eventMsg["version"].(float64))
-			timestamp := int64(eventMsg["timestamp"].(float64))
-
-			// 解析事件体为map
-			var eventBody map[string]interface{}
-			if err := json.Unmarshal([]byte(eventData), &eventBody); err != nil {
+			domainEvent, err := s.deserializeEventFromNATS(eventMsg, aggregateID)
+			if err != nil {
 				if err := msg.Nak(); err != nil {
 					s.logger.Error("Failed to Nak message", "error", err)
 				}
 				continue
 			}
-
-			// 构建DomainEvent对象
-			domainEvent := &entity.BaseEvent{
-				Id:            utils.ToString(eventBody["id"]),
-				AggregateID:   aggregateID,
-				EventType:     eventType,
-				AggregateType: utils.ToString(eventBody["aggregateType"]),
-				Payload:       eventBody,
-				Version:       version,
-				Timestamp:     time.Unix(timestamp, 0),
-			}
-
 			events = append(events, domainEvent)
 		}
 
@@ -238,6 +214,52 @@ func (s *NATSEventStore) getEventsFromVersion(ctx context.Context, aggregateID s
 	}
 
 	return events, nil
+}
+
+// deserializeEventFromNATS 从NATS消息中反序列化事件
+func (s *NATSEventStore) deserializeEventFromNATS(eventMsg map[string]interface{}, aggregateID string) (entity.DomainEvent, error) {
+	// 解析事件数据
+	eventData, ok := eventMsg["event_data"].(string)
+	if !ok {
+		return nil, fmt.Errorf("invalid event_data format")
+	}
+	
+	eventType, ok := eventMsg["event_type"].(string)
+	if !ok {
+		return nil, fmt.Errorf("invalid event_type format")
+	}
+	
+	version, ok := eventMsg["version"].(float64)
+	if !ok {
+		return nil, fmt.Errorf("invalid version format")
+	}
+	
+	timestamp, ok := eventMsg["timestamp"].(float64)
+	if !ok {
+		return nil, fmt.Errorf("invalid timestamp format")
+	}
+
+	// 解析事件体为map
+	var eventBody map[string]interface{}
+	if err := json.Unmarshal([]byte(eventData), &eventBody); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal event body: %w", err)
+	}
+
+	// 使用通用函数创建基础事件对象
+	baseEvent := DecodeEventFromMap(eventBody)
+	
+	// 强制转换为BaseEvent指针以设置额外字段
+	if baseEventImpl, ok := baseEvent.(*entity.BaseEvent); ok {
+		// 从NATS消息中覆盖必要字段
+		if aggregateID != "" {
+			baseEventImpl.AggregateID = aggregateID
+		}
+		baseEventImpl.EventType = eventType
+		baseEventImpl.Version = int(version)
+		baseEventImpl.Timestamp = time.Unix(int64(timestamp), 0)
+	}
+
+	return baseEvent, nil
 }
 
 // GetEventsByType 按事件类型获取事件
@@ -268,32 +290,22 @@ func (s *NATSEventStore) GetEventsByType(ctx context.Context, eventType string) 
 		}
 
 		if eventMsg["event_type"].(string) == eventType {
-			// 解析事件数据
-			eventData := eventMsg["event_data"].(string)
-			aggregateID := eventMsg["aggregate_id"].(string)
-			version := int(eventMsg["version"].(float64))
-			timestamp := int64(eventMsg["timestamp"].(float64))
-
-			// 解析事件体为map
-			var eventBody map[string]interface{}
-			if err := json.Unmarshal([]byte(eventData), &eventBody); err != nil {
+			// 从消息中获取aggregateID
+			aggregateID, ok := eventMsg["aggregate_id"].(string)
+			if !ok {
 				if err := msg.Nak(); err != nil {
 					s.logger.Error("Failed to Nak message", "error", err)
 				}
 				continue
 			}
-
-			// 构建DomainEvent对象
-			domainEvent := &entity.BaseEvent{
-				Id:            utils.ToString(eventMsg["id"]),
-				AggregateID:   aggregateID,
-				EventType:     eventType,
-				AggregateType: utils.ToString(eventBody["aggregateType"]),
-				Payload:       eventBody,
-				Version:       version,
-				Timestamp:     time.Unix(timestamp, 0),
+			
+			domainEvent, err := s.deserializeEventFromNATS(eventMsg, aggregateID)
+			if err != nil {
+				if err := msg.Nak(); err != nil {
+					s.logger.Error("Failed to Nak message", "error", err)
+				}
+				continue
 			}
-
 			events = append(events, domainEvent)
 		}
 		if err := msg.Ack(); err != nil {
@@ -338,31 +350,13 @@ func (s *NATSEventStore) GetEventsByTimeRange(ctx context.Context, aggregateID s
 
 		timestamp := int64(eventMsg["timestamp"].(float64))
 		if timestamp >= fromUnix && timestamp <= toUnix {
-			// 解析事件数据
-			eventData := eventMsg["event_data"].(string)
-			eventType := eventMsg["event_type"].(string)
-			version := int(eventMsg["version"].(float64))
-
-			// 解析事件体为map
-			var eventBody map[string]interface{}
-			if err := json.Unmarshal([]byte(eventData), &eventBody); err != nil {
+			domainEvent, err := s.deserializeEventFromNATS(eventMsg, aggregateID)
+			if err != nil {
 				if err := msg.Nak(); err != nil {
 					s.logger.Error("Failed to Nak message", "error", err)
 				}
 				continue
 			}
-
-			// 构建DomainEvent对象
-			domainEvent := &entity.BaseEvent{
-				Id:            utils.ToString(eventBody["id"]),
-				AggregateID:   aggregateID,
-				EventType:     eventType,
-				AggregateType: utils.ToString(eventBody["aggregateType"]),
-				Payload:       eventBody,
-				Version:       version,
-				Timestamp:     time.Unix(timestamp, 0),
-			}
-
 			events = append(events, domainEvent)
 		}
 		if err := msg.Ack(); err != nil {

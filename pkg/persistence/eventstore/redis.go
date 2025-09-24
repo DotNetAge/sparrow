@@ -10,7 +10,6 @@ import (
 
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/errs"
-	"github.com/DotNetAge/sparrow/pkg/utils"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -114,6 +113,11 @@ func (s *RedisEventStore) getEvents(ctx context.Context, aggregateID string) ([]
 		return []entity.DomainEvent{}, nil
 	}
 
+	return s.deserializeEvents(dataList)
+}
+
+// deserializeEvents 内部反序列化事件方法
+func (s *RedisEventStore) deserializeEvents(dataList []string) ([]entity.DomainEvent, error) {
 	events := make([]entity.DomainEvent, 0, len(dataList))
 	for _, data := range dataList {
 		// 为了保持兼容性，使用map解析事件数据
@@ -122,16 +126,9 @@ func (s *RedisEventStore) getEvents(ctx context.Context, aggregateID string) ([]
 			return nil, fmt.Errorf("failed to unmarshal event: %w", err)
 		}
 
-		// 创建符合DomainEvent接口的事件对象
-		events = append(events, &entity.BaseEvent{
-			Id:            utils.ToString(eventData["id"]),
-			AggregateID:   utils.ToString(eventData["aggregate_id"]),
-			EventType:     utils.ToString(eventData["event_type"]),
-			AggregateType: utils.ToString(eventData["aggregate_type"]),
-			Timestamp:     utils.ParseTime(eventData["timestamp"]),
-			Version:       utils.ToInt(eventData["version"]),
-			Payload:       eventData,
-		})
+		// 使用通用函数创建事件对象
+	domainEvent := DecodeEventFromMap(eventData)
+	events = append(events, domainEvent)
 	}
 
 	return events, nil
@@ -178,16 +175,8 @@ func (s *RedisEventStore) GetEventsByType(ctx context.Context, eventType string)
 				continue // 跳过错误
 			}
 
-			// 创建符合DomainEvent接口的事件对象
-			var domainEvent = &entity.BaseEvent{
-				Id:            utils.ToString(eventData["id"]),
-				AggregateID:   utils.ToString(eventData["aggregate_id"]),
-				EventType:     utils.ToString(eventData["event_type"]),
-				AggregateType: utils.ToString(eventData["aggregate_type"]),
-				Timestamp:     utils.ParseTime(eventData["timestamp"]),
-				Version:       utils.ToInt(eventData["version"]),
-				Payload:       eventData,
-			}
+			// 使用通用函数创建事件对象
+			domainEvent := DecodeEventFromMap(eventData)
 
 			if domainEvent.GetEventType() == eventType {
 				allEvents = append(allEvents, domainEvent)
@@ -247,15 +236,7 @@ func (s *RedisEventStore) GetEventsWithPagination(ctx context.Context, aggregate
 			return nil, fmt.Errorf("failed to unmarshal event: %w", err)
 		}
 
-		domainEvent := &entity.BaseEvent{
-			Id:            utils.ToString(eventData["id"]),
-			AggregateID:   utils.ToString(eventData["aggregate_id"]),
-			EventType:     utils.ToString(eventData["event_type"]),
-			AggregateType: utils.ToString(eventData["aggregate_type"]),
-			Timestamp:     utils.ParseTime(eventData["timestamp"]),
-			Version:       utils.ToInt(eventData["version"]),
-			Payload:       eventData,
-		}
+		domainEvent := DecodeEventFromMap(eventData)
 		events = append(events, domainEvent)
 	}
 

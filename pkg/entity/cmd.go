@@ -5,15 +5,15 @@ type Command interface {
 	GetAggregateID() string
 }
 
-type BaseCommmand struct {
+type BaseCommand struct {
 	CommandID   string `json:"command_id"`
 	AggregateID string `json:"aggregate_id"`	
 }
 
-func (c *BaseCommmand) GetCommandID() string {
+func (c *BaseCommand) GetCommandID() string {
 	return c.CommandID
 }
 
-func (c *BaseCommmand) GetAggregateID() string {
+func (c *BaseCommand) GetAggregateID() string {
 	return c.AggregateID
 }
