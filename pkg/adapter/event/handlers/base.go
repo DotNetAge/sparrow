@@ -2,7 +2,8 @@ package handlers
 
 import (
 	"context"
-	"purchase-service/pkg/entity"
+
+	"github.com/DotNetAge/sparrow/pkg/entity"
 )
 
 // EventHandler 事件处理器接口

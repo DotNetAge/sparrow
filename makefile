@@ -2,7 +2,7 @@
 
 # 构建二进制文件
 build:
-	go build -o bin/purchase-service cmd/main.go
+	go build -o bin/github.com/DotNetAge/sparrow cmd/main.go
 
 # 运行服务
 run:
@@ -36,8 +36,8 @@ docker-build:
 		echo "Building Docker image with $$APP_NAME:$$APP_VERSION"; \
 		docker build -t $$APP_NAME:$$APP_VERSION .; \
 	else \
-		echo "Building Docker image with purchase-service:latest"; \
-		docker build -t purchase-service:latest .; \
+		echo "Building Docker image with github.com/DotNetAge/sparrow:latest"; \
+		docker build -t github.com/DotNetAge/sparrow:latest .; \
 	fi
 
 # 运行Docker容器

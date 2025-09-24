@@ -3,11 +3,12 @@ package messaging
 import (
 	"context"
 	"fmt"
-	"purchase-service/pkg/adapter/event/handlers"
-	"purchase-service/pkg/entity"
-	"purchase-service/pkg/eventbus"
 	"strings"
 	"sync"
+
+	"github.com/DotNetAge/sparrow/pkg/adapter/event/handlers"
+	"github.com/DotNetAge/sparrow/pkg/entity"
+	"github.com/DotNetAge/sparrow/pkg/eventbus"
 )
 
 // EventSubscriber 事件订阅器 - 封装事件总线以简化领域事件的订阅

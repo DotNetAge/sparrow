@@ -2,8 +2,9 @@ package eventbus
 
 import (
 	"context"
-	"purchase-service/pkg/adapter/event/handlers"
-	"purchase-service/pkg/entity"
+
+	"github.com/DotNetAge/sparrow/pkg/adapter/event/handlers"
+	"github.com/DotNetAge/sparrow/pkg/entity"
 )
 
 // EventBus 定义事件总线接口

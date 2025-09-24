@@ -1,8 +1,8 @@
 package router
 
 import (
-	"purchase-service/pkg/adapter/http/handlers"
-	"purchase-service/pkg/config"
+	"github.com/DotNetAge/sparrow/pkg/adapter/http/handlers"
+	"github.com/DotNetAge/sparrow/pkg/config"
 
 	"github.com/gin-gonic/gin"
 )

@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"purchase-service/pkg/entity"
-	"purchase-service/pkg/errs"
-	"purchase-service/pkg/utils"
+	"github.com/DotNetAge/sparrow/pkg/entity"
+	"github.com/DotNetAge/sparrow/pkg/errs"
+	"github.com/DotNetAge/sparrow/pkg/utils"
 
 	"github.com/redis/go-redis/v9"
 )

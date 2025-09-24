@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"purchase-service/pkg/adapter/event/handlers"
-	"purchase-service/pkg/config"
-	"purchase-service/pkg/entity"
-	"purchase-service/pkg/eventbus"
 	"sync"
 	"time"
+
+	"github.com/DotNetAge/sparrow/pkg/adapter/event/handlers"
+	"github.com/DotNetAge/sparrow/pkg/config"
+	"github.com/DotNetAge/sparrow/pkg/entity"
+	"github.com/DotNetAge/sparrow/pkg/eventbus"
 
 	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"

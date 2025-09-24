@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"purchase-service/pkg/adapter/event/handlers"
-	"purchase-service/pkg/entity"
+	"github.com/DotNetAge/sparrow/pkg/adapter/event/handlers"
+	"github.com/DotNetAge/sparrow/pkg/entity"
 )
 
 // MemoryEventBus 纯Go内存事件总线实现

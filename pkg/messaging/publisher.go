@@ -3,9 +3,10 @@ package messaging
 import (
 	"context"
 	"fmt"
-	"purchase-service/pkg/entity"
-	"purchase-service/pkg/eventbus"
-	"purchase-service/pkg/usecase"
+
+	"github.com/DotNetAge/sparrow/pkg/entity"
+	"github.com/DotNetAge/sparrow/pkg/eventbus"
+	"github.com/DotNetAge/sparrow/pkg/usecase"
 )
 
 // EventPublisher 事件发布器 - 连接事件存储与投影

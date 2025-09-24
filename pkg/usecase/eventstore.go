@@ -2,8 +2,9 @@ package usecase
 
 import (
 	"context"
-	"purchase-service/pkg/entity"
 	"time"
+
+	"github.com/DotNetAge/sparrow/pkg/entity"
 )
 
 // EventStore 事件存储接口

@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"purchase-service/pkg/entity"
-	"purchase-service/pkg/errs"
 	"time"
+
+	"github.com/DotNetAge/sparrow/pkg/entity"
+	"github.com/DotNetAge/sparrow/pkg/errs"
 )
 
 // QueryCondition 查询条件

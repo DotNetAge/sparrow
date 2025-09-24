@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"purchase-service/pkg/entity"
-	"purchase-service/pkg/errs"
-	"purchase-service/pkg/usecase"
+	"github.com/DotNetAge/sparrow/pkg/entity"
+	"github.com/DotNetAge/sparrow/pkg/errs"
+	"github.com/DotNetAge/sparrow/pkg/usecase"
 
 	"github.com/dgraph-io/badger/v4"
 )

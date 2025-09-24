@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"purchase-service/pkg/config"
-	"purchase-service/pkg/entity"
-	"purchase-service/pkg/errs"
-	"purchase-service/pkg/logger"
-	"purchase-service/pkg/utils"
+	"github.com/DotNetAge/sparrow/pkg/config"
+	"github.com/DotNetAge/sparrow/pkg/entity"
+	"github.com/DotNetAge/sparrow/pkg/errs"
+	"github.com/DotNetAge/sparrow/pkg/logger"
+	"github.com/DotNetAge/sparrow/pkg/utils"
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"

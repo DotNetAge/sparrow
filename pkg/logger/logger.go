@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"purchase-service/pkg/config"
+	"github.com/DotNetAge/sparrow/pkg/config"
 
 	"go.uber.org/zap"
 )

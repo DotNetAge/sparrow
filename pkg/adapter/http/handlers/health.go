@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"purchase-service/pkg/config"
+	"github.com/DotNetAge/sparrow/pkg/config"
 
 	"github.com/gin-gonic/gin"
 )
