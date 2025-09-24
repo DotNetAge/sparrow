@@ -10,6 +10,7 @@ import (
 
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/errs"
+	"github.com/DotNetAge/sparrow/pkg/logger"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -18,10 +19,11 @@ import (
 type RedisEventStore struct {
 	client *redis.Client
 	prefix string
+	logger *logger.Logger
 }
 
 // NewRedisEventStore 创建Redis事件存储实例
-func NewRedisEventStore(client *redis.Client, prefix string) *RedisEventStore {
+func NewRedisEventStore(client *redis.Client, prefix string, logger *logger.Logger) *RedisEventStore {
 	if prefix != "" && !strings.HasSuffix(prefix, ":") {
 		prefix += ":"
 	}
@@ -29,6 +31,7 @@ func NewRedisEventStore(client *redis.Client, prefix string) *RedisEventStore {
 	return &RedisEventStore{
 		client: client,
 		prefix: prefix,
+		logger: logger,
 	}
 }
 
@@ -41,6 +44,9 @@ func (s *RedisEventStore) SaveEvents(ctx context.Context, aggregateID string, ev
 	// 获取当前版本
 	currentVersion, err := s.GetAggregateVersion(ctx, aggregateID)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to get current version", "aggregate_id", aggregateID, "error", err)
+		}
 		return fmt.Errorf("failed to get current version: %w", err)
 	}
 
@@ -73,6 +79,9 @@ func (s *RedisEventStore) SaveEvents(ctx context.Context, aggregateID string, ev
 	for i, event := range allEvents {
 		eventData, err := json.Marshal(event)
 		if err != nil {
+			if s.logger != nil {
+				s.logger.Error("Failed to marshal event", "aggregate_id", aggregateID, "event_type", event.GetEventType(), "error", err)
+			}
 			return fmt.Errorf("failed to marshal event: %w", err)
 		}
 		eventsData[i] = string(eventData)
@@ -92,6 +101,11 @@ func (s *RedisEventStore) SaveEvents(ctx context.Context, aggregateID string, ev
 	// pipe.Expire(ctx, eventsKey, 7*24*time.Hour)
 
 	_, err = pipe.Exec(ctx)
+	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to batch store events", "error", err)
+		}
+	}
 	return err
 }
 
@@ -106,6 +120,9 @@ func (s *RedisEventStore) getEvents(ctx context.Context, aggregateID string) ([]
 
 	dataList, err := s.client.LRange(ctx, eventsKey, 0, -1).Result()
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to get events", "aggregate_id", aggregateID, "error", err)
+		}
 		return nil, fmt.Errorf("failed to get events: %w", err)
 	}
 	// 如果没有数据，返回空切片
@@ -123,6 +140,9 @@ func (s *RedisEventStore) deserializeEvents(dataList []string) ([]entity.DomainE
 		// 为了保持兼容性，使用map解析事件数据
 		var eventData map[string]interface{}
 		if err := json.Unmarshal([]byte(data), &eventData); err != nil {
+			if s.logger != nil {
+				s.logger.Error("Failed to unmarshal event", "error", err)
+			}
 			return nil, fmt.Errorf("failed to unmarshal event: %w", err)
 		}
 
@@ -158,6 +178,9 @@ func (s *RedisEventStore) GetEventsByType(ctx context.Context, eventType string)
 	pattern := s.prefix + "events:*"
 	keys, err := s.client.Keys(ctx, pattern).Result()
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to scan event keys", "pattern", pattern, "error", err)
+		}
 		return nil, fmt.Errorf("failed to scan event keys: %w", err)
 	}
 
@@ -165,6 +188,9 @@ func (s *RedisEventStore) GetEventsByType(ctx context.Context, eventType string)
 	for _, key := range keys {
 		dataList, err := s.client.LRange(ctx, key, 0, -1).Result()
 		if err != nil {
+			if s.logger != nil {
+				s.logger.Error("Failed to get events from key", "key", key, "error", err)
+			}
 			continue // 跳过错误
 		}
 
@@ -172,6 +198,9 @@ func (s *RedisEventStore) GetEventsByType(ctx context.Context, eventType string)
 			// 为了保持兼容性，使用map解析事件数据
 			var eventData map[string]interface{}
 			if err := json.Unmarshal([]byte(data), &eventData); err != nil {
+				if s.logger != nil {
+					s.logger.Error("Failed to unmarshal event data", "key", key, "error", err)
+				}
 				continue // 跳过错误
 			}
 
@@ -193,6 +222,9 @@ func (s *RedisEventStore) GetEventsByType(ctx context.Context, eventType string)
 func (s *RedisEventStore) GetEventsByTimeRange(ctx context.Context, aggregateID string, fromTime, toTime time.Time) ([]entity.DomainEvent, error) {
 	allEvents, err := s.getEvents(ctx, aggregateID)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to get events", "aggregate_id", aggregateID, "error", err)
+		}
 		return nil, err
 	}
 
@@ -222,6 +254,9 @@ func (s *RedisEventStore) GetEventsWithPagination(ctx context.Context, aggregate
 
 	dataList, err := s.client.LRange(ctx, eventsKey, int64(start), int64(end)).Result()
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to get events with pagination", "aggregate_id", aggregateID, "limit", limit, "offset", offset, "error", err)
+		}
 		return nil, fmt.Errorf("failed to get events with pagination: %w", err)
 	}
 
@@ -233,6 +268,9 @@ func (s *RedisEventStore) GetEventsWithPagination(ctx context.Context, aggregate
 	for _, data := range dataList {
 		var eventData map[string]interface{}
 		if err := json.Unmarshal([]byte(data), &eventData); err != nil {
+			if s.logger != nil {
+				s.logger.Error("Failed to unmarshal event", "aggregate_id", aggregateID, "error", err)
+			}
 			return nil, fmt.Errorf("failed to unmarshal event: %w", err)
 		}
 
@@ -252,11 +290,17 @@ func (s *RedisEventStore) GetAggregateVersion(ctx context.Context, aggregateID s
 		if err == redis.Nil {
 			return 0, nil // 没有事件，版本为0
 		}
+		if s.logger != nil {
+			s.logger.Error("Failed to get aggregate version", "aggregate_id", aggregateID, "error", err)
+		}
 		return 0, fmt.Errorf("failed to get version: %w", err)
 	}
 
 	version, err := strconv.Atoi(versionStr)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Invalid version format", "aggregate_id", aggregateID, "version_str", versionStr, "error", err)
+		}
 		return 0, fmt.Errorf("invalid version format: %w", err)
 	}
 
@@ -273,6 +317,9 @@ func (s *RedisEventStore) Load(ctx context.Context, aggregateID string, aggregat
 	if err == nil && snapshot != nil {
 		// 将快照数据应用到聚合根
 		if err := aggregate.LoadFromSnapshot(snapshot); err != nil {
+			if s.logger != nil {
+				s.logger.Error("Failed to load from snapshot", "aggregate_id", aggregateID, "error", err)
+			}
 			return fmt.Errorf("failed to load from snapshot: %w", err)
 		}
 		// 获取快照版本之后的事件
@@ -280,6 +327,9 @@ func (s *RedisEventStore) Load(ctx context.Context, aggregateID string, aggregat
 			var err error
 			events, err = s.GetEventsFromVersion(ctx, aggregateID, version+1)
 			if err != nil {
+				if s.logger != nil {
+					s.logger.Error("Failed to get events from version", "aggregate_id", aggregateID, "from_version", version+1, "error", err)
+				}
 				return fmt.Errorf("failed to get events from version: %w", err)
 			}
 		}
@@ -288,6 +338,9 @@ func (s *RedisEventStore) Load(ctx context.Context, aggregateID string, aggregat
 		var err error
 		events, err = s.GetEvents(ctx, aggregateID)
 		if err != nil {
+			if s.logger != nil {
+				s.logger.Error("Failed to get events", "aggregate_id", aggregateID, "error", err)
+			}
 			return fmt.Errorf("failed to get events: %w", err)
 		}
 	}
@@ -296,6 +349,9 @@ func (s *RedisEventStore) Load(ctx context.Context, aggregateID string, aggregat
 	if len(events) > 0 {
 		// 加载聚合 - 由于我们已经将events转换为[]entity.DomainEvent类型，这里可以直接使用
 		if err := aggregate.LoadFromEvents(events); err != nil {
+			if s.logger != nil {
+				s.logger.Error("Failed to load aggregate from events", "aggregate_id", aggregateID, "events_count", len(events), "error", err)
+			}
 			return fmt.Errorf("failed to load aggregate from events: %w", err)
 		}
 	}
@@ -307,6 +363,9 @@ func (s *RedisEventStore) Load(ctx context.Context, aggregateID string, aggregat
 func (s *RedisEventStore) SaveSnapshot(ctx context.Context, aggregateID string, snapshot interface{}, version int) error {
 	snapshotData, err := json.Marshal(snapshot)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to marshal snapshot", "aggregate_id", aggregateID, "version", version, "error", err)
+		}
 		return fmt.Errorf("failed to marshal snapshot: %w", err)
 	}
 
@@ -319,6 +378,9 @@ func (s *RedisEventStore) SaveSnapshot(ctx context.Context, aggregateID string, 
 		"created_at", time.Now().Unix(),
 	).Err()
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to store snapshot", "aggregate_id", aggregateID, "version", version, "error", err)
+		}
 		return fmt.Errorf("failed to save snapshot: %w", err)
 	}
 
@@ -331,6 +393,9 @@ func (s *RedisEventStore) GetLatestSnapshot(ctx context.Context, aggregateID str
 
 	data, err := s.client.HGetAll(ctx, snapshotKey).Result()
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to get snapshot", "aggregate_id", aggregateID, "error", err)
+		}
 		return nil, 0, fmt.Errorf("failed to get snapshot: %w", err)
 	}
 
@@ -343,12 +408,18 @@ func (s *RedisEventStore) GetLatestSnapshot(ctx context.Context, aggregateID str
 
 	version, err := strconv.Atoi(versionStr)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Invalid version format", "aggregate_id", aggregateID, "version_str", versionStr, "error", err)
+		}
 		return nil, 0, fmt.Errorf("invalid version format: %w", err)
 	}
 
 	var snapshot interface{}
 	err = json.Unmarshal([]byte(snapshotData), &snapshot)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to unmarshal snapshot", "aggregate_id", aggregateID, "error", err)
+		}
 		return nil, 0, fmt.Errorf("failed to unmarshal snapshot: %w", err)
 	}
 
@@ -368,12 +439,18 @@ func (s *RedisEventStore) SaveEventsBatch(ctx context.Context, events map[string
 		// 获取当前版本
 		currentVersion, err := s.GetAggregateVersion(ctx, aggregateID)
 		if err != nil {
+			if s.logger != nil {
+				s.logger.Error("Failed to get current version", "aggregate_id", aggregateID, "error", err)
+			}
 			return fmt.Errorf("failed to get current version for aggregate %s: %w", aggregateID, err)
 		}
 
 		// 获取现有事件
 		existingEvents, err := s.getEvents(ctx, aggregateID)
 		if err != nil {
+			if s.logger != nil {
+				s.logger.Error("Failed to get existing events", "aggregate_id", aggregateID, "error", err)
+			}
 			return fmt.Errorf("failed to get existing events: %w", err)
 		}
 
@@ -385,6 +462,9 @@ func (s *RedisEventStore) SaveEventsBatch(ctx context.Context, events map[string
 		for i, event := range allEvents {
 			eventData, err := json.Marshal(event)
 			if err != nil {
+				if s.logger != nil {
+					s.logger.Error("Failed to marshal event", "aggregate_id", aggregateID, "event_type", event.GetEventType(), "error", err)
+				}
 				return fmt.Errorf("failed to marshal event: %w", err)
 			}
 			eventsData[i] = string(eventData)
@@ -403,6 +483,9 @@ func (s *RedisEventStore) SaveEventsBatch(ctx context.Context, events map[string
 	}
 
 	_, err := pipe.Exec(ctx)
+	if err != nil && s.logger != nil {
+		s.logger.Error("Failed to batch store events", "error", err)
+	}
 	return err
 }
 

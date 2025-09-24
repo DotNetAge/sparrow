@@ -23,6 +23,9 @@ type PostgreSQLEventStore struct {
 // NewPostgreSQLEventStore 创建PostgreSQL事件存储实例
 func NewPostgreSQLEventStore(db *sqlx.DB, logger *logger.Logger) (*PostgreSQLEventStore, error) {
 	if err := createEventStoreTables(db); err != nil {
+		if logger != nil {
+			logger.Error("Failed to create event store tables", "error", err)
+		}
 		return nil, fmt.Errorf("failed to create event store tables: %w", err)
 	}
 
@@ -60,6 +63,7 @@ func createEventStoreTables(db *sqlx.DB) error {
 
 	for _, query := range queries {
 		if _, err := db.Exec(query); err != nil {
+			// 这里没有logger参数，所以无法记录日志
 			return fmt.Errorf("failed to execute query: %w", err)
 		}
 	}
@@ -75,6 +79,9 @@ func (s *PostgreSQLEventStore) SaveEvents(ctx context.Context, aggregateID strin
 
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to begin transaction", "aggregate_id", aggregateID, "error", err)
+		}
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
 	defer func() {
@@ -90,6 +97,9 @@ func (s *PostgreSQLEventStore) SaveEvents(ctx context.Context, aggregateID strin
 	query := `SELECT COALESCE(MAX(version), 0) FROM events WHERE aggregate_id = $1`
 	err = tx.GetContext(ctx, &currentVersion, query, aggregateID)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to get current version", "aggregate_id", aggregateID, "error", err)
+		}
 		return fmt.Errorf("failed to get current version: %w", err)
 	}
 
@@ -109,25 +119,34 @@ func (s *PostgreSQLEventStore) SaveEvents(ctx context.Context, aggregateID strin
 
 	for i, event := range events {
 		eventData, err := json.Marshal(event)
-		if err != nil {
-			return fmt.Errorf("failed to marshal event: %w", err)
+	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to marshal event", "aggregate_id", aggregateID, "event_type", event.GetEventType(), "error", err)
 		}
+		return fmt.Errorf("failed to marshal event: %w", err)
+	}
 
 		version := currentVersion + i + 1
 		_, err = tx.ExecContext(ctx, insertQuery,
-			aggregateID,
-			event.GetAggregateType(),
-			event.GetEventType(),
-			eventData,
-			version,
-			json.RawMessage(`{}`), // 空metadata
-		)
-		if err != nil {
-			return fmt.Errorf("failed to insert event: %w", err)
+		aggregateID,
+		event.GetAggregateType(),
+		event.GetEventType(),
+		eventData,
+		version,
+		json.RawMessage(`{}`), // 空metadata
+	)
+	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to insert event", "aggregate_id", aggregateID, "event_type", event.GetEventType(), "version", version, "error", err)
 		}
+		return fmt.Errorf("failed to insert event: %w", err)
+	}
 	}
 
 	if err := tx.Commit(); err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to commit transaction", "aggregate_id", aggregateID, "error", err)
+		}
 		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
@@ -145,6 +164,9 @@ func (s *PostgreSQLEventStore) GetEvents(ctx context.Context, aggregateID string
 	var eventsData []json.RawMessage
 	err := s.db.SelectContext(ctx, &eventsData, query, aggregateID)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to get events", "aggregate_id", aggregateID, "error", err)
+		}
 		return nil, fmt.Errorf("failed to get events: %w", err)
 	}
 
@@ -162,6 +184,9 @@ func (s *PostgreSQLEventStore) GetEventsFromVersion(ctx context.Context, aggrega
 	var eventsData []json.RawMessage
 	err := s.db.SelectContext(ctx, &eventsData, query, aggregateID, fromVersion)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to get events from version", "aggregate_id", aggregateID, "from_version", fromVersion, "error", err)
+		}
 		return nil, fmt.Errorf("failed to get events from version: %w", err)
 	}
 
@@ -179,6 +204,9 @@ func (s *PostgreSQLEventStore) GetEventsByType(ctx context.Context, eventType st
 	var eventsData []json.RawMessage
 	err := s.db.SelectContext(ctx, &eventsData, query, eventType)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to get events by type", "event_type", eventType, "error", err)
+		}
 		return nil, fmt.Errorf("failed to get events by type: %w", err)
 	}
 
@@ -196,6 +224,9 @@ func (s *PostgreSQLEventStore) GetEventsByTimeRange(ctx context.Context, aggrega
 	var eventsData []json.RawMessage
 	err := s.db.SelectContext(ctx, &eventsData, query, aggregateID, fromTime, toTime)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to get events by time range", "aggregate_id", aggregateID, "from_time", fromTime, "to_time", toTime, "error", err)
+		}
 		return nil, fmt.Errorf("failed to get events by time range: %w", err)
 	}
 
@@ -221,6 +252,9 @@ func (s *PostgreSQLEventStore) GetEventsWithPagination(ctx context.Context, aggr
 	var eventsData []json.RawMessage
 	err := s.db.SelectContext(ctx, &eventsData, query, aggregateID, limit, offset)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to get events with pagination", "aggregate_id", aggregateID, "limit", limit, "offset", offset, "error", err)
+		}
 		return nil, fmt.Errorf("failed to get events with pagination: %w", err)
 	}
 
@@ -234,6 +268,9 @@ func (s *PostgreSQLEventStore) GetAggregateVersion(ctx context.Context, aggregat
 	var version int
 	err := s.db.GetContext(ctx, &version, query, aggregateID)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to get aggregate version", "aggregate_id", aggregateID, "error", err)
+		}
 		return 0, fmt.Errorf("failed to get aggregate version: %w", err)
 	}
 
@@ -250,13 +287,19 @@ func (s *PostgreSQLEventStore) Load(ctx context.Context, aggregateID string, agg
 	if err == nil && snapshot != nil {
 		// 将快照数据应用到聚合根
 		if err := aggregate.LoadFromSnapshot(snapshot); err != nil {
-			return fmt.Errorf("failed to load from snapshot: %w", err)
+		if s.logger != nil {
+			s.logger.Error("Failed to load from snapshot", "aggregate_id", aggregateID, "error", err)
 		}
+		return fmt.Errorf("failed to load from snapshot: %w", err)
+	}
 		// 获取快照版本之后的事件
 		if version > 0 {
 			var err error
 			events, err = s.GetEventsFromVersion(ctx, aggregateID, version+1)
 			if err != nil {
+				if s.logger != nil {
+					s.logger.Error("Failed to get events from version", "aggregate_id", aggregateID, "from_version", version+1, "error", err)
+				}
 				return fmt.Errorf("failed to get events from version: %w", err)
 			}
 		}
@@ -265,15 +308,21 @@ func (s *PostgreSQLEventStore) Load(ctx context.Context, aggregateID string, agg
 		var err error
 		events, err = s.GetEvents(ctx, aggregateID)
 		if err != nil {
-			return fmt.Errorf("failed to get events: %w", err)
-		}
+				if s.logger != nil {
+					s.logger.Error("Failed to get events", "aggregate_id", aggregateID, "error", err)
+				}
+				return fmt.Errorf("failed to get events: %w", err)
+			}
 	}
 
 	// 3. 应用事件到聚合根
 	if len(events) > 0 {
 		if err := aggregate.LoadFromEvents(events); err != nil {
-			return fmt.Errorf("failed to load from events: %w", err)
+		if s.logger != nil {
+			s.logger.Error("Failed to load from events", "aggregate_id", aggregateID, "events_count", len(events), "error", err)
 		}
+		return fmt.Errorf("failed to load from events: %w", err)
+	}
 	}
 
 	return nil
@@ -283,6 +332,9 @@ func (s *PostgreSQLEventStore) Load(ctx context.Context, aggregateID string, agg
 func (s *PostgreSQLEventStore) SaveSnapshot(ctx context.Context, aggregateID string, snapshot interface{}, version int) error {
 	snapshotData, err := json.Marshal(snapshot)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to marshal snapshot", "aggregate_id", aggregateID, "version", version, "error", err)
+		}
 		return fmt.Errorf("failed to marshal snapshot: %w", err)
 	}
 
@@ -302,6 +354,9 @@ func (s *PostgreSQLEventStore) SaveSnapshot(ctx context.Context, aggregateID str
 		version,
 	)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to save snapshot", "aggregate_id", aggregateID, "version", version, "error", err)
+		}
 		return fmt.Errorf("failed to save snapshot: %w", err)
 	}
 
@@ -322,12 +377,18 @@ func (s *PostgreSQLEventStore) GetLatestSnapshot(ctx context.Context, aggregateI
 		if err == sql.ErrNoRows {
 			return nil, 0, nil // 没有快照
 		}
+		if s.logger != nil {
+			s.logger.Error("Failed to get latest snapshot", "aggregate_id", aggregateID, "error", err)
+		}
 		return nil, 0, fmt.Errorf("failed to get latest snapshot: %w", err)
 	}
 
 	var snapshot interface{}
 	err = json.Unmarshal(snapshotData, &snapshot)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to unmarshal snapshot", "aggregate_id", aggregateID, "error", err)
+		}
 		return nil, 0, fmt.Errorf("failed to unmarshal snapshot: %w", err)
 	}
 
@@ -342,6 +403,9 @@ func (s *PostgreSQLEventStore) SaveEventsBatch(ctx context.Context, events map[s
 
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to begin transaction", "error", err)
+		}
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
 	defer func() {
@@ -362,33 +426,45 @@ func (s *PostgreSQLEventStore) SaveEventsBatch(ctx context.Context, events map[s
 		var currentVersion int
 		versionQuery := `SELECT COALESCE(MAX(version), 0) FROM events WHERE aggregate_id = $1`
 		err = tx.GetContext(ctx, &currentVersion, versionQuery, aggregateID)
-		if err != nil {
-			return fmt.Errorf("failed to get current version for aggregate %s: %w", aggregateID, err)
+	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to get current version", "aggregate_id", aggregateID, "error", err)
 		}
+		return fmt.Errorf("failed to get current version for aggregate %s: %w", aggregateID, err)
+	}
 
 		// 插入事件
 		for i, event := range eventList {
 			eventData, err := json.Marshal(event)
-			if err != nil {
-				return fmt.Errorf("failed to marshal event: %w", err)
-			}
+	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to marshal event", "aggregate_id", aggregateID, "event_type", event.GetEventType(), "error", err)
+		}
+		return fmt.Errorf("failed to marshal event: %w", err)
+	}
 
 			version := currentVersion + i + 1
 			_, err = tx.ExecContext(ctx, insertQuery,
-				aggregateID,
-				event.GetAggregateType(),
-				event.GetEventType(),
-				eventData,
-				version,
-				json.RawMessage(`{}`),
-			)
-			if err != nil {
-				return fmt.Errorf("failed to insert event: %w", err)
-			}
+		aggregateID,
+		event.GetAggregateType(),
+		event.GetEventType(),
+		eventData,
+		version,
+		json.RawMessage(`{}`),
+	)
+	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to insert event", "aggregate_id", aggregateID, "event_type", event.GetEventType(), "version", version, "error", err)
+		}
+		return fmt.Errorf("failed to insert event: %w", err)
+	}
 		}
 	}
 
 	if err := tx.Commit(); err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to commit transaction", "error", err)
+		}
 		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
@@ -404,8 +480,11 @@ func (s *PostgreSQLEventStore) deserializeEvents(eventsData []json.RawMessage) (
 		// 为了保持兼容性，使用map解析事件数据
 		var eventData map[string]interface{}
 		if err := json.Unmarshal(data, &eventData); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal event data: %w", err)
+		if s.logger != nil {
+			s.logger.Error("Failed to unmarshal event data", "error", err)
 		}
+		return nil, fmt.Errorf("failed to unmarshal event data: %w", err)
+	}
 
 		// 使用通用函数创建事件对象
 	domainEvent := DecodeEventFromMap(eventData)

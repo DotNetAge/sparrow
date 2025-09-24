@@ -33,11 +33,17 @@ type NATSEventStore struct {
 func NewNATSEventStore(cfg *config.NATsConfig, log *logger.Logger) (*NATSEventStore, error) {
 	conn, err := nats.Connect(cfg.NATSURL)
 	if err != nil {
+		if log != nil {
+			log.Error("Failed to connect to NATS", "error", err)
+		}
 		return nil, fmt.Errorf("failed to connect to NATS: %w", err)
 	}
 
 	js, err := jetstream.New(conn)
 	if err != nil {
+		if log != nil {
+			log.Error("Failed to create jetstream", "error", err)
+		}
 		return nil, fmt.Errorf("failed to create jetstream: %w", err)
 	}
 
@@ -52,6 +58,9 @@ func NewNATSEventStore(cfg *config.NATsConfig, log *logger.Logger) (*NATSEventSt
 	}
 
 	if err := store.createResources(); err != nil {
+		if log != nil {
+			log.Error("Failed to create resources", "error", err)
+		}
 		return nil, fmt.Errorf("failed to create resources: %w", err)
 	}
 
@@ -78,8 +87,11 @@ func (s *NATSEventStore) createResources() error {
 		Replicas:    1,
 	})
 	if err != nil && !strings.Contains(err.Error(), "stream name already in use") {
-		return fmt.Errorf("failed to create stream: %w", err)
-	}
+			if s.logger != nil {
+				s.logger.Error("Failed to create stream", "error", err)
+			}
+			return fmt.Errorf("failed to create stream: %w", err)
+		}
 
 	// 创建Key-Value桶用于存储快照和版本信息
 	_, err = s.js.CreateKeyValue(ctx, jetstream.KeyValueConfig{
@@ -89,8 +101,11 @@ func (s *NATSEventStore) createResources() error {
 		Replicas:    1,
 	})
 	if err != nil && !strings.Contains(err.Error(), "bucket name already in use") {
-		return fmt.Errorf("failed to create key-value bucket: %w", err)
-	}
+			if s.logger != nil {
+				s.logger.Error("Failed to create key-value bucket", "error", err)
+			}
+			return fmt.Errorf("failed to create key-value bucket: %w", err)
+		}
 
 	return nil
 }
@@ -104,8 +119,11 @@ func (s *NATSEventStore) SaveEvents(ctx context.Context, aggregateID string, eve
 	// 获取当前版本
 	currentVersion, err := s.GetAggregateVersion(ctx, aggregateID)
 	if err != nil {
-		return errs.NewEventStoreError("version_check", "failed to get current version", aggregateID, err)
-	}
+			if s.logger != nil {
+				s.logger.Error("Failed to get current version", "aggregate_id", aggregateID, "error", err)
+			}
+			return errs.NewEventStoreError("version_check", "failed to get current version", aggregateID, err)
+		}
 
 	if expectedVersion != -1 && currentVersion != expectedVersion {
 		return errs.NewConcurrencyConflictError(aggregateID, expectedVersion, currentVersion)
@@ -115,6 +133,9 @@ func (s *NATSEventStore) SaveEvents(ctx context.Context, aggregateID string, eve
 	for i, event := range events {
 		eventData, err := json.Marshal(event)
 		if err != nil {
+			if s.logger != nil {
+				s.logger.Error("Failed to marshal event", "aggregate_id", aggregateID, "event_type", event.GetEventType(), "error", err)
+			}
 			return fmt.Errorf("failed to marshal event: %w", err)
 		}
 
@@ -131,6 +152,9 @@ func (s *NATSEventStore) SaveEvents(ctx context.Context, aggregateID string, eve
 
 		msgData, err := json.Marshal(msg)
 		if err != nil {
+			if s.logger != nil {
+				s.logger.Error("Failed to marshal event message", "aggregate_id", aggregateID, "error", err)
+			}
 			return fmt.Errorf("failed to marshal event message: %w", err)
 		}
 
@@ -138,6 +162,9 @@ func (s *NATSEventStore) SaveEvents(ctx context.Context, aggregateID string, eve
 		subject := fmt.Sprintf("%s.%s", s.eventSubject, aggregateID)
 		_, err = s.js.Publish(ctx, subject, msgData)
 		if err != nil {
+			if s.logger != nil {
+				s.logger.Error("Failed to publish event", "aggregate_id", aggregateID, "event_type", event.GetEventType(), "version", version, "error", err)
+			}
 			return fmt.Errorf("failed to publish event: %w", err)
 		}
 	}
@@ -147,6 +174,9 @@ func (s *NATSEventStore) SaveEvents(ctx context.Context, aggregateID string, eve
 	newVersion := currentVersion + len(events)
 	_, err = s.bucket.Put(ctx, versionKey, []byte(strconv.Itoa(newVersion)))
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to update version", "aggregate_id", aggregateID, "new_version", newVersion, "error", err)
+		}
 		return errs.NewEventStoreError("version_update", "failed to update version", aggregateID, err)
 	}
 
@@ -175,12 +205,18 @@ func (s *NATSEventStore) getEventsFromVersion(ctx context.Context, aggregateID s
 		DeliverPolicy: jetstream.DeliverAllPolicy,
 	})
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to create consumer", "aggregate_id", aggregateID, "error", err)
+		}
 		return nil, errs.NewEventStoreError("consumer_creation", "failed to create consumer", aggregateID, err)
 	}
 
 	// 获取消息
 	messages, err := consumer.Fetch(1000) // 限制单次获取数量
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to fetch messages", "aggregate_id", aggregateID, "error", err)
+		}
 		return nil, errs.NewEventStoreError("message_fetch", "failed to fetch messages", aggregateID, err)
 	}
 
@@ -271,11 +307,17 @@ func (s *NATSEventStore) GetEventsByType(ctx context.Context, eventType string) 
 		DeliverPolicy: jetstream.DeliverAllPolicy,
 	})
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to create consumer", "event_type", eventType, "error", err)
+		}
 		return nil, fmt.Errorf("failed to create consumer: %w", err)
 	}
 
 	messages, err := consumer.Fetch(1000)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to fetch messages", "event_type", eventType, "error", err)
+		}
 		return nil, fmt.Errorf("failed to fetch messages: %w", err)
 	}
 
@@ -327,11 +369,17 @@ func (s *NATSEventStore) GetEventsByTimeRange(ctx context.Context, aggregateID s
 		DeliverPolicy: jetstream.DeliverAllPolicy,
 	})
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to create consumer", "aggregate_id", aggregateID, "error", err)
+		}
 		return nil, fmt.Errorf("failed to create consumer: %w", err)
 	}
 
 	messages, err := consumer.Fetch(1000)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to fetch messages", "aggregate_id", aggregateID, "error", err)
+		}
 		return nil, fmt.Errorf("failed to fetch messages: %w", err)
 	}
 
@@ -402,11 +450,17 @@ func (s *NATSEventStore) GetAggregateVersion(ctx context.Context, aggregateID st
 		if err == jetstream.ErrKeyNotFound {
 			return 0, nil // 没有事件，版本为0
 		}
+		if s.logger != nil {
+			s.logger.Error("Failed to get version", "aggregate_id", aggregateID, "error", err)
+		}
 		return 0, fmt.Errorf("failed to get version: %w", err)
 	}
 
 	version, err := strconv.Atoi(string(versionData.Value()))
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Invalid version format", "aggregate_id", aggregateID, "error", err)
+		}
 		return 0, fmt.Errorf("invalid version format: %w", err)
 	}
 
@@ -417,6 +471,9 @@ func (s *NATSEventStore) GetAggregateVersion(ctx context.Context, aggregateID st
 func (s *NATSEventStore) SaveSnapshot(ctx context.Context, aggregateID string, snapshot interface{}, version int) error {
 	snapshotData, err := json.Marshal(snapshot)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to marshal snapshot", "aggregate_id", aggregateID, "version", version, "error", err)
+		}
 		return fmt.Errorf("failed to marshal snapshot: %w", err)
 	}
 
@@ -432,12 +489,18 @@ func (s *NATSEventStore) SaveSnapshot(ctx context.Context, aggregateID string, s
 
 	snapshotMsgData, err := json.Marshal(snapshotMsg)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to marshal snapshot message", "aggregate_id", aggregateID, "error", err)
+		}
 		return fmt.Errorf("failed to marshal snapshot message: %w", err)
 	}
 
 	// 保存到Key-Value存储
 	_, err = s.bucket.Put(ctx, snapshotKey, snapshotMsgData)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to save snapshot", "aggregate_id", aggregateID, "version", version, "error", err)
+		}
 		return fmt.Errorf("failed to save snapshot: %w", err)
 	}
 
@@ -445,6 +508,9 @@ func (s *NATSEventStore) SaveSnapshot(ctx context.Context, aggregateID string, s
 	subject := fmt.Sprintf("%s.%s", s.snapshotSubject, aggregateID)
 	_, err = s.js.Publish(ctx, subject, snapshotMsgData)
 	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to publish snapshot", "aggregate_id", aggregateID, "version", version, "error", err)
+		}
 		return fmt.Errorf("failed to publish snapshot: %w", err)
 	}
 
@@ -456,6 +522,9 @@ func (s *NATSEventStore) Load(ctx context.Context, aggregateID string, aggregate
 	// 尝试从快照恢复
 	snapshot, snapshotVersion, err := s.GetLatestSnapshot(ctx, aggregateID)
 	if err != nil && err != errs.ErrSnapshotNotFound {
+		if s.logger != nil {
+			s.logger.Error("Failed to get latest snapshot", "aggregate_id", aggregateID, "error", err)
+		}
 		return fmt.Errorf("failed to get latest snapshot: %w", err)
 	}
 
@@ -466,22 +535,34 @@ func (s *NATSEventStore) Load(ctx context.Context, aggregateID string, aggregate
 	if snapshot != nil {
 		// 如果有快照，调用聚合根的LoadFromSnapshot方法恢复状态
 		if err := aggregate.LoadFromSnapshot(snapshot); err != nil {
+			if s.logger != nil {
+				s.logger.Error("Failed to load from snapshot", "aggregate_id", aggregateID, "error", err)
+			}
 			return fmt.Errorf("failed to load from snapshot: %w", err)
 		}
 
 		// 获取快照版本之后的事件
 		if events, errEvent = s.GetEventsFromVersion(ctx, aggregateID, snapshotVersion+1); errEvent != nil {
+			if s.logger != nil {
+				s.logger.Error("Failed to get events from version", "aggregate_id", aggregateID, "from_version", snapshotVersion+1, "error", errEvent)
+			}
 			return fmt.Errorf("failed to get events from version: %w", errEvent)
 		}
 	} else {
 		// 如果没有快照，获取所有事件
 		if events, errEvent = s.GetEvents(ctx, aggregateID); errEvent != nil {
+			if s.logger != nil {
+				s.logger.Error("Failed to get events", "aggregate_id", aggregateID, "error", errEvent)
+			}
 			return fmt.Errorf("failed to get events: %w", errEvent)
 		}
 	}
 
 	// 应用事件到聚合根
 	if err := aggregate.LoadFromEvents(events); err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to load from events", "aggregate_id", aggregateID, "events_count", len(events), "error", err)
+		}
 		return fmt.Errorf("failed to load from events: %w", err)
 	}
 
@@ -497,16 +578,25 @@ func (s *NATSEventStore) GetLatestSnapshot(ctx context.Context, aggregateID stri
 		if err == jetstream.ErrKeyNotFound {
 			return nil, 0, nil // 没有快照
 		}
+		if s.logger != nil {
+			s.logger.Error("Failed to get snapshot", "aggregate_id", aggregateID, "error", err)
+		}
 		return nil, 0, fmt.Errorf("failed to get snapshot: %w", err)
 	}
 
 	var snapshotMsg map[string]interface{}
 	if err := json.Unmarshal(snapshotData.Value(), &snapshotMsg); err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to unmarshal snapshot", "aggregate_id", aggregateID, "error", err)
+		}
 		return nil, 0, fmt.Errorf("failed to unmarshal snapshot: %w", err)
 	}
 
 	var snapshot interface{}
 	if err := json.Unmarshal([]byte(snapshotMsg["snapshot_data"].(string)), &snapshot); err != nil {
+		if s.logger != nil {
+			s.logger.Error("Failed to unmarshal snapshot data", "aggregate_id", aggregateID, "error", err)
+		}
 		return nil, 0, fmt.Errorf("failed to unmarshal snapshot data: %w", err)
 	}
 
@@ -523,6 +613,9 @@ func (s *NATSEventStore) SaveEventsBatch(ctx context.Context, events map[string]
 	// 使用事务批量保存
 	for aggregateID, eventList := range events {
 		if err := s.SaveEvents(ctx, aggregateID, eventList, -1); err != nil {
+			if s.logger != nil {
+				s.logger.Error("Failed to save events batch", "aggregate_id", aggregateID, "error", err)
+			}
 			return fmt.Errorf("failed to save events for aggregate %s: %w", aggregateID, err)
 		}
 	}
