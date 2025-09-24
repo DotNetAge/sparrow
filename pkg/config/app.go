@@ -1,0 +1,7 @@
+package config
+
+
+type AppConfig struct {
+    Name string `mapstructure:"name"`
+    Version string `mapstructure:"version"`
+}
