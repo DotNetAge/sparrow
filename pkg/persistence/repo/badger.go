@@ -27,13 +27,15 @@ type BadgerRepository[T entity.Entity] struct {
 	entityType string
 }
 
+var _ usecase.Repository[entity.Entity] = (*BadgerRepository[entity.Entity])(nil)
+
 // NewBadgerRepository 创建BadgerDB仓储实例
 // 参数:
 //   - db: BadgerDB实例
 //   - prefix: 键前缀，用于区分不同类型的实体
 //
 // 返回: 初始化的BadgerDB仓储实例
-func NewBadgerRepository[T entity.Entity](db *badger.DB, prefix string) *BadgerRepository[T] {
+func NewBadgerRepository[T entity.Entity](db *badger.DB, prefix string) usecase.Repository[T] {
 	var zero T
 	entityType := fmt.Sprintf("%T", zero)
 

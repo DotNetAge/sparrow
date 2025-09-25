@@ -2,6 +2,7 @@ package eventstore
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/logger"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
+	redistestcontainers "github.com/testcontainers/testcontainers-go/modules/redis"
 )
 
 // 创建一个符合logger.Logger接口的测试日志记录器
@@ -20,15 +22,33 @@ func newTestLogger() *logger.Logger {
 
 // setupTestRedisEventStore 创建测试用的Redis事件存储
 func setupTestRedisEventStore(t *testing.T) (*RedisEventStore, func()) {
-	// 连接到本地Redis服务器
+	t.Helper()
+	ctx := context.Background()
+
+	// 启动Redis测试容器
+	redisContainer, err := redistestcontainers.RunContainer(ctx)
+	if err != nil {
+		t.Fatalf("启动Redis容器失败: %v", err)
+	}
+
+	// 获取Redis连接URL
+	redisConnString, err := redisContainer.ConnectionString(ctx)
+	if err != nil {
+		t.Fatalf("获取Redis连接字符串失败: %v", err)
+	}
+
+	// ConnectionString返回的格式为"redis://localhost:6379"，需要去掉协议前缀
+	redisAddr := strings.TrimPrefix(redisConnString, "redis://")
+
+	// 创建Redis客户端
 	client := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: redisAddr,
 	})
 
 	// 检查连接是否成功
-	_, err := client.Ping(context.Background()).Result()
+	_, err = client.Ping(ctx).Result()
 	if err != nil {
-		t.Skipf("Redis服务器未连接: %v", err)
+		t.Fatalf("无法连接到Redis容器: %v", err)
 	}
 
 	// 创建事件存储实例
@@ -41,7 +61,11 @@ func setupTestRedisEventStore(t *testing.T) (*RedisEventStore, func()) {
 	// 清理函数
 	cleanup := func() {
 		// 清理测试数据
-		client.Del(context.Background(), client.Keys(context.Background(), "test:*").Val()...)
+		client.Del(ctx, client.Keys(ctx, "test:*").Val()...)
+		// 关闭Redis连接
+		client.Close()
+		// 终止容器
+		redisContainer.Terminate(ctx)
 	}
 
 	return store, cleanup

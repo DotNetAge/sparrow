@@ -29,6 +29,8 @@ type RedisRepository[T entity.Entity] struct {
 	ttl        time.Duration // 过期时间，0表示永不过期
 }
 
+var _ usecase.Repository[entity.Entity] = (*RedisRepository[entity.Entity])(nil)
+
 // NewRedisRepository 创建Redis仓储实例
 // 参数:
 //   - client: Redis客户端
@@ -36,7 +38,7 @@ type RedisRepository[T entity.Entity] struct {
 //   - ttl: 过期时间，0表示永不过期
 //
 // 返回: 初始化的Redis仓储实例
-func NewRedisRepository[T entity.Entity](client *redis.Client, prefix string, ttl time.Duration) *RedisRepository[T] {
+func NewRedisRepository[T entity.Entity](client *redis.Client, prefix string, ttl time.Duration) usecase.Repository[T] {
 	var zero T
 	entityType := fmt.Sprintf("%T", zero)
 

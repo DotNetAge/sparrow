@@ -13,62 +13,66 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/persistence/eventstore"
 	"github.com/DotNetAge/sparrow/pkg/persistence/repo"
 	"github.com/DotNetAge/sparrow/pkg/usecase"
+	"github.com/DotNetAge/sparrow/pkg/utils"
 	"github.com/dgraph-io/badger/v4"
 	"github.com/redis/go-redis/v9"
+	"go.uber.org/zap"
 )
 
-func WithPort(port int) Option {
+// ServerPort 配置服务器端口
+func ServerPort(port int) Option {
 	return func(o *App) {
 		o.Config.Server.Port = port
 	}
 }
 
-func WithHost(host string) Option {
+// ServerHost 配置服务器主机
+func ServerHost(host string) Option {
 	return func(o *App) {
 		o.Config.Server.Host = host
 	}
 }
 
-// UseSQL 配置SQL数据库连接
-func UseSQL() Option {
+// SQLDB 配置SQL数据库连接
+func SQLDB() Option {
 	return func(o *App) {
 	}
 }
 
-// UseRedis 配置Redis数据库连接
-func UseRedis() Option {
-	return func(o *App) {
-		if o.Db.RedisClient == nil {
-			o.Db.RedisClient = newRedis(&o.Config.Redis)
-		}
+// RedisDB 配置Redis数据库连接
+func RedisDB() Option {
+	return func(app *App) {
+		app.Container.Register(func() *redis.Client {
+			return newRedis(&app.Config.Redis)
+		})
 	}
 }
 
-// UseBadgerStore 配置Badger数据库连接
-func UseBadger() Option {
+// BadgerStore 配置Badger数据库连接
+func BadgerDB() Option {
 	return func(o *App) {
-		if o.Db.BadgerDB == nil {
+		o.Container.Register(func() *badger.DB {
 			db, err := badger.Open(badger.DefaultOptions(o.Config.Badger.DataDir))
 			if err != nil {
-				o.Logger.Error("Failed to create Badger DB", "error", err)
+				o.Logger.Error("创建BadgerDB实例失败", "error", err)
 				panic(err)
 			}
-			o.Db.BadgerDB = db
-		}
+			return db
+		})
 	}
 }
 
-// UseBadgerStore 使用Badger作为事件存储
-func UseBadgerStore() Option {
+// BadgerStore 使用Badger作为事件存储
+func BadgerStore() Option {
 	return func(o *App) {
-		if o.Store == nil {
+		o.Container.Register(func() usecase.EventStore {
 			store, err := eventstore.NewBadgerEventStore(o.Config.Badger.EventStoreDir, o.Logger)
 			if err != nil {
 				o.Logger.Error("Failed to create Badger event store", "error", err)
 				panic(err)
 			}
-			o.Store = store
-		}
+			return store
+		})
 	}
 }
 
@@ -80,110 +84,142 @@ func newRedis(config *config.RedisConfig) *redis.Client {
 	})
 }
 
-// UseRedisStore 使用Redis作为事件存储
-func UseRedisStore() Option {
+// RedisStore 使用Redis作为事件存储
+func RedisStore() Option {
 	return func(o *App) {
-		if o.Store == nil {
-			if o.Db.RedisClient == nil {
-				o.Db.RedisClient = newRedis(&o.Config.Redis)
+		o.Container.Register(func() usecase.EventStore {
+			var redisClient *redis.Client
+			if err := o.Container.ResolveInstance(&redisClient); err != nil {
+				o.Logger.Error("Failed to resolve Redis client", "error", err)
+				panic(err)
 			}
-			store, err := eventstore.NewRedisEventStore(o.Db.RedisClient, o.Config.App.Name+":", o.Logger)
+			store, err := eventstore.NewRedisEventStore(redisClient, o.Config.App.Name+":", o.Logger)
 			if err != nil {
 				o.Logger.Error("Failed to create Redis event store", "error", err)
 				panic(err)
 			}
-			o.Store = store
-		}
+			return store
+		})
 	}
 }
 
-// UseSQLStore 使用SQL作为事件存储
-func UseSQLStore() Option {
+// SQLStore 使用SQL作为事件存储
+func SQLStore() Option {
 	return func(o *App) {
 	}
 }
 
-// UseNatsStore 使用NATS作为事件存储
-func UseNatsStore() Option {
+// NatsStore 使用NATS作为事件存储
+func JetStreamStore() Option {
 	return func(o *App) {
-		if o.Store == nil {
+		o.Container.Register(func() usecase.EventStore {
 			store, err := eventstore.NewNatsEventStore(&o.Config.NATS, o.Logger)
 			if err != nil {
 				o.Logger.Error("Failed to create NATS event store", "error", err)
 				panic(err)
 			}
-			o.Store = store
-		}
+			return store
+		})
 	}
 }
 
-func UseMessaging() Option {
+// Messaging 使用事件总线作为消息发布和订阅
+func Messaging() Option {
 	return func(a *App) {
-		if a.Bus == nil {
-			a.Logger.Error("Event bus is not configured, cannot create event publisher and subscriber")
-			panic("Event bus is not configured, cannot create event publisher and subscriber")
-		}
-
-		if a.Publisher == nil {
-			if a.Store == nil {
-				a.Logger.Error("Event store is not configured, cannot create event publisher")
-				panic("Event store is not configured, cannot create event publisher")
+		a.Container.Register(func() *messaging.EventPublisher {
+			bus := a.GetEventBus()
+			store := a.GetEventStore()
+			if bus == nil || store == nil {
+				a.Logger.Error("Event bus or store is not configured, cannot create event publisher")
+				panic("Event bus or store is not configured, cannot create event publisher")
 			}
-			a.Publisher = messaging.NewEventPublisher(a.Store, a.Bus, a.Config.App.Name)
-		}
-		if a.Subscriber == nil {
-			a.Subscriber = messaging.NewEventSubscriber(a.Bus)
-		}
+			return messaging.NewEventPublisher(store, bus, a.Config.App.Name)
+		})
+
+		a.Container.Register(func() *messaging.EventSubscriber {
+			bus := a.GetEventBus()
+			if bus == nil {
+				a.Logger.Error("Event bus is not configured, cannot create event subscriber")
+				panic("Event bus is not configured, cannot create event subscriber")
+			}
+			return messaging.NewEventSubscriber(bus)
+		})
 	}
 }
 
-// UseNatsBus 使用NATS作为事件总线
-func UseNatsBus() Option {
+// NatsBus 使用NATS作为事件总线
+func NatsBus() Option {
 	return func(o *App) {
-		if o.Bus == nil {
+		o.Container.Register(func() eventbus.EventBus {
 			eventBus, err := jetstream.NewJetStreamEventBus(&o.Config.NATS)
 			if err != nil {
 				o.Logger.Error("Failed to create NATS event bus", "error", err)
 				panic(err)
 			}
-			o.Bus = eventBus
-		}
+			return eventBus
+		})
 	}
 }
 
-// UseMemBus 使用内存作为事件总线
-func UseMemBus() Option {
+// MemBus 使用内存作为事件总线
+func MemBus() Option {
 	return func(o *App) {
-		o.Bus = eventbus.NewMemoryEventBus()
+		o.Container.Register(eventbus.NewMemoryEventBus)
 	}
 }
 
-// UseTasks 使用任务系统
+// Tasks 使用任务系统
 // 任务系统使用内存作为存储
-func UseTasks() Option {
+func Tasks() Option {
 	return func(o *App) {
-		if o.Tasks == nil {
-			memRepo := repo.NewMemoryRepository[*entity.Task]()
-			o.Tasks = usecase.NewTaskService(memRepo, o.Logger)
-		}
-		router.RegisterTaskRoutes(o.Engine, o.Tasks)
+		o.Container.RegisterNamed("taskRepo", repo.NewMemoryRepository[*entity.Task])
+		o.Container.Register(func() *usecase.TaskService {
+			var repo usecase.Repository[*entity.Task]
+			if err := o.Container.ResolveByName("taskRepo", &repo); err != nil {
+				o.Logger.Error("Failed to resolve task repository", "error", err)
+				panic(err)
+			}
+			return usecase.NewTaskService(repo, o.Logger)
+		})
+		router.RegisterTaskRoutes(o.Engine, o.GetTasks())
 	}
 }
 
 // UseSession 使用会话系统
 // 会话系统使用内存作为存储
-func UseSession(expire time.Duration) Option {
+func Sessions(expire time.Duration) Option {
 	return func(o *App) {
-		if o.Sessions == nil {
-			memRepo := repo.NewMemoryRepository[*entity.Session]()
-			o.Sessions = usecase.NewSessionService(memRepo, expire, o.Logger)
-		}
-		router.RegisterSessionRoutes(o.Engine, o.Sessions)
+		o.Container.RegisterNamed("sessionRepo", repo.NewMemoryRepository[*entity.Session])
+		o.Container.Register(func() *usecase.SessionService {
+			var repo usecase.Repository[*entity.Session]
+			if err := o.Container.ResolveByName("sessionRepo", &repo); err != nil {
+				o.Logger.Error("Failed to resolve session repository", "error", err)
+				panic(err)
+			}
+			return usecase.NewSessionService(repo, expire, o.Logger)
+		})
+
+		router.RegisterSessionRoutes(o.Engine, o.GetSessions())
 	}
 }
 
-func UseHealtCheck() Option {
+func HealthCheck() Option {
 	return func(o *App) {
 		router.RegisterHealthRoutes(&o.Config.App, o.Engine)
+	}
+}
+
+func BadgerRepo[T entity.Entity](name string) Option {
+	return func(o *App) {
+		var db *badger.DB
+		if err := o.Container.ResolveInstance(&db); err != nil {
+			o.Logger.Fatal("Failed to resolve Badger DB instance", zap.Error(err))
+			panic(err)
+		}
+		repoName := utils.Pascal(name + "Repo")
+		prefix := utils.Snake(name)
+		o.Container.RegisterNamed(repoName, func() usecase.Repository[T] {
+			return repo.NewBadgerRepository[T](db, prefix)
+		})
 	}
 }

@@ -24,9 +24,11 @@ type MemoryRepository[T entity.Entity] struct {
 	entityType string
 }
 
+var _ usecase.Repository[entity.Entity] = (*MemoryRepository[entity.Entity])(nil)
+
 // NewMemoryRepository 创建内存仓储实例
 // 返回: 初始化的内存仓储实例
-func NewMemoryRepository[T entity.Entity]() *MemoryRepository[T] {
+func NewMemoryRepository[T entity.Entity]() usecase.Repository[T] {
 	var zero T
 	entityType := fmt.Sprintf("%T", zero)
 
@@ -429,4 +431,234 @@ func (r *MemoryRepository[T]) Clear(ctx context.Context) error {
 	r.entities = make(map[string]T)
 
 	return nil
+}
+
+// FindWithConditions 根据条件查询实体
+func (r *MemoryRepository[T]) FindWithConditions(ctx context.Context, options usecase.QueryOptions) ([]T, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	var result []T
+
+	// 遍历所有实体
+	for _, entity := range r.entities {
+		// 检查是否满足所有条件
+		match := true
+		for _, condition := range options.Conditions {
+			if !r.matchCondition(entity, condition) {
+				match = false
+				break
+			}
+		}
+
+		// 如果满足所有条件，则添加到结果集
+		if match {
+			result = append(result, entity)
+		}
+	}
+
+	return result, nil
+}
+
+// CountWithConditions 根据条件统计实体数量
+func (r *MemoryRepository[T]) CountWithConditions(ctx context.Context, conditions []usecase.QueryCondition) (int64, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	var count int64 = 0
+
+	// 遍历所有实体
+	for _, entity := range r.entities {
+		// 检查是否满足所有条件
+		match := true
+		for _, condition := range conditions {
+			if !r.matchCondition(entity, condition) {
+				match = false
+				break
+			}
+		}
+
+		// 如果满足所有条件，则增加计数
+		if match {
+			count++
+		}
+	}
+
+	return count, nil
+}
+
+// matchCondition 检查实体是否满足单个查询条件
+func (r *MemoryRepository[T]) matchCondition(entity T, condition usecase.QueryCondition) bool {
+	// 使用反射获取实体字段值
+	entityValue := reflect.ValueOf(entity)
+	if entityValue.Kind() == reflect.Ptr {
+		entityValue = entityValue.Elem()
+	}
+
+	fieldValue := entityValue.FieldByName(condition.Field)
+	if !fieldValue.IsValid() || !fieldValue.CanInterface() {
+		return false
+	}
+
+	// 获取字段的具体值
+	fieldInterface := fieldValue.Interface()
+
+	// 根据操作符进行比较
+	switch condition.Operator {
+	case "EQ", "eq":
+		// 相等比较
+		return reflect.DeepEqual(fieldInterface, condition.Value)
+	case "NE", "ne":
+		// 不等比较
+		return !reflect.DeepEqual(fieldInterface, condition.Value)
+	case "GT", "gt":
+		// 大于比较
+		return r.compareValues(fieldInterface, condition.Value, func(a, b interface{}) bool {
+			aValue := reflect.ValueOf(a)
+			bValue := reflect.ValueOf(b)
+
+			switch aValue.Kind() {
+			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+				return aValue.Int() > bValue.Int()
+			case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+				return aValue.Uint() > bValue.Uint()
+			case reflect.Float32, reflect.Float64:
+				return aValue.Float() > bValue.Float()
+			case reflect.String:
+				return aValue.String() > bValue.String()
+			case reflect.Struct:
+				// 检查是否是time.Time类型
+				aType := aValue.Type()
+				if aType == reflect.TypeOf(time.Time{}) {
+					aTime := aValue.Interface().(time.Time)
+					bTime := bValue.Interface().(time.Time)
+					return aTime.After(bTime)
+				}
+				return false
+			default:
+				return false
+			}
+		})
+	case "LT", "lt":
+		// 小于比较
+		return r.compareValues(fieldInterface, condition.Value, func(a, b interface{}) bool {
+			aValue := reflect.ValueOf(a)
+			bValue := reflect.ValueOf(b)
+
+			switch aValue.Kind() {
+			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+				return aValue.Int() < bValue.Int()
+			case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+				return aValue.Uint() < bValue.Uint()
+			case reflect.Float32, reflect.Float64:
+				return aValue.Float() < bValue.Float()
+			case reflect.String:
+				return aValue.String() < bValue.String()
+			case reflect.Struct:
+				// 检查是否是time.Time类型
+				aType := aValue.Type()
+				if aType == reflect.TypeOf(time.Time{}) {
+					aTime := aValue.Interface().(time.Time)
+					bTime := bValue.Interface().(time.Time)
+					return aTime.Before(bTime)
+				}
+				return false
+			default:
+				return false
+			}
+		})
+	case "GTE", "gte":
+		// 大于等于比较
+		return r.compareValues(fieldInterface, condition.Value, func(a, b interface{}) bool {
+			aValue := reflect.ValueOf(a)
+			bValue := reflect.ValueOf(b)
+
+			switch aValue.Kind() {
+			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+				return aValue.Int() >= bValue.Int()
+			case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+				return aValue.Uint() >= bValue.Uint()
+			case reflect.Float32, reflect.Float64:
+				return aValue.Float() >= bValue.Float()
+			case reflect.String:
+				return aValue.String() >= bValue.String()
+			case reflect.Struct:
+				// 检查是否是time.Time类型
+				aType := aValue.Type()
+				if aType == reflect.TypeOf(time.Time{}) {
+					aTime := aValue.Interface().(time.Time)
+					bTime := bValue.Interface().(time.Time)
+					return aTime.After(bTime) || aTime.Equal(bTime)
+				}
+				return false
+			default:
+				return false
+			}
+		})
+	case "LTE", "lte":
+		// 小于等于比较
+		return r.compareValues(fieldInterface, condition.Value, func(a, b interface{}) bool {
+			aValue := reflect.ValueOf(a)
+			bValue := reflect.ValueOf(b)
+
+			switch aValue.Kind() {
+			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+				return aValue.Int() <= bValue.Int()
+			case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+				return aValue.Uint() <= bValue.Uint()
+			case reflect.Float32, reflect.Float64:
+				return aValue.Float() <= bValue.Float()
+			case reflect.String:
+				return aValue.String() <= bValue.String()
+			case reflect.Struct:
+				// 检查是否是time.Time类型
+				aType := aValue.Type()
+				if aType == reflect.TypeOf(time.Time{}) {
+					aTime := aValue.Interface().(time.Time)
+					bTime := bValue.Interface().(time.Time)
+					return aTime.Before(bTime) || aTime.Equal(bTime)
+				}
+				return false
+			default:
+				return false
+			}
+		})
+	default:
+		// 不支持的操作符
+		return false
+	}
+}
+
+// compareValues 比较两个值，使用提供的比较函数
+func (r *MemoryRepository[T]) compareValues(a, b interface{}, compareFunc func(a, b interface{}) bool) bool {
+	// 检查类型是否相同
+	aType := reflect.TypeOf(a)
+	bType := reflect.TypeOf(b)
+
+	// 如果类型不同，尝试进行简单转换
+	if aType != bType {
+		// 对于一些常见的数值类型转换
+		switch aType.Kind() {
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			if bType.Kind() == reflect.Float64 {
+				// int 转 float64 比较
+				aInt := reflect.ValueOf(a).Int()
+				bFloat := reflect.ValueOf(b).Float()
+				return float64(aInt) > bFloat
+			}
+		case reflect.Float64, reflect.Float32:
+			if bType.Kind() == reflect.Int {
+				// float 转 int 比较
+				aFloat := reflect.ValueOf(a).Float()
+				bInt := reflect.ValueOf(b).Int()
+				return aFloat > float64(bInt)
+			}
+		default:
+			// 不支持的类型转换
+			return false
+		}
+	}
+
+	// 类型相同，直接比较
+	return compareFunc(a, b)
 }

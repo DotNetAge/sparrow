@@ -8,9 +8,10 @@ import (
 
 func main() {
 	app := bootstrap.NewApp(
-		bootstrap.UseHealtCheck(),
-		bootstrap.UseTasks(),
-		bootstrap.UseSession(time.Hour),
+		bootstrap.HealthCheck(),
+		bootstrap.Tasks(),
+		bootstrap.Sessions(time.Hour),
 	)
+	app.Use(bootstrap.NatsBus())
 	app.Start()
 }

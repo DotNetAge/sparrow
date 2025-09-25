@@ -16,6 +16,8 @@ type MemoryEventBus struct {
 	closed   bool
 }
 
+var _ EventBus = (*MemoryEventBus)(nil)
+
 // eventHandler 包装事件处理器和元数据
 type eventHandler struct {
 	fn      EventHandler
@@ -23,7 +25,7 @@ type eventHandler struct {
 }
 
 // NewMemoryEventBus 创建新的内存事件总线实例
-func NewMemoryEventBus() *MemoryEventBus {
+func NewMemoryEventBus() EventBus {
 	return &MemoryEventBus{
 		handlers: make(map[string][]*eventHandler),
 	}
