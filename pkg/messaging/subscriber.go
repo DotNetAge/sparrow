@@ -6,7 +6,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/DotNetAge/sparrow/pkg/adapter/event/handlers"
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/eventbus"
 )
@@ -31,7 +30,7 @@ func NewEventSubscriber(eventBus eventbus.EventBus) *EventSubscriber {
 // Subscribe 订阅指定类型的领域事件
 // eventType: 事件类型
 // handler: 领域事件处理器
-func (s *EventSubscriber) Subscribe(eventType string, handler handlers.DomainEventHandler) error {
+func (s *EventSubscriber) Subscribe(eventType string, handler DomainEventHandler) error {
 	return s.SubscribeWithFilter(eventType, "", handler)
 }
 
@@ -39,7 +38,7 @@ func (s *EventSubscriber) Subscribe(eventType string, handler handlers.DomainEve
 // eventType: 事件类型
 // serviceName: 服务名称过滤器，为空时不过滤
 // handler: 领域事件处理器
-func (s *EventSubscriber) SubscribeWithFilter(eventType string, serviceName string, handler handlers.DomainEventHandler) error {
+func (s *EventSubscriber) SubscribeWithFilter(eventType string, serviceName string, handler DomainEventHandler) error {
 	if handler == nil {
 		return fmt.Errorf("handler cannot be nil")
 	}
@@ -151,9 +150,12 @@ func (s *EventSubscriber) Close() error {
 // 用于管理订阅关系和实现订阅取消功能
 type subscriberInfo struct {
 	// handler: 领域事件处理器函数
-	handler handlers.DomainEventHandler
+	handler DomainEventHandler
 	// eventType: 订阅的事件类型
 	eventType string
 	// serviceName: 服务名称过滤器，用于过滤特定服务的事件
 	serviceName string
 }
+
+// DomainEventHandler 领域事件处理器接口
+type DomainEventHandler func(ctx context.Context, event entity.DomainEvent) error

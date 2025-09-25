@@ -3,7 +3,6 @@ package eventbus
 import (
 	"context"
 
-	"github.com/DotNetAge/sparrow/pkg/adapter/event/handlers"
 	"github.com/DotNetAge/sparrow/pkg/entity"
 )
 
@@ -23,7 +22,7 @@ type EventBus interface {
 	// eventType: 事件类型
 	// handler: 事件处理器函数
 	// 返回值: 错误信息
-	Sub(eventType string, handler handlers.EventHandler) error
+	Sub(eventType string, handler EventHandler) error
 
 	// Unsub 取消订阅指定类型的事件
 	// eventType: 事件类型
@@ -34,3 +33,6 @@ type EventBus interface {
 	// 返回值: 错误信息
 	Close() error
 }
+
+// EventHandler 事件处理器接口
+type EventHandler func(ctx context.Context, event entity.Event) error

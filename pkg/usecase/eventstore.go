@@ -29,4 +29,5 @@ type EventStore interface {
 
 	// 批量操作
 	SaveEventsBatch(ctx context.Context, events map[string][]entity.DomainEvent) error
+	Close() error
 }

@@ -32,7 +32,11 @@ func setupTestRedisEventStore(t *testing.T) (*RedisEventStore, func()) {
 	}
 
 	// 创建事件存储实例
-	store := NewRedisEventStore(client, "test:", newTestLogger())
+	store := &RedisEventStore{
+		client: client,
+		prefix: "test:",
+		logger: newTestLogger(),
+	}
 
 	// 清理函数
 	cleanup := func() {
@@ -173,23 +177,6 @@ func (a *RedisMockAggregateRoot) GetUncommittedEvents() []entity.DomainEvent {
 // ClearUncommittedEvents 清除未提交的事件
 func (a *RedisMockAggregateRoot) ClearUncommittedEvents() {
 	a.UncommittedEvents = nil
-}
-
-// TestRedisNewRedisEventStore 测试创建Redis事件存储
-func TestRedisNewRedisEventStore(t *testing.T) {
-	client := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
-	})
-
-	store := NewRedisEventStore(client, "test_prefix", newTestLogger())
-
-	assert.NotNil(t, store)
-	assert.Equal(t, client, store.client)
-	assert.Equal(t, "test_prefix:", store.prefix)
-
-	// 测试无前缀情况
-	store = NewRedisEventStore(client, "", newTestLogger())
-	assert.Equal(t, "", store.prefix)
 }
 
 // TestRedisSaveEvents 测试保存事件

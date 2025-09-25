@@ -10,6 +10,7 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/errs"
 	"github.com/DotNetAge/sparrow/pkg/logger"
+	"github.com/DotNetAge/sparrow/pkg/usecase"
 
 	"github.com/dgraph-io/badger/v4"
 )
@@ -20,8 +21,10 @@ type BadgerEventStore struct {
 	logger *logger.Logger
 }
 
+var _ usecase.EventStore = (*BadgerEventStore)(nil)
+
 // NewBadgerEventStore 创建BadgerDB事件存储实例
-func NewBadgerEventStore(dbPath string, log *logger.Logger) (*BadgerEventStore, error) {
+func NewBadgerEventStore(dbPath string, log *logger.Logger) (usecase.EventStore, error) {
 	opts := badger.DefaultOptions(dbPath)
 	opts.SyncWrites = true
 	opts.Logger = nil // 禁用日志输出
@@ -35,6 +38,18 @@ func NewBadgerEventStore(dbPath string, log *logger.Logger) (*BadgerEventStore, 
 	}
 
 	return &BadgerEventStore{db: db, logger: log}, nil
+}
+
+// SaveEventsBatch 批量保存事件
+func (s *BadgerEventStore) SaveEventsBatch(ctx context.Context, events map[string][]entity.DomainEvent) error {
+	return s.db.Update(func(txn *badger.Txn) error {
+		for aggregateID, evtList := range events {
+			if err := s.SaveEvents(ctx, aggregateID, evtList, -1); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
 // Close 关闭数据库连接
@@ -68,11 +83,11 @@ func (s *BadgerEventStore) SaveEvents(ctx context.Context, aggregateID string, e
 
 			eventData, err := json.Marshal(evt)
 			if err != nil {
-					if s.logger != nil {
-						s.logger.Error("Failed to marshal event", "aggregate_id", aggregateID, "event_type", evt.GetEventType(), "error", err)
-					}
-					return errs.NewEventStoreError("event_marshal", "failed to marshal event", aggregateID, err)
+				if s.logger != nil {
+					s.logger.Error("Failed to marshal event", "aggregate_id", aggregateID, "event_type", evt.GetEventType(), "error", err)
 				}
+				return errs.NewEventStoreError("event_marshal", "failed to marshal event", aggregateID, err)
+			}
 
 			eventKey := s.getEventKey(aggregateID, version)
 			eventMeta := EventMeta{
@@ -86,29 +101,29 @@ func (s *BadgerEventStore) SaveEvents(ctx context.Context, aggregateID string, e
 
 			metaData, err := json.Marshal(eventMeta)
 			if err != nil {
-						if s.logger != nil {
-							s.logger.Error("Failed to marshal event metadata", "aggregate_id", aggregateID, "error", err)
-						}
-						return errs.NewEventStoreError("metadata_marshal", "failed to marshal event metadata", aggregateID, err)
-					}
+				if s.logger != nil {
+					s.logger.Error("Failed to marshal event metadata", "aggregate_id", aggregateID, "error", err)
+				}
+				return errs.NewEventStoreError("metadata_marshal", "failed to marshal event metadata", aggregateID, err)
+			}
 
 			if err := txn.Set(eventKey, metaData); err != nil {
-							if s.logger != nil {
-								s.logger.Error("Failed to save event", "aggregate_id", aggregateID, "version", version, "error", err)
-							}
-							return errs.NewEventStoreError("event_save", "failed to save event", aggregateID, err)
-						}
+				if s.logger != nil {
+					s.logger.Error("Failed to save event", "aggregate_id", aggregateID, "version", version, "error", err)
+				}
+				return errs.NewEventStoreError("event_save", "failed to save event", aggregateID, err)
+			}
 		}
 
 		// 更新版本号
 		versionKey := s.getVersionKey(aggregateID)
 		newVersion := currentVersion + len(events)
 		if err := txn.Set(versionKey, []byte(strconv.Itoa(newVersion))); err != nil {
-				if s.logger != nil {
-					s.logger.Error("Failed to update version", "aggregate_id", aggregateID, "new_version", newVersion, "error", err)
-				}
-				return errs.NewEventStoreError("version_update", "failed to update version", aggregateID, err)
+			if s.logger != nil {
+				s.logger.Error("Failed to update version", "aggregate_id", aggregateID, "new_version", newVersion, "error", err)
 			}
+			return errs.NewEventStoreError("version_update", "failed to update version", aggregateID, err)
+		}
 
 		return nil
 	})
@@ -193,37 +208,37 @@ func (s *BadgerEventStore) GetEventsByType(ctx context.Context, eventType string
 		prefix := []byte("event:")
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			item := it.Item()
-				var metaData []byte
-				err := item.Value(func(val []byte) error {
-					metaData = append([]byte{}, val...)
-					return nil
-				})
+			var metaData []byte
+			err := item.Value(func(val []byte) error {
+				metaData = append([]byte{}, val...)
+				return nil
+			})
+			if err != nil {
+				if s.logger != nil {
+					s.logger.Error("Failed to get event value", "error", err)
+				}
+				return fmt.Errorf("failed to get event value: %w", err)
+			}
+
+			// 先解析EventMeta以获取事件类型信息
+			var eventMeta EventMeta
+			if err := json.Unmarshal(metaData, &eventMeta); err != nil {
+				if s.logger != nil {
+					s.logger.Error("Failed to unmarshal event metadata", "error", err)
+				}
+				continue // 跳过这个事件
+			}
+
+			if eventMeta.EventType == eventType {
+				event, err := s.deserializeEvent(metaData)
 				if err != nil {
 					if s.logger != nil {
-						s.logger.Error("Failed to get event value", "error", err)
+						s.logger.Error("Failed to deserialize event", "error", err)
 					}
-					return fmt.Errorf("failed to get event value: %w", err)
+					return fmt.Errorf("failed to deserialize event: %w", err)
 				}
-
-				// 先解析EventMeta以获取事件类型信息
-				var eventMeta EventMeta
-				if err := json.Unmarshal(metaData, &eventMeta); err != nil {
-					if s.logger != nil {
-						s.logger.Error("Failed to unmarshal event metadata", "error", err)
-					}
-					continue // 跳过这个事件
-				}
-
-				if eventMeta.EventType == eventType {
-					event, err := s.deserializeEvent(metaData)
-					if err != nil {
-						if s.logger != nil {
-							s.logger.Error("Failed to deserialize event", "error", err)
-						}
-						return fmt.Errorf("failed to deserialize event: %w", err)
-					}
-					events = append(events, event)
-				}
+				events = append(events, event)
+			}
 		}
 
 		return nil
@@ -252,36 +267,36 @@ func (s *BadgerEventStore) GetEventsByTimeRange(ctx context.Context, aggregateID
 			item := it.Item()
 
 			var metaData []byte
-				err := item.Value(func(val []byte) error {
-					metaData = append([]byte{}, val...)
-					return nil
-				})
+			err := item.Value(func(val []byte) error {
+				metaData = append([]byte{}, val...)
+				return nil
+			})
+			if err != nil {
+				if s.logger != nil {
+					s.logger.Error("Failed to get event value", "aggregate_id", aggregateID, "error", err)
+				}
+				return fmt.Errorf("failed to get event value: %w", err)
+			}
+
+			// 先解析EventMeta以获取时间信息
+			var eventMeta EventMeta
+			if err := json.Unmarshal(metaData, &eventMeta); err != nil {
+				if s.logger != nil {
+					s.logger.Error("Failed to unmarshal event metadata", "aggregate_id", aggregateID, "error", err)
+				}
+				continue // 跳过这个事件
+			}
+
+			if eventMeta.CreatedAt.After(fromTime) && eventMeta.CreatedAt.Before(toTime) {
+				event, err := s.deserializeEvent(metaData)
 				if err != nil {
 					if s.logger != nil {
-						s.logger.Error("Failed to get event value", "aggregate_id", aggregateID, "error", err)
+						s.logger.Error("Failed to deserialize event", "aggregate_id", aggregateID, "error", err)
 					}
-					return fmt.Errorf("failed to get event value: %w", err)
+					return fmt.Errorf("failed to deserialize event: %w", err)
 				}
-
-				// 先解析EventMeta以获取时间信息
-				var eventMeta EventMeta
-				if err := json.Unmarshal(metaData, &eventMeta); err != nil {
-					if s.logger != nil {
-						s.logger.Error("Failed to unmarshal event metadata", "aggregate_id", aggregateID, "error", err)
-					}
-					continue // 跳过这个事件
-				}
-
-				if eventMeta.CreatedAt.After(fromTime) && eventMeta.CreatedAt.Before(toTime) {
-					event, err := s.deserializeEvent(metaData)
-					if err != nil {
-						if s.logger != nil {
-							s.logger.Error("Failed to deserialize event", "aggregate_id", aggregateID, "error", err)
-						}
-						return fmt.Errorf("failed to deserialize event: %w", err)
-					}
-					events = append(events, event)
-				}
+				events = append(events, event)
+			}
 		}
 
 		return nil
@@ -325,27 +340,27 @@ func (s *BadgerEventStore) GetEventsWithPagination(ctx context.Context, aggregat
 			}
 
 			item := it.Item()
-					var metaData []byte
-					err := item.Value(func(val []byte) error {
-						metaData = append([]byte{}, val...)
-						return nil
-					})
-					if err != nil {
-						if s.logger != nil {
-							s.logger.Error("Failed to get event value", "aggregate_id", aggregateID, "error", err)
-						}
-						return fmt.Errorf("failed to get event value: %w", err)
-					}
+			var metaData []byte
+			err := item.Value(func(val []byte) error {
+				metaData = append([]byte{}, val...)
+				return nil
+			})
+			if err != nil {
+				if s.logger != nil {
+					s.logger.Error("Failed to get event value", "aggregate_id", aggregateID, "error", err)
+				}
+				return fmt.Errorf("failed to get event value: %w", err)
+			}
 
-					event, err := s.deserializeEvent(metaData)
-					if err != nil {
-						if s.logger != nil {
-							s.logger.Error("Failed to deserialize event", "aggregate_id", aggregateID, "error", err)
-						}
-						return fmt.Errorf("failed to deserialize event: %w", err)
-					}
-					events = append(events, event)
-					count++
+			event, err := s.deserializeEvent(metaData)
+			if err != nil {
+				if s.logger != nil {
+					s.logger.Error("Failed to deserialize event", "aggregate_id", aggregateID, "error", err)
+				}
+				return fmt.Errorf("failed to deserialize event: %w", err)
+			}
+			events = append(events, event)
+			count++
 		}
 
 		return nil
@@ -599,8 +614,6 @@ func (s *BadgerEventStore) deserializeEvent(data []byte) (entity.DomainEvent, er
 }
 
 // deserializeEvents 方法已移除，因为未被使用
-
-
 
 // SnapshotMeta 快照元数据结构
 type SnapshotMeta struct {

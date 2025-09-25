@@ -12,6 +12,7 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/errs"
 	"github.com/DotNetAge/sparrow/pkg/logger"
+	"github.com/dgraph-io/badger/v4"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -26,8 +27,8 @@ type MockAggregateRoot struct {
 	AggregateType string
 
 	// 用于测试错误情况
-	ShouldFailApplyEvent     bool
-	ShouldFailLoadFromEvents bool
+	ShouldFailApplyEvent       bool
+	ShouldFailLoadFromEvents   bool
 	ShouldFailLoadFromSnapshot bool
 }
 
@@ -195,16 +196,28 @@ func setupTestEventStore(t *testing.T) (*BadgerEventStore, func()) {
 	var log *logger.Logger = nil
 
 	// 创建BadgerEventStore
-	store, err := NewBadgerEventStore(dir, log)
-	require.NoError(t, err)
+	opts := badger.DefaultOptions(dir)
+	opts.SyncWrites = true
+	opts.Logger = nil // 禁用日志输出
+
+	db, err := badger.Open(opts)
+	if err != nil {
+		if log != nil {
+			log.Error("Failed to open badger database", "error", err)
+		}
+		return nil, func() {
+			db.Close()
+			os.RemoveAll(dir)
+		}
+	}
 
 	// 清理函数
 	cleanup := func() {
-		store.Close()
+		db.Close()
 		os.RemoveAll(dir)
 	}
 
-	return store, cleanup
+	return &BadgerEventStore{db: db, logger: log}, cleanup
 }
 
 // 测试NewBadgerEventStore函数
@@ -218,7 +231,7 @@ func TestNewBadgerEventStore(t *testing.T) {
 	store, err := NewBadgerEventStore(dir, nil)
 	assert.NoError(t, err)
 	assert.NotNil(t, store)
-	store.Close()
+	assert.NoError(t, store.Close())
 
 	// 测试无效路径
 	invalidPath := "/invalid/path/that/does/not/exist"
@@ -522,7 +535,7 @@ func TestLoad(t *testing.T) {
 	err = store.Load(ctx, aggregateID, aggregate)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, aggregate.EventsApplied) // 应用了一个新事件
-	assert.Equal(t, 3, aggregate.Version) // 最终版本是3（快照版本2 + 一个新事件）
+	assert.Equal(t, 3, aggregate.Version)       // 最终版本是3（快照版本2 + 一个新事件）
 	assert.NotNil(t, aggregate.SnapshotData)
 
 	// 测试加载错误 - 快照加载失败

@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
+	"math/rand"
 	"strings"
 	"time"
 
@@ -12,411 +12,206 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/errs"
 	"github.com/DotNetAge/sparrow/pkg/logger"
+	"github.com/DotNetAge/sparrow/pkg/usecase"
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
-// NATSEventStore Nats事件存储实现（永久存储）
-type NATSEventStore struct {
-	conn            *nats.Conn
-	js              jetstream.JetStream
-	streamName      string
-	eventSubject    string
-	snapshotSubject string
-	bucketName      string
-	bucket          jetstream.KeyValue
-	logger          *logger.Logger
+// NatsEventStore 基于NATS JetStream的事件存储实现
+type NatsEventStore struct {
+	js          jetstream.JetStream
+	nc          *nats.Conn
+	logger      *logger.Logger
+	streamName  string
+	storeStream string
+	bucketName  string
+	durableName string
 }
 
-// NewNATSEventStore 创建Nats事件存储实例
-func NewNATSEventStore(cfg *config.NATsConfig, log *logger.Logger) (*NATSEventStore, error) {
-	conn, err := nats.Connect(cfg.NATSURL)
+var _ usecase.EventStore = (*NatsEventStore)(nil)
+
+// NewNatsEventStore 创建NATS事件存储实例
+func NewNatsEventStore(cfg *config.NATsConfig, logger *logger.Logger) (usecase.EventStore, error) {
+	// 连接到NATS服务器
+	nc, err := nats.Connect(cfg.NATSURL)
 	if err != nil {
-		if log != nil {
-			log.Error("Failed to connect to NATS", "error", err)
+		if logger != nil {
+			logger.Error("连接到NATS服务器失败", "error", err)
 		}
-		return nil, fmt.Errorf("failed to connect to NATS: %w", err)
+		return nil, fmt.Errorf("连接到NATS服务器失败: %w", err)
 	}
 
-	js, err := jetstream.New(conn)
+	// 获取JetStream上下文
+	js, err := jetstream.New(nc)
 	if err != nil {
-		if log != nil {
-			log.Error("Failed to create jetstream", "error", err)
+		nc.Close()
+		if logger != nil {
+			logger.Error("获取JetStream上下文失败", "error", err)
 		}
-		return nil, fmt.Errorf("failed to create jetstream: %w", err)
+		return nil, fmt.Errorf("获取JetStream上下文失败: %w", err)
 	}
 
-	store := &NATSEventStore{
-		conn:            conn,
-		js:              js,
-		streamName:      cfg.StoreStream,
-		eventSubject:    fmt.Sprintf("%s.events", cfg.StoreStream),
-		snapshotSubject: fmt.Sprintf("%s.snapshots", cfg.StoreStream),
-		bucketName:      cfg.BucketName,
-		logger:          log,
-	}
-
-	if err := store.createResources(); err != nil {
-		if log != nil {
-			log.Error("Failed to create resources", "error", err)
+	// 创建事件存储流
+	if err := createEventStoreStream(context.Background(), js, cfg.StoreStream); err != nil {
+		nc.Close()
+		if logger != nil {
+			logger.Error("创建事件存储流失败", "error", err)
 		}
-		return nil, fmt.Errorf("failed to create resources: %w", err)
+		return nil, fmt.Errorf("创建事件存储流失败: %w", err)
 	}
 
-	bucket, err := js.KeyValue(context.Background(), cfg.BucketName)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get key-value bucket: %w", err)
-	}
-	store.bucket = bucket
-
-	return store, nil
+	return &NatsEventStore{
+		js:          js,
+		nc:          nc,
+		logger:      logger,
+		streamName:  cfg.StreamName,
+		storeStream: cfg.StoreStream,
+		bucketName:  cfg.BucketName,
+		durableName: cfg.DurableName,
+	}, nil
 }
 
-// createResources 创建必要的Nats资源
-func (s *NATSEventStore) createResources() error {
-	ctx := context.Background()
+// createEventStoreStream 创建事件存储所需的JetStream流
+func createEventStoreStream(ctx context.Context, js jetstream.JetStream, streamName string) error {
+	// 检查流是否已存在
+	_, err := js.Stream(ctx, streamName)
+	if err == nil {
+		// 流已存在，返回成功
+		fmt.Printf("流 %s 已存在\n", streamName)
+		return nil
+	}
 
-	// 创建事件流
-	_, err := s.js.CreateStream(ctx, jetstream.StreamConfig{
-		Name:        s.streamName,
-		Description: "Event store stream",
-		Subjects:    []string{fmt.Sprintf("%s.*", s.streamName)},
-		Retention:   jetstream.LimitsPolicy,
-		Storage:     jetstream.FileStorage,
-		Replicas:    1,
-	})
-	if err != nil && !strings.Contains(err.Error(), "stream name already in use") {
-			if s.logger != nil {
-				s.logger.Error("Failed to create stream", "error", err)
-			}
-			return fmt.Errorf("failed to create stream: %w", err)
-		}
+	// 尝试创建流，配置更加详细
+	streamConfig := jetstream.StreamConfig{
+		Name:      streamName,
+		Subjects:  []string{streamName + ".>"}, // 使用>通配符匹配所有以streamName开头的主题
+		Storage:   jetstream.FileStorage,
+		Replicas:  1,
+		MaxBytes:  1024 * 1024 * 1024, // 1GB
+		MaxMsgs:   -1,                 // 无限制
+		Retention: jetstream.LimitsPolicy,
+	}
 
-	// 创建Key-Value桶用于存储快照和版本信息
-	_, err = s.js.CreateKeyValue(ctx, jetstream.KeyValueConfig{
-		Bucket:      s.bucketName,
-		Description: "Event store snapshots and metadata",
-		Storage:     jetstream.FileStorage,
-		Replicas:    1,
-	})
-	if err != nil && !strings.Contains(err.Error(), "bucket name already in use") {
-			if s.logger != nil {
-				s.logger.Error("Failed to create key-value bucket", "error", err)
-			}
-			return fmt.Errorf("failed to create key-value bucket: %w", err)
-		}
+	_, err = js.CreateStream(ctx, streamConfig)
+	if err != nil {
+		return fmt.Errorf("创建流失败: %w", err)
+	}
 
+	fmt.Printf("流 %s 创建成功\n", streamName)
+	// 等待一小段时间，确保流已完全初始化
 	return nil
 }
 
 // SaveEvents 保存事件
-func (s *NATSEventStore) SaveEvents(ctx context.Context, aggregateID string, events []entity.DomainEvent, expectedVersion int) error {
+func (s *NatsEventStore) SaveEvents(ctx context.Context, aggregateID string, events []entity.DomainEvent, expectedVersion int) error {
 	if len(events) == 0 {
 		return nil
 	}
 
-	// 获取当前版本
+	// 首先检查流是否存在并且可用
+	_, err := s.js.Stream(ctx, s.storeStream)
+	if err != nil {
+		fmt.Printf("检查流 %s 失败: %v\n", s.storeStream, err)
+		// 尝试重新创建流
+		if err := createEventStoreStream(ctx, s.js, s.storeStream); err != nil {
+			fmt.Printf("重新创建流失败: %v\n", err)
+			return fmt.Errorf("流不可用: %w", err)
+		}
+	} else {
+		fmt.Printf("流 %s 存在且可用\n", s.storeStream)
+	}
+
+	// 检查当前版本
 	currentVersion, err := s.GetAggregateVersion(ctx, aggregateID)
 	if err != nil {
-			if s.logger != nil {
-				s.logger.Error("Failed to get current version", "aggregate_id", aggregateID, "error", err)
-			}
-			return errs.NewEventStoreError("version_check", "failed to get current version", aggregateID, err)
-		}
+		return fmt.Errorf("获取当前版本失败: %w", err)
+	}
 
 	if expectedVersion != -1 && currentVersion != expectedVersion {
-		return errs.NewConcurrencyConflictError(aggregateID, expectedVersion, currentVersion)
+		return &errs.EventStoreError{
+			Type:      "concurrency_conflict",
+			Message:   fmt.Sprintf("预期版本 %d, 实际版本 %d", expectedVersion, currentVersion),
+			Aggregate: aggregateID,
+		}
 	}
 
-	// 发布事件到JetStream
+	// 保存事件
 	for i, event := range events {
-		eventData, err := json.Marshal(event)
-		if err != nil {
-			if s.logger != nil {
-				s.logger.Error("Failed to marshal event", "aggregate_id", aggregateID, "event_type", event.GetEventType(), "error", err)
-			}
-			return fmt.Errorf("failed to marshal event: %w", err)
-		}
-
 		version := currentVersion + i + 1
-
-		// 创建事件消息
-		msg := map[string]interface{}{
-			"aggregate_id": aggregateID,
-			"event_type":   event.GetEventType(),
-			"event_data":   string(eventData),
-			"version":      version,
-			"timestamp":    time.Now().Unix(),
-		}
-
-		msgData, err := json.Marshal(msg)
+		eventBytes, err := EncodeEvent(event)
 		if err != nil {
 			if s.logger != nil {
-				s.logger.Error("Failed to marshal event message", "aggregate_id", aggregateID, "error", err)
+				s.logger.Error("编码事件失败", "aggregate_id", aggregateID, "event_type", event.GetEventType(), "error", err)
 			}
-			return fmt.Errorf("failed to marshal event message: %w", err)
+			return fmt.Errorf("编码事件失败: %w", err)
 		}
 
-		// 发布到JetStream
-		subject := fmt.Sprintf("%s.%s", s.eventSubject, aggregateID)
-		_, err = s.js.Publish(ctx, subject, msgData)
-		if err != nil {
-			if s.logger != nil {
-				s.logger.Error("Failed to publish event", "aggregate_id", aggregateID, "event_type", event.GetEventType(), "version", version, "error", err)
-			}
-			return fmt.Errorf("failed to publish event: %w", err)
-		}
-	}
-
-	// 更新版本信息
-	versionKey := s.versionKey(aggregateID)
-	newVersion := currentVersion + len(events)
-	_, err = s.bucket.Put(ctx, versionKey, []byte(strconv.Itoa(newVersion)))
-	if err != nil {
+		subject := fmt.Sprintf("%s.%s.%d", s.storeStream, aggregateID, version)
 		if s.logger != nil {
-			s.logger.Error("Failed to update version", "aggregate_id", aggregateID, "new_version", newVersion, "error", err)
+			s.logger.Debug("尝试发布事件到主题", "subject", subject, "aggregate_id", aggregateID, "event_type", event.GetEventType(), "version", version)
 		}
-		return errs.NewEventStoreError("version_update", "failed to update version", aggregateID, err)
+		
+		// 使用标准Publish方法发布事件
+		_, err = s.js.Publish(ctx, subject, eventBytes)
+		if err != nil {
+			if s.logger != nil {
+				s.logger.Error("发布事件失败", "aggregate_id", aggregateID, "event_type", event.GetEventType(), "version", version, "error", err)
+			}
+			return fmt.Errorf("发布事件失败: %w", err)
+		}
+		
+		if s.logger != nil {
+			s.logger.Debug("成功发布事件到主题", "subject", subject)
+		}
 	}
 
 	return nil
 }
 
 // GetEvents 获取聚合的所有事件
-func (s *NATSEventStore) GetEvents(ctx context.Context, aggregateID string) ([]entity.DomainEvent, error) {
-	return s.getEventsFromVersion(ctx, aggregateID, 1)
+func (s *NatsEventStore) GetEvents(ctx context.Context, aggregateID string) ([]entity.DomainEvent, error) {
+	return s.getEventsBySubject(ctx, fmt.Sprintf("%s.%s.*", s.storeStream, aggregateID))
 }
 
 // GetEventsFromVersion 从指定版本开始获取事件
-func (s *NATSEventStore) GetEventsFromVersion(ctx context.Context, aggregateID string, fromVersion int) ([]entity.DomainEvent, error) {
-	return s.getEventsFromVersion(ctx, aggregateID, fromVersion)
-}
-
-// getEventsFromVersion 内部获取事件方法
-func (s *NATSEventStore) getEventsFromVersion(ctx context.Context, aggregateID string, fromVersion int) ([]entity.DomainEvent, error) {
-	// 使用JetStream的消费者获取事件
-	subject := fmt.Sprintf("%s.%s", s.eventSubject, aggregateID)
-
-	// 创建消费者（如果存在则获取）
-	consumer, err := s.js.CreateOrUpdateConsumer(ctx, s.streamName, jetstream.ConsumerConfig{
-		Durable:       fmt.Sprintf("consumer-%s", aggregateID),
-		FilterSubject: subject,
-		DeliverPolicy: jetstream.DeliverAllPolicy,
+func (s *NatsEventStore) GetEventsFromVersion(ctx context.Context, aggregateID string, fromVersion int) ([]entity.DomainEvent, error) {
+	return s.getEventsBySubjectWithFilter(ctx, fmt.Sprintf("%s.%s.*", s.storeStream, aggregateID), func(msg jetstream.Msg) bool {
+		// 解析消息中的事件元数据
+		var meta EventMeta
+		if err := json.Unmarshal(msg.Data(), &meta); err != nil {
+			return false
+		}
+		// 只返回版本号大于或等于fromVersion的事件
+		return meta.Version >= fromVersion
 	})
-	if err != nil {
-		if s.logger != nil {
-			s.logger.Error("Failed to create consumer", "aggregate_id", aggregateID, "error", err)
-		}
-		return nil, errs.NewEventStoreError("consumer_creation", "failed to create consumer", aggregateID, err)
-	}
-
-	// 获取消息
-	messages, err := consumer.Fetch(1000) // 限制单次获取数量
-	if err != nil {
-		if s.logger != nil {
-			s.logger.Error("Failed to fetch messages", "aggregate_id", aggregateID, "error", err)
-		}
-		return nil, errs.NewEventStoreError("message_fetch", "failed to fetch messages", aggregateID, err)
-	}
-
-	var events []entity.DomainEvent
-	currentVersion := 1
-
-	for msg := range messages.Messages() {
-		var eventMsg map[string]interface{}
-		if err := json.Unmarshal(msg.Data(), &eventMsg); err != nil {
-			if err := msg.Nak(); err != nil {
-				s.logger.Error("Failed to Nak message", "error", err)
-			}
-			continue
-		}
-
-		if currentVersion >= fromVersion {
-			domainEvent, err := s.deserializeEventFromNATS(eventMsg, aggregateID)
-			if err != nil {
-				if err := msg.Nak(); err != nil {
-					s.logger.Error("Failed to Nak message", "error", err)
-				}
-				continue
-			}
-			events = append(events, domainEvent)
-		}
-
-		currentVersion++
-		if err := msg.Ack(); err != nil {
-			s.logger.Error("Failed to Ack message", "error", err)
-		}
-	}
-
-	return events, nil
-}
-
-// deserializeEventFromNATS 从NATS消息中反序列化事件
-func (s *NATSEventStore) deserializeEventFromNATS(eventMsg map[string]interface{}, aggregateID string) (entity.DomainEvent, error) {
-	// 解析事件数据
-	eventData, ok := eventMsg["event_data"].(string)
-	if !ok {
-		return nil, fmt.Errorf("invalid event_data format")
-	}
-	
-	eventType, ok := eventMsg["event_type"].(string)
-	if !ok {
-		return nil, fmt.Errorf("invalid event_type format")
-	}
-	
-	version, ok := eventMsg["version"].(float64)
-	if !ok {
-		return nil, fmt.Errorf("invalid version format")
-	}
-	
-	timestamp, ok := eventMsg["timestamp"].(float64)
-	if !ok {
-		return nil, fmt.Errorf("invalid timestamp format")
-	}
-
-	// 解析事件体为map
-	var eventBody map[string]interface{}
-	if err := json.Unmarshal([]byte(eventData), &eventBody); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal event body: %w", err)
-	}
-
-	// 使用通用函数创建基础事件对象
-	baseEvent := DecodeEventFromMap(eventBody)
-	
-	// 强制转换为BaseEvent指针以设置额外字段
-	if baseEventImpl, ok := baseEvent.(*entity.BaseEvent); ok {
-		// 从NATS消息中覆盖必要字段
-		if aggregateID != "" {
-			baseEventImpl.AggregateID = aggregateID
-		}
-		baseEventImpl.EventType = eventType
-		baseEventImpl.Version = int(version)
-		baseEventImpl.Timestamp = time.Unix(int64(timestamp), 0)
-	}
-
-	return baseEvent, nil
 }
 
 // GetEventsByType 按事件类型获取事件
-func (s *NATSEventStore) GetEventsByType(ctx context.Context, eventType string) ([]entity.DomainEvent, error) {
-	// 创建通配符消费者
-	consumer, err := s.js.CreateOrUpdateConsumer(ctx, s.streamName, jetstream.ConsumerConfig{
-		Durable:       fmt.Sprintf("consumer-type-%s", eventType),
-		FilterSubject: fmt.Sprintf("%s.*", s.eventSubject),
-		DeliverPolicy: jetstream.DeliverAllPolicy,
+func (s *NatsEventStore) GetEventsByType(ctx context.Context, eventType string) ([]entity.DomainEvent, error) {
+	// 在NATS中按类型过滤事件效率不高，我们需要获取所有事件然后在客户端过滤
+	return s.getEventsBySubjectWithFilter(ctx, fmt.Sprintf("%s.*.*", s.storeStream), func(msg jetstream.Msg) bool {
+		var meta EventMeta
+		if err := json.Unmarshal(msg.Data(), &meta); err != nil {
+			return false
+		}
+		return meta.EventType == eventType
 	})
-	if err != nil {
-		if s.logger != nil {
-			s.logger.Error("Failed to create consumer", "event_type", eventType, "error", err)
-		}
-		return nil, fmt.Errorf("failed to create consumer: %w", err)
-	}
-
-	messages, err := consumer.Fetch(1000)
-	if err != nil {
-		if s.logger != nil {
-			s.logger.Error("Failed to fetch messages", "event_type", eventType, "error", err)
-		}
-		return nil, fmt.Errorf("failed to fetch messages: %w", err)
-	}
-
-	var events []entity.DomainEvent
-	for msg := range messages.Messages() {
-		var eventMsg map[string]interface{}
-		if err := json.Unmarshal(msg.Data(), &eventMsg); err != nil {
-			if err := msg.Nak(); err != nil {
-				s.logger.Error("Failed to Nak message", "error", err)
-			}
-			continue
-		}
-
-		if eventMsg["event_type"].(string) == eventType {
-			// 从消息中获取aggregateID
-			aggregateID, ok := eventMsg["aggregate_id"].(string)
-			if !ok {
-				if err := msg.Nak(); err != nil {
-					s.logger.Error("Failed to Nak message", "error", err)
-				}
-				continue
-			}
-			
-			domainEvent, err := s.deserializeEventFromNATS(eventMsg, aggregateID)
-			if err != nil {
-				if err := msg.Nak(); err != nil {
-					s.logger.Error("Failed to Nak message", "error", err)
-				}
-				continue
-			}
-			events = append(events, domainEvent)
-		}
-		if err := msg.Ack(); err != nil {
-			s.logger.Error("Failed to Ack message", "error", err)
-		}
-	}
-
-	return events, nil
 }
 
 // GetEventsByTimeRange 按时间范围获取事件
-func (s *NATSEventStore) GetEventsByTimeRange(ctx context.Context, aggregateID string, fromTime, toTime time.Time) ([]entity.DomainEvent, error) {
-	// 使用JetStream的时间戳过滤
-	subject := fmt.Sprintf("%s.%s", s.eventSubject, aggregateID)
-
-	consumer, err := s.js.CreateOrUpdateConsumer(ctx, s.streamName, jetstream.ConsumerConfig{
-		Durable:       fmt.Sprintf("consumer-time-%s", aggregateID),
-		FilterSubject: subject,
-		DeliverPolicy: jetstream.DeliverAllPolicy,
+func (s *NatsEventStore) GetEventsByTimeRange(ctx context.Context, aggregateID string, fromTime, toTime time.Time) ([]entity.DomainEvent, error) {
+	return s.getEventsBySubjectWithFilter(ctx, fmt.Sprintf("%s.%s.*", s.storeStream, aggregateID), func(msg jetstream.Msg) bool {
+		var meta EventMeta
+		if err := json.Unmarshal(msg.Data(), &meta); err != nil {
+			return false
+		}
+		return meta.CreatedAt.After(fromTime) && meta.CreatedAt.Before(toTime)
 	})
-	if err != nil {
-		if s.logger != nil {
-			s.logger.Error("Failed to create consumer", "aggregate_id", aggregateID, "error", err)
-		}
-		return nil, fmt.Errorf("failed to create consumer: %w", err)
-	}
-
-	messages, err := consumer.Fetch(1000)
-	if err != nil {
-		if s.logger != nil {
-			s.logger.Error("Failed to fetch messages", "aggregate_id", aggregateID, "error", err)
-		}
-		return nil, fmt.Errorf("failed to fetch messages: %w", err)
-	}
-
-	var events []entity.DomainEvent
-	fromUnix := fromTime.Unix()
-	toUnix := toTime.Unix()
-
-	for msg := range messages.Messages() {
-		var eventMsg map[string]interface{}
-		if err := json.Unmarshal(msg.Data(), &eventMsg); err != nil {
-			if err := msg.Nak(); err != nil {
-				s.logger.Error("Failed to Nak message", "error", err)
-			}
-			continue
-		}
-
-		timestamp := int64(eventMsg["timestamp"].(float64))
-		if timestamp >= fromUnix && timestamp <= toUnix {
-			domainEvent, err := s.deserializeEventFromNATS(eventMsg, aggregateID)
-			if err != nil {
-				if err := msg.Nak(); err != nil {
-					s.logger.Error("Failed to Nak message", "error", err)
-				}
-				continue
-			}
-			events = append(events, domainEvent)
-		}
-		if err := msg.Ack(); err != nil {
-			s.logger.Error("Failed to Ack message", "error", err)
-		}
-	}
-
-	return events, nil
 }
 
 // GetEventsWithPagination 分页获取事件
-func (s *NATSEventStore) GetEventsWithPagination(ctx context.Context, aggregateID string, limit, offset int) ([]entity.DomainEvent, error) {
+func (s *NatsEventStore) GetEventsWithPagination(ctx context.Context, aggregateID string, limit, offset int) ([]entity.DomainEvent, error) {
 	if limit <= 0 {
 		limit = 10
 	}
@@ -429,213 +224,253 @@ func (s *NATSEventStore) GetEventsWithPagination(ctx context.Context, aggregateI
 		return nil, err
 	}
 
-	if offset >= len(allEvents) {
+	// 实现内存分页
+	start := offset
+	end := offset + limit
+	if start >= len(allEvents) {
 		return []entity.DomainEvent{}, nil
 	}
-
-	end := offset + limit
 	if end > len(allEvents) {
 		end = len(allEvents)
 	}
 
-	return allEvents[offset:end], nil
+	return allEvents[start:end], nil
 }
 
 // GetAggregateVersion 获取聚合版本
-func (s *NATSEventStore) GetAggregateVersion(ctx context.Context, aggregateID string) (int, error) {
-	versionKey := s.versionKey(aggregateID)
-
-	versionData, err := s.bucket.Get(ctx, versionKey)
+func (s *NatsEventStore) GetAggregateVersion(ctx context.Context, aggregateID string) (int, error) {
+	events, err := s.GetEvents(ctx, aggregateID)
 	if err != nil {
-		if err == jetstream.ErrKeyNotFound {
-			return 0, nil // 没有事件，版本为0
-		}
-		if s.logger != nil {
-			s.logger.Error("Failed to get version", "aggregate_id", aggregateID, "error", err)
-		}
-		return 0, fmt.Errorf("failed to get version: %w", err)
+		return 0, err
 	}
 
-	version, err := strconv.Atoi(string(versionData.Value()))
-	if err != nil {
-		if s.logger != nil {
-			s.logger.Error("Invalid version format", "aggregate_id", aggregateID, "error", err)
+	maxVersion := 0
+	for _, event := range events {
+		if event.GetVersion() > maxVersion {
+			maxVersion = event.GetVersion()
 		}
-		return 0, fmt.Errorf("invalid version format: %w", err)
 	}
 
-	return version, nil
+	return maxVersion, nil
 }
 
-// SaveSnapshot 保存快照
-func (s *NATSEventStore) SaveSnapshot(ctx context.Context, aggregateID string, snapshot interface{}, version int) error {
-	snapshotData, err := json.Marshal(snapshot)
-	if err != nil {
-		if s.logger != nil {
-			s.logger.Error("Failed to marshal snapshot", "aggregate_id", aggregateID, "version", version, "error", err)
+// Load 从事件流加载聚合根状态
+func (s *NatsEventStore) Load(ctx context.Context, aggregateID string, aggregate entity.AggregateRoot) error {
+	// 1. 尝试从快照恢复
+	snapshot, version, err := s.GetLatestSnapshot(ctx, aggregateID)
+	var events []entity.DomainEvent
+
+	// 2. 获取快照之后的事件
+	if err == nil && snapshot != nil {
+		// 将快照数据应用到聚合根
+		if err := aggregate.LoadFromSnapshot(snapshot); err != nil {
+			if s.logger != nil {
+				s.logger.Error("从快照加载失败", "aggregate_id", aggregateID, "error", err)
+			}
+			return fmt.Errorf("从快照加载失败: %w", err)
 		}
-		return fmt.Errorf("failed to marshal snapshot: %w", err)
+		// 获取快照版本之后的事件
+		if version > 0 {
+			events, err = s.GetEventsFromVersion(ctx, aggregateID, version+1)
+			if err != nil {
+				if s.logger != nil {
+					s.logger.Error("从指定版本获取事件失败", "aggregate_id", aggregateID, "from_version", version+1, "error", err)
+				}
+				return fmt.Errorf("从指定版本获取事件失败: %w", err)
+			}
+		}
+	} else {
+		// 没有快照或快照加载失败，从所有事件恢复
+		events, err = s.GetEvents(ctx, aggregateID)
+		if err != nil {
+			if s.logger != nil {
+				s.logger.Error("获取事件失败", "aggregate_id", aggregateID, "error", err)
+			}
+			return fmt.Errorf("获取事件失败: %w", err)
+		}
 	}
 
-	snapshotKey := s.snapshotKey(aggregateID)
-
-	// 创建快照数据
-	snapshotMsg := map[string]interface{}{
-		"aggregate_id":  aggregateID,
-		"snapshot_data": string(snapshotData),
-		"version":       version,
-		"created_at":    time.Now().Unix(),
-	}
-
-	snapshotMsgData, err := json.Marshal(snapshotMsg)
-	if err != nil {
-		if s.logger != nil {
-			s.logger.Error("Failed to marshal snapshot message", "aggregate_id", aggregateID, "error", err)
+	// 3. 应用事件到聚合根
+	if len(events) > 0 {
+		if err := aggregate.LoadFromEvents(events); err != nil {
+			if s.logger != nil {
+				s.logger.Error("从事件加载失败", "aggregate_id", aggregateID, "events_count", len(events), "error", err)
+			}
+			return fmt.Errorf("从事件加载失败: %w", err)
 		}
-		return fmt.Errorf("failed to marshal snapshot message: %w", err)
-	}
-
-	// 保存到Key-Value存储
-	_, err = s.bucket.Put(ctx, snapshotKey, snapshotMsgData)
-	if err != nil {
-		if s.logger != nil {
-			s.logger.Error("Failed to save snapshot", "aggregate_id", aggregateID, "version", version, "error", err)
-		}
-		return fmt.Errorf("failed to save snapshot: %w", err)
-	}
-
-	// 发布快照事件
-	subject := fmt.Sprintf("%s.%s", s.snapshotSubject, aggregateID)
-	_, err = s.js.Publish(ctx, subject, snapshotMsgData)
-	if err != nil {
-		if s.logger != nil {
-			s.logger.Error("Failed to publish snapshot", "aggregate_id", aggregateID, "version", version, "error", err)
-		}
-		return fmt.Errorf("failed to publish snapshot: %w", err)
 	}
 
 	return nil
 }
 
-// Load 从事件流加载聚合根状态
-func (s *NATSEventStore) Load(ctx context.Context, aggregateID string, aggregate entity.AggregateRoot) error {
-	// 尝试从快照恢复
-	snapshot, snapshotVersion, err := s.GetLatestSnapshot(ctx, aggregateID)
-	if err != nil && err != errs.ErrSnapshotNotFound {
+// SaveSnapshot 保存快照
+func (s *NatsEventStore) SaveSnapshot(ctx context.Context, aggregateID string, snapshot interface{}, version int) error {
+	snapshotData, err := json.Marshal(snapshot)
+	if err != nil {
 		if s.logger != nil {
-			s.logger.Error("Failed to get latest snapshot", "aggregate_id", aggregateID, "error", err)
+			s.logger.Error("编码快照失败", "aggregate_id", aggregateID, "version", version, "error", err)
 		}
-		return fmt.Errorf("failed to get latest snapshot: %w", err)
+		return fmt.Errorf("编码快照失败: %w", err)
 	}
 
-	var events []entity.DomainEvent
-	var errEvent error
-
-	// 根据快照状态决定获取全部事件或增量事件
-	if snapshot != nil {
-		// 如果有快照，调用聚合根的LoadFromSnapshot方法恢复状态
-		if err := aggregate.LoadFromSnapshot(snapshot); err != nil {
-			if s.logger != nil {
-				s.logger.Error("Failed to load from snapshot", "aggregate_id", aggregateID, "error", err)
-			}
-			return fmt.Errorf("failed to load from snapshot: %w", err)
-		}
-
-		// 获取快照版本之后的事件
-		if events, errEvent = s.GetEventsFromVersion(ctx, aggregateID, snapshotVersion+1); errEvent != nil {
-			if s.logger != nil {
-				s.logger.Error("Failed to get events from version", "aggregate_id", aggregateID, "from_version", snapshotVersion+1, "error", errEvent)
-			}
-			return fmt.Errorf("failed to get events from version: %w", errEvent)
-		}
-	} else {
-		// 如果没有快照，获取所有事件
-		if events, errEvent = s.GetEvents(ctx, aggregateID); errEvent != nil {
-			if s.logger != nil {
-				s.logger.Error("Failed to get events", "aggregate_id", aggregateID, "error", errEvent)
-			}
-			return fmt.Errorf("failed to get events: %w", errEvent)
-		}
-	}
-
-	// 应用事件到聚合根
-	if err := aggregate.LoadFromEvents(events); err != nil {
+	subject := fmt.Sprintf("%s.snapshot.%s", s.storeStream, aggregateID)
+	if _, err := s.js.Publish(ctx, subject, snapshotData); err != nil {
 		if s.logger != nil {
-			s.logger.Error("Failed to load from events", "aggregate_id", aggregateID, "events_count", len(events), "error", err)
+			s.logger.Error("保存快照失败", "aggregate_id", aggregateID, "version", version, "error", err)
 		}
-		return fmt.Errorf("failed to load from events: %w", err)
+		return fmt.Errorf("保存快照失败: %w", err)
 	}
 
 	return nil
 }
 
 // GetLatestSnapshot 获取最新快照
-func (s *NATSEventStore) GetLatestSnapshot(ctx context.Context, aggregateID string) (interface{}, int, error) {
-	snapshotKey := s.snapshotKey(aggregateID)
+func (s *NatsEventStore) GetLatestSnapshot(ctx context.Context, aggregateID string) (interface{}, int, error) {
+	subject := fmt.Sprintf("%s.snapshot.%s", s.storeStream, aggregateID)
 
-	snapshotData, err := s.bucket.Get(ctx, snapshotKey)
+	// 在NATS中，我们可以使用Consumer来获取最新的快照消息
+	consumerName := fmt.Sprintf("snapshot_consumer_%s", aggregateID)
+
+	// 创建消费者
+	consumer, err := s.js.CreateOrUpdateConsumer(ctx, s.storeStream, jetstream.ConsumerConfig{
+		Durable:       consumerName,
+		AckPolicy:     jetstream.AckExplicitPolicy,
+		FilterSubject: subject,
+		DeliverPolicy: jetstream.DeliverLastPolicy,
+	})
 	if err != nil {
-		if err == jetstream.ErrKeyNotFound {
-			return nil, 0, nil // 没有快照
-		}
 		if s.logger != nil {
-			s.logger.Error("Failed to get snapshot", "aggregate_id", aggregateID, "error", err)
+			s.logger.Error("创建快照消费者失败", "aggregate_id", aggregateID, "error", err)
 		}
-		return nil, 0, fmt.Errorf("failed to get snapshot: %w", err)
+		return nil, 0, fmt.Errorf("创建快照消费者失败: %w", err)
 	}
 
-	var snapshotMsg map[string]interface{}
-	if err := json.Unmarshal(snapshotData.Value(), &snapshotMsg); err != nil {
-		if s.logger != nil {
-			s.logger.Error("Failed to unmarshal snapshot", "aggregate_id", aggregateID, "error", err)
-		}
-		return nil, 0, fmt.Errorf("failed to unmarshal snapshot: %w", err)
+	// 获取最新消息
+	msgs, err := consumer.Fetch(1)
+	if err != nil {
+		// 没有快照消息也是正常的
+		return nil, 0, nil
 	}
 
+	var snapshotData []byte
+	for msg := range msgs.Messages() {
+		defer msg.Ack()
+		snapshotData = msg.Data()
+		break
+	}
+
+	if len(snapshotData) == 0 {
+		return nil, 0, nil
+	}
+
+	// 从消息中提取版本信息 (这里我们假设版本信息在快照数据中)
 	var snapshot interface{}
-	if err := json.Unmarshal([]byte(snapshotMsg["snapshot_data"].(string)), &snapshot); err != nil {
+	if err := json.Unmarshal(snapshotData, &snapshot); err != nil {
 		if s.logger != nil {
-			s.logger.Error("Failed to unmarshal snapshot data", "aggregate_id", aggregateID, "error", err)
+			s.logger.Error("解码快照失败", "aggregate_id", aggregateID, "error", err)
 		}
-		return nil, 0, fmt.Errorf("failed to unmarshal snapshot data: %w", err)
+		return nil, 0, fmt.Errorf("解码快照失败: %w", err)
 	}
 
-	version := int(snapshotMsg["version"].(float64))
+	// 假设版本是存储在聚合根中的，这里我们无法直接获取
+	// 在实际使用中，可能需要修改快照结构以包含版本信息
+	version, err := s.GetAggregateVersion(ctx, aggregateID)
+	if err != nil {
+		version = 0
+	}
+
 	return snapshot, version, nil
 }
 
 // SaveEventsBatch 批量保存事件
-func (s *NATSEventStore) SaveEventsBatch(ctx context.Context, events map[string][]entity.DomainEvent) error {
+func (s *NatsEventStore) SaveEventsBatch(ctx context.Context, events map[string][]entity.DomainEvent) error {
 	if len(events) == 0 {
 		return nil
 	}
 
-	// 使用事务批量保存
 	for aggregateID, eventList := range events {
 		if err := s.SaveEvents(ctx, aggregateID, eventList, -1); err != nil {
 			if s.logger != nil {
-				s.logger.Error("Failed to save events batch", "aggregate_id", aggregateID, "error", err)
+				s.logger.Error("批量保存事件失败", "aggregate_id", aggregateID, "error", err)
 			}
-			return fmt.Errorf("failed to save events for aggregate %s: %w", aggregateID, err)
+			return fmt.Errorf("批量保存事件失败: %w", err)
 		}
 	}
 
 	return nil
 }
 
-// 键生成方法
-func (s *NATSEventStore) versionKey(aggregateID string) string {
-	return fmt.Sprintf("version:%s", aggregateID)
-}
-
-func (s *NATSEventStore) snapshotKey(aggregateID string) string {
-	return fmt.Sprintf("snapshot:%s", aggregateID)
-}
-
 // Close 关闭连接
-func (s *NATSEventStore) Close() error {
-	if s.conn != nil {
-		s.conn.Close()
+func (s *NatsEventStore) Close() error {
+	if s.nc != nil {
+		s.nc.Close()
 	}
 	return nil
+}
+
+// getEventsBySubject 辅助方法：通过主题获取事件
+func (s *NatsEventStore) getEventsBySubject(ctx context.Context, subject string) ([]entity.DomainEvent, error) {
+	return s.getEventsBySubjectWithFilter(ctx, subject, func(_ jetstream.Msg) bool {
+		return true
+	})
+}
+
+// getEventsBySubjectWithFilter 辅助方法：通过主题获取事件并应用过滤器
+func (s *NatsEventStore) getEventsBySubjectWithFilter(ctx context.Context, subject string, filter func(jetstream.Msg) bool) ([]entity.DomainEvent, error) {
+	// 使用更安全的方式生成消费者名称，避免使用特殊字符
+	// 这里我们简单地使用前缀加上时间戳和随机数来确保唯一性
+	consumerName := fmt.Sprintf("consumer_%d_%d", time.Now().UnixNano(), rand.Int63())
+	consumer, err := s.js.CreateOrUpdateConsumer(ctx, s.storeStream, jetstream.ConsumerConfig{
+		Durable:       consumerName,
+		AckPolicy:     jetstream.AckExplicitPolicy,
+		FilterSubject: subject,
+		DeliverPolicy: jetstream.DeliverAllPolicy,
+	})
+	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("创建消费者失败", "subject", subject, "error", err)
+		}
+		return nil, fmt.Errorf("创建消费者失败: %w", err)
+	}
+
+	// 获取所有消息
+	var events []entity.DomainEvent
+
+	// 设置Fetch选项，添加超时
+	fetchOptions := []jetstream.FetchOpt{
+		jetstream.FetchMaxWait(5 * time.Second),
+	}
+
+	msgs, err := consumer.Fetch(1000, fetchOptions...) // 一次获取最多1000条消息
+	if err != nil {
+		// 如果没有消息或超时，返回空列表
+		if err == nats.ErrTimeout || strings.Contains(err.Error(), "no messages") {
+			return []entity.DomainEvent{}, nil
+		}
+		if s.logger != nil {
+			s.logger.Error("获取消息失败", "error", err)
+		}
+		return nil, fmt.Errorf("获取消息失败: %w", err)
+	}
+
+	for msg := range msgs.Messages() {
+		defer msg.Ack()
+
+		// 应用过滤器
+		if !filter(msg) {
+			continue
+		}
+
+		// 解码事件
+		event, err := DecodeEvent(msg.Data())
+		if err != nil {
+			if s.logger != nil {
+				s.logger.Error("解码事件失败", "error", err)
+			}
+			continue
+		}
+		events = append(events, event)
+	}
+
+	return events, nil
 }

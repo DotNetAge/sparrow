@@ -5,22 +5,22 @@ import (
 )
 
 type Config struct {
-	App AppConfig `mapstructure:"app"`
-	Server   ServerConfig   `mapstructure:"server"`
-	Log      LogConfig      `mapstructure:"log"`
-	NATS     NATsConfig     `mapstructure:"nats"`
-	SQL      SQLConfig      `mapstructure:"sql"`
-	Redis    RedisConfig    `mapstructure:"redis"`
-	Badger   BadgerConfig         `mapstructure:"badger"`
+	App    AppConfig    `mapstructure:"app"`
+	Server ServerConfig `mapstructure:"server"`
+	Log    LogConfig    `mapstructure:"log"`
+	NATS   NATsConfig   `mapstructure:"nats"`
+	SQL    SQLConfig    `mapstructure:"sql"`
+	Redis  RedisConfig  `mapstructure:"redis"`
+	Badger BadgerConfig `mapstructure:"badger"`
 }
 
-func SetDefaults(viper *viper.Viper){ 
+func SetDefaults(viper *viper.Viper) {
 	viper.SetDefault("server.host", "0.0.0.0")
 	viper.SetDefault("server.port", 8080)
 	viper.SetDefault("server.read_timeout", "30s")
 	viper.SetDefault("server.write_timeout", "30s")
 	viper.SetDefault("server.idle_timeout", "60s")
-		
+
 	viper.SetDefault("log.level", "info")
 	viper.SetDefault("log.format", "json")
 	viper.SetDefault("log.output", "stdout")
@@ -41,11 +41,11 @@ func SetDefaults(viper *viper.Viper){
 	viper.SetDefault("redis.es_db", 1) // 作为事件存储时的数据库
 
 	// Badger 配置
-	viper.SetDefault("badger.data_dir", "./badger") // 作为仓库存储的路径
-	viper.SetDefault("badger.es_dir", "./badger/es") // 作为事件存储时的路径
-	viper.SetDefault("badger.value_threshold", int64(1024 * 1024)) // 1MB
+	viper.SetDefault("badger.data_dir", "./badger")              // 作为仓库存储的路径
+	viper.SetDefault("badger.es_dir", "./badger/es")             // 作为事件存储时的路径
+	viper.SetDefault("badger.value_threshold", int64(1024*1024)) // 1MB
 	viper.SetDefault("badger.num_compactors", 1)
-	
+
 	// SQL 配置
 	viper.SetDefault("sql.driver", "postgres")
 	viper.SetDefault("sql.host", "localhost")

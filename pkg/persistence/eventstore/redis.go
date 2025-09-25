@@ -11,6 +11,7 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/errs"
 	"github.com/DotNetAge/sparrow/pkg/logger"
+	"github.com/DotNetAge/sparrow/pkg/usecase"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -22,8 +23,10 @@ type RedisEventStore struct {
 	logger *logger.Logger
 }
 
+var _ usecase.EventStore = (*RedisEventStore)(nil)
+
 // NewRedisEventStore 创建Redis事件存储实例
-func NewRedisEventStore(client *redis.Client, prefix string, logger *logger.Logger) *RedisEventStore {
+func NewRedisEventStore(client *redis.Client, prefix string, logger *logger.Logger) (usecase.EventStore, error) {
 	if prefix != "" && !strings.HasSuffix(prefix, ":") {
 		prefix += ":"
 	}
@@ -32,7 +35,15 @@ func NewRedisEventStore(client *redis.Client, prefix string, logger *logger.Logg
 		client: client,
 		prefix: prefix,
 		logger: logger,
+	}, nil
+}
+
+// Close 关闭Redis连接
+func (s *RedisEventStore) Close() error {
+	if s.client != nil {
+		return s.client.Close()
 	}
+	return nil
 }
 
 // SaveEvents 保存事件
@@ -147,8 +158,8 @@ func (s *RedisEventStore) deserializeEvents(dataList []string) ([]entity.DomainE
 		}
 
 		// 使用通用函数创建事件对象
-	domainEvent := DecodeEventFromMap(eventData)
-	events = append(events, domainEvent)
+		domainEvent := DecodeEventFromMap(eventData)
+		events = append(events, domainEvent)
 	}
 
 	return events, nil

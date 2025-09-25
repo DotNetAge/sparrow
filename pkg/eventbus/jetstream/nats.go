@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/DotNetAge/sparrow/pkg/adapter/event/handlers"
 	"github.com/DotNetAge/sparrow/pkg/config"
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/eventbus"
@@ -87,7 +86,7 @@ func (b *jetStreamBus) Pub(ctx context.Context, evt entity.Event) error {
 
 // Subscribe 订阅事件
 // handler: 事件处理器函数
-func (b *jetStreamBus) Sub(eventType string, handler handlers.EventHandler) error {
+func (b *jetStreamBus) Sub(eventType string, handler eventbus.EventHandler) error {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 

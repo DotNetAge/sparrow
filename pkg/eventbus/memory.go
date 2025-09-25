@@ -6,7 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/DotNetAge/sparrow/pkg/adapter/event/handlers"
 	"github.com/DotNetAge/sparrow/pkg/entity"
 )
 
@@ -19,7 +18,7 @@ type MemoryEventBus struct {
 
 // eventHandler 包装事件处理器和元数据
 type eventHandler struct {
-	fn      handlers.EventHandler
+	fn      EventHandler
 	created time.Time
 }
 
@@ -61,7 +60,7 @@ func (b *MemoryEventBus) Pub(ctx context.Context, evt entity.Event) error {
 }
 
 // Sub 订阅事件类型
-func (b *MemoryEventBus) Sub(eventType string, handler handlers.EventHandler) error {
+func (b *MemoryEventBus) Sub(eventType string, handler EventHandler) error {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
