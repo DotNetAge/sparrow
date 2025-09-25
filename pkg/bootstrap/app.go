@@ -38,11 +38,17 @@ func NewApp(opts ...Option) *App {
 	// 初始化配置
 	cfg, err := config.Load()
 	if err != nil {
-		panic(fmt.Errorf("load config failed: %w", err))
+		panic(fmt.Errorf("加载配置失败: %w", err))
+	}
+
+	log, err := logger.NewLogger(&cfg.Log)
+	if err != nil {
+		panic(fmt.Errorf("创建日志记录器失败: %w", err))
 	}
 
 	app := &App{
 		Config: cfg,
+		Logger: log,
 		Engine: gin.Default(),
 	}
 
