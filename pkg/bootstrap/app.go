@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/DotNetAge/sparrow/pkg/config"
-	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/eventbus"
 	"github.com/DotNetAge/sparrow/pkg/logger"
 	"github.com/DotNetAge/sparrow/pkg/messaging"
@@ -111,8 +110,8 @@ func (app *App) GetSessions() *usecase.SessionService {
 
 // GetNamedRepo 获取命名仓库实例
 // name: 仓库名称，对应容器注册的名称（如 "user"）
-func (app *App) GetNamedRepo(name string) usecase.Repository[entity.Entity] {
-	var repo usecase.Repository[entity.Entity]
+func (app *App) GetNamedRepo(name string) usecase.Repository[any] {
+	var repo usecase.Repository[any]
 	if err := app.Container.ResolveByName(name+"Repo", &repo); err != nil {
 		panic(fmt.Errorf("解析命名仓库失败: %w", err))
 	}
