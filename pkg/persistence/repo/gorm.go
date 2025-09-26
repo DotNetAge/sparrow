@@ -29,6 +29,8 @@ type GormRepository[T entity.Entity] struct {
 	model      T
 }
 
+var _ usecase.Repository[entity.Entity] = (*GormRepository[entity.Entity])(nil)
+
 // NewGormRepository 创建GORM仓储实例
 // 参数:
 //   - db: GORM数据库连接

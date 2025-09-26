@@ -9,6 +9,8 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/eventbus"
 	"github.com/DotNetAge/sparrow/pkg/eventbus/jetstream"
+	"github.com/DotNetAge/sparrow/pkg/eventbus/rabbitmq"
+	redis_bus "github.com/DotNetAge/sparrow/pkg/eventbus/redis"
 	"github.com/DotNetAge/sparrow/pkg/messaging"
 	"github.com/DotNetAge/sparrow/pkg/persistence/eventstore"
 	"github.com/DotNetAge/sparrow/pkg/persistence/repo"
@@ -16,7 +18,6 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/utils"
 	"github.com/dgraph-io/badger/v4"
 	"github.com/redis/go-redis/v9"
-	"go.uber.org/zap"
 )
 
 // ServerPort 配置服务器端口
@@ -68,7 +69,7 @@ func BadgerStore() Option {
 		o.Container.Register(func() usecase.EventStore {
 			store, err := eventstore.NewBadgerEventStore(o.Config.Badger.EventStoreDir, o.Logger)
 			if err != nil {
-				o.Logger.Error("Failed to create Badger event store", "error", err)
+				o.Logger.Error("创建Badger事件存储失败", "error", err)
 				panic(err)
 			}
 			return store
@@ -90,12 +91,12 @@ func RedisStore() Option {
 		o.Container.Register(func() usecase.EventStore {
 			var redisClient *redis.Client
 			if err := o.Container.ResolveInstance(&redisClient); err != nil {
-				o.Logger.Error("Failed to resolve Redis client", "error", err)
+				o.Logger.Error("解析Redis客户端失败", "error", err)
 				panic(err)
 			}
 			store, err := eventstore.NewRedisEventStore(redisClient, o.Config.App.Name+":", o.Logger)
 			if err != nil {
-				o.Logger.Error("Failed to create Redis event store", "error", err)
+				o.Logger.Error("创建Redis事件存储失败", "error", err)
 				panic(err)
 			}
 			return store
@@ -115,7 +116,7 @@ func JetStreamStore() Option {
 		o.Container.Register(func() usecase.EventStore {
 			store, err := eventstore.NewNatsEventStore(&o.Config.NATS, o.Logger)
 			if err != nil {
-				o.Logger.Error("Failed to create NATS event store", "error", err)
+				o.Logger.Error("创建NATS事件存储失败", "error", err)
 				panic(err)
 			}
 			return store
@@ -130,8 +131,8 @@ func Messaging() Option {
 			bus := a.GetEventBus()
 			store := a.GetEventStore()
 			if bus == nil || store == nil {
-				a.Logger.Error("Event bus or store is not configured, cannot create event publisher")
-				panic("Event bus or store is not configured, cannot create event publisher")
+				a.Logger.Error("事件总线或事件存储未配置，无法创建事件发布者")
+				panic("事件总线或事件存储未配置，无法创建事件发布者")
 			}
 			return messaging.NewEventPublisher(store, bus, a.Config.App.Name)
 		})
@@ -139,8 +140,8 @@ func Messaging() Option {
 		a.Container.Register(func() *messaging.EventSubscriber {
 			bus := a.GetEventBus()
 			if bus == nil {
-				a.Logger.Error("Event bus is not configured, cannot create event subscriber")
-				panic("Event bus is not configured, cannot create event subscriber")
+				a.Logger.Error("事件总线未配置，无法创建事件订阅者")
+				panic("事件总线未配置，无法创建事件订阅者")
 			}
 			return messaging.NewEventSubscriber(bus)
 		})
@@ -153,7 +154,33 @@ func NatsBus() Option {
 		o.Container.Register(func() eventbus.EventBus {
 			eventBus, err := jetstream.NewJetStreamEventBus(&o.Config.NATS)
 			if err != nil {
-				o.Logger.Error("Failed to create NATS event bus", "error", err)
+				o.Logger.Error("创建NATS事件总线失败", "error", err)
+				panic(err)
+			}
+			return eventBus
+		})
+	}
+}
+
+func RedisBus() Option {
+	return func(o *App) {
+		o.Container.Register(func() eventbus.EventBus {
+			eventBus, err := redis_bus.NewRedisEventBus(&o.Config.Redis)
+			if err != nil {
+				o.Logger.Error("创建Redis事件总线失败", "error", err)
+				panic(err)
+			}
+			return eventBus
+		})
+	}
+}
+
+func RabbitMQBus() Option {
+	return func(o *App) {
+		o.Container.Register(func() eventbus.EventBus {
+			eventBus, err := rabbitmq.NewRabbitMQEventBus(&o.Config.RabbitMQ)
+			if err != nil {
+				o.Logger.Error("创建RabbitMQ事件总线失败", "error", err)
 				panic(err)
 			}
 			return eventBus
@@ -176,7 +203,7 @@ func Tasks() Option {
 		o.Container.Register(func() *usecase.TaskService {
 			var repo usecase.Repository[*entity.Task]
 			if err := o.Container.ResolveByName("taskRepo", &repo); err != nil {
-				o.Logger.Error("Failed to resolve task repository", "error", err)
+				o.Logger.Error("解析任务存储库失败", "error", err)
 				panic(err)
 			}
 			return usecase.NewTaskService(repo, o.Logger)
@@ -193,7 +220,7 @@ func Sessions(expire time.Duration) Option {
 		o.Container.Register(func() *usecase.SessionService {
 			var repo usecase.Repository[*entity.Session]
 			if err := o.Container.ResolveByName("sessionRepo", &repo); err != nil {
-				o.Logger.Error("Failed to resolve session repository", "error", err)
+				o.Logger.Error("解析会话存储库失败", "error", err)
 				panic(err)
 			}
 			return usecase.NewSessionService(repo, expire, o.Logger)
@@ -213,13 +240,28 @@ func BadgerRepo[T entity.Entity](name string) Option {
 	return func(o *App) {
 		var db *badger.DB
 		if err := o.Container.ResolveInstance(&db); err != nil {
-			o.Logger.Fatal("Failed to resolve Badger DB instance", zap.Error(err))
+			o.Logger.Fatal("解析Badger数据库实例失败", "error", err)
 			panic(err)
 		}
 		repoName := utils.Pascal(name + "Repo")
 		prefix := utils.Snake(name)
 		o.Container.RegisterNamed(repoName, func() usecase.Repository[T] {
 			return repo.NewBadgerRepository[T](db, prefix)
+		})
+	}
+}
+
+func RedisRepo[T entity.Entity](name string) Option {
+	return func(o *App) {
+		var redisClient *redis.Client
+		if err := o.Container.ResolveInstance(&redisClient); err != nil {
+			o.Logger.Fatal("解析Redis客户端失败", "error", err)
+			panic(err)
+		}
+		repoName := utils.Pascal(name + "Repo")
+		prefix := utils.Snake(name)
+		o.Container.RegisterNamed(repoName, func() usecase.Repository[T] {
+			return repo.NewRedisRepository[T](redisClient, prefix, 0)
 		})
 	}
 }

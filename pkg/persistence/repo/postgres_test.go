@@ -19,19 +19,19 @@ import (
 
 // PostgresComplexEntity 用于测试的复杂实体类
 type PostgresComplexEntity struct {
-    Id          string     `db:"id" json:"id"`         // 实体唯一标识
-    CreatedAt   time.Time  `db:"created_at" json:"created_at"` // 创建时间
-    UpdatedAt   time.Time  `db:"updated_at" json:"updated_at"` // 更新时间
-    DeletedAt   *time.Time `db:"deleted_at" json:"deleted_at"` // 软删除时间（可为空）
-    Name        string     `db:"name" json:"name"`
-    Description string     `db:"description" json:"description"`
-    Status      string     `db:"status" json:"status"`
-    Priority    int        `db:"priority" json:"priority"`
-    Score       float64    `db:"score" json:"score"`
-    Tags        []string   `db:"tags" json:"tags"`
-    Metadata    map[string]interface{} `db:"metadata" json:"metadata"`
-    Active      bool       `db:"active" json:"active"`
-    ExpiresAt   time.Time  `db:"expires_at" json:"expires_at"`
+	Id          string                 `db:"id" json:"id"`                 // 实体唯一标识
+	CreatedAt   time.Time              `db:"created_at" json:"created_at"` // 创建时间
+	UpdatedAt   time.Time              `db:"updated_at" json:"updated_at"` // 更新时间
+	DeletedAt   *time.Time             `db:"deleted_at" json:"deleted_at"` // 软删除时间（可为空）
+	Name        string                 `db:"name" json:"name"`
+	Description string                 `db:"description" json:"description"`
+	Status      string                 `db:"status" json:"status"`
+	Priority    int                    `db:"priority" json:"priority"`
+	Score       float64                `db:"score" json:"score"`
+	Tags        []string               `db:"tags" json:"tags"`
+	Metadata    map[string]interface{} `db:"metadata" json:"metadata"`
+	Active      bool                   `db:"active" json:"active"`
+	ExpiresAt   time.Time              `db:"expires_at" json:"expires_at"`
 }
 
 // 实现Entity接口
@@ -67,85 +67,85 @@ func generatePostgresComplexEntityID(idx int) string {
 // 恢复为指针类型实现
 // createPostgresComplexEntity 创建用于测试的复杂实体
 func createPostgresComplexEntity(idx int) *PostgresComplexEntity {
-    now := time.Now().UTC()
-    entity := &PostgresComplexEntity{
-        Id:          fmt.Sprintf("postgres-entity-%d", idx),
-        CreatedAt:   now,
-        UpdatedAt:   now,
-        Name:        fmt.Sprintf("Postgres Complex Entity %d", idx),
-        Description: fmt.Sprintf("This is a Postgres complex entity with index %d", idx),
-        Status:      "active",
-        Priority:    idx * 10,
-        Score:       float64(idx) * 1.5,
-        Tags:        []string{"test", fmt.Sprintf("postgres-entity-%d", idx), "complex"},
-        Metadata: map[string]interface{}{
-            "key1": fmt.Sprintf("value-%d", idx),
-            "key2": idx * 2,
-            "key3": true,
-        },
-        Active:    true,
-        ExpiresAt: now.Add(time.Hour * 24),
-    }
-    return entity
+	now := time.Now().UTC()
+	entity := &PostgresComplexEntity{
+		Id:          fmt.Sprintf("postgres-entity-%d", idx),
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		Name:        fmt.Sprintf("Postgres Complex Entity %d", idx),
+		Description: fmt.Sprintf("This is a Postgres complex entity with index %d", idx),
+		Status:      "active",
+		Priority:    idx * 10,
+		Score:       float64(idx) * 1.5,
+		Tags:        []string{"test", fmt.Sprintf("postgres-entity-%d", idx), "complex"},
+		Metadata: map[string]interface{}{
+			"key1": fmt.Sprintf("value-%d", idx),
+			"key2": idx * 2,
+			"key3": true,
+		},
+		Active:    true,
+		ExpiresAt: now.Add(time.Hour * 24),
+	}
+	return entity
 }
 
 // 恢复Repository类型声明
 func setupTestPostgresRepository(t *testing.T) (*PostgresRepository[*PostgresComplexEntity], func()) {
-    t.Helper()
+	t.Helper()
 
-    // 创建PostgreSQL容器
-    postgresContainer, err := postgres.RunContainer(context.Background(),
-        testcontainers.WithImage("postgres:14-alpine"),
-        postgres.WithDatabase("testdb"),
-        postgres.WithUsername("testuser"),
-        postgres.WithPassword("testpassword"),
-        testcontainers.WithWaitStrategy(
-            wait.NewLogStrategy("database system is ready to accept connections").
-            WithStartupTimeout(30 * time.Second),
-        ),
-    )
-    if err != nil {
-        t.Fatalf("Failed to start PostgreSQL container: %v", err)
-    }
+	// 创建PostgreSQL容器
+	postgresContainer, err := postgres.RunContainer(context.Background(),
+		testcontainers.WithImage("postgres:14-alpine"),
+		postgres.WithDatabase("testdb"),
+		postgres.WithUsername("testuser"),
+		postgres.WithPassword("testpassword"),
+		testcontainers.WithWaitStrategy(
+			wait.NewLogStrategy("database system is ready to accept connections").
+				WithStartupTimeout(30*time.Second),
+		),
+	)
+	if err != nil {
+		t.Fatalf("Failed to start PostgreSQL container: %v", err)
+	}
 
-    // 获取连接字符串
-    connStr, err := postgresContainer.ConnectionString(context.Background(), "sslmode=disable")
-    if err != nil {
-        t.Fatalf("Failed to get PostgreSQL connection string: %v", err)
-    }
+	// 获取连接字符串
+	connStr, err := postgresContainer.ConnectionString(context.Background(), "sslmode=disable")
+	if err != nil {
+		t.Fatalf("Failed to get PostgreSQL connection string: %v", err)
+	}
 
-    // 连接数据库（带重试机制）
-    var db *sqlx.DB
-    maxRetries := 5
-    retryInterval := 2 * time.Second
+	// 连接数据库（带重试机制）
+	var db *sqlx.DB
+	maxRetries := 5
+	retryInterval := 2 * time.Second
 
-    for i := 0; i < maxRetries; i++ {
-        db, err = sqlx.Connect("postgres", connStr)
-        if err == nil {
-            // 验证连接是否真正可用
-            if err := db.Ping(); err == nil {
-                break
-            } else {
-                err = fmt.Errorf("database ping failed: %w", err)
-            }
-        }
-        
-        if i == maxRetries-1 {
-            t.Fatalf("Failed to connect to PostgreSQL after %d attempts: %v", maxRetries, err)
-        }
-        
-        t.Logf("Connection attempt %d failed, retrying in %v...", i+1, retryInterval)
-        time.Sleep(retryInterval)
-    }
+	for i := 0; i < maxRetries; i++ {
+		db, err = sqlx.Connect("postgres", connStr)
+		if err == nil {
+			// 验证连接是否真正可用
+			if err := db.Ping(); err == nil {
+				break
+			} else {
+				err = fmt.Errorf("database ping failed: %w", err)
+			}
+		}
 
-    // 创建测试表
-    tableName := "complex_entities"
-    dropTableQuery := fmt.Sprintf("DROP TABLE IF EXISTS %s", tableName)
-    if _, err := db.Exec(dropTableQuery); err != nil {
-        t.Fatalf("Failed to drop table: %v", err)
-    }
+		if i == maxRetries-1 {
+			t.Fatalf("Failed to connect to PostgreSQL after %d attempts: %v", maxRetries, err)
+		}
 
-    createTableQuery := fmt.Sprintf(`
+		t.Logf("Connection attempt %d failed, retrying in %v...", i+1, retryInterval)
+		time.Sleep(retryInterval)
+	}
+
+	// 创建测试表
+	tableName := "complex_entities"
+	dropTableQuery := fmt.Sprintf("DROP TABLE IF EXISTS %s", tableName)
+	if _, err := db.Exec(dropTableQuery); err != nil {
+		t.Fatalf("Failed to drop table: %v", err)
+	}
+
+	createTableQuery := fmt.Sprintf(`
     CREATE TABLE %s (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
@@ -162,22 +162,22 @@ func setupTestPostgresRepository(t *testing.T) (*PostgresRepository[*PostgresCom
         deleted_at TIMESTAMP WITH TIME ZONE
     )`, tableName)
 
-    if _, err := db.Exec(createTableQuery); err != nil {
-        t.Fatalf("Failed to create table: %v", err)
-    }
+	if _, err := db.Exec(createTableQuery); err != nil {
+		t.Fatalf("Failed to create table: %v", err)
+	}
 
-    // 创建Repository - 添加类型断言，因为NewPostgresRepository现在返回接口类型
-    repo := NewPostgresRepository[*PostgresComplexEntity](db, tableName, nil).(*PostgresRepository[*PostgresComplexEntity])
+	// 创建Repository - 添加类型断言，因为NewPostgresRepository现在返回接口类型
+	repo := NewPostgresRepository[*PostgresComplexEntity](db, tableName, nil).(*PostgresRepository[*PostgresComplexEntity])
 
-    // 清理函数
-    cleanup := func() {
-        // 断开数据库连接
-        db.Close()
-        // 停止容器
-        postgresContainer.Terminate(context.Background())
-    }
+	// 清理函数
+	cleanup := func() {
+		// 断开数据库连接
+		db.Close()
+		// 停止容器
+		postgresContainer.Terminate(context.Background())
+	}
 
-    return repo, cleanup
+	return repo, cleanup
 }
 
 // 修复TestPostgresRepository_Save函数中的FindByID调用
@@ -654,12 +654,6 @@ func TestPostgresRepository_HardDelete(t *testing.T) {
 	assert.IsType(t, &errs.RepositoryError{}, err)
 }
 
-// TestPostgresRepository_Restore 测试恢复已删除的实体功能
-func TestPostgresRepository_Restore(t *testing.T) {
-	// PostgreSQL不支持软删除，所以这个测试不适用
-	t.Skip("PostgreSQL不支持软删除和恢复功能")
-}
-
 // TestPostgresRepository_FindByFieldWithPagination 测试按字段查找并分页功能
 func TestPostgresRepository_FindByFieldWithPagination(t *testing.T) {
 	repo, cleanup := setupTestPostgresRepository(t)
@@ -1007,7 +1001,7 @@ func TestPostgresRepository_Transaction(t *testing.T) {
 func TestDirectSQLXOperations(t *testing.T) {
 	// 设置PostgreSQL容器和数据库连接
 	tableName := "simple_entities"
-	
+
 	// 启动PostgreSQL容器
 	postgresContainer, err := postgres.Run(context.Background(),
 		"postgres:14-alpine",
@@ -1016,7 +1010,7 @@ func TestDirectSQLXOperations(t *testing.T) {
 		postgres.WithPassword("testpassword"),
 		testcontainers.WithWaitStrategy(
 			wait.NewLogStrategy("database system is ready to accept connections").
-			WithStartupTimeout(30 * time.Second),
+				WithStartupTimeout(30*time.Second),
 		),
 	)
 	if err != nil {
@@ -1058,10 +1052,10 @@ func TestDirectSQLXOperations(t *testing.T) {
 
 	// 定义简单的实体结构
 	simpleEntity := struct {
-		ID        string    `db:"id" json:"id"`
-		Name      string    `db:"name" json:"name"`
-		CreatedAt time.Time `db:"created_at" json:"created_at"`
-		UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
+		ID        string     `db:"id" json:"id"`
+		Name      string     `db:"name" json:"name"`
+		CreatedAt time.Time  `db:"created_at" json:"created_at"`
+		UpdatedAt time.Time  `db:"updated_at" json:"updated_at"`
 		DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
 	}{}
 

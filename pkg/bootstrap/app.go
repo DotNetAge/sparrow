@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/DotNetAge/sparrow/pkg/config"
+	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/eventbus"
 	"github.com/DotNetAge/sparrow/pkg/logger"
 	"github.com/DotNetAge/sparrow/pkg/messaging"
@@ -76,7 +77,7 @@ func (app *App) GetEventStore() usecase.EventStore {
 	return store
 }
 
-func (app *App) GetPub(eventType string) *messaging.EventPublisher {
+func (app *App) GetPub() *messaging.EventPublisher {
 	var pub *messaging.EventPublisher
 	if err := app.Container.ResolveInstance(&pub); err != nil {
 		panic(fmt.Errorf("解析事件发布器失败: %w", err))
@@ -84,7 +85,7 @@ func (app *App) GetPub(eventType string) *messaging.EventPublisher {
 	return pub
 }
 
-func (app *App) GetSub(eventType string) *messaging.EventSubscriber {
+func (app *App) GetSub() *messaging.EventSubscriber {
 	var sub *messaging.EventSubscriber
 	if err := app.Container.ResolveInstance(&sub); err != nil {
 		panic(fmt.Errorf("解析事件订阅器失败: %w", err))
@@ -106,6 +107,16 @@ func (app *App) GetSessions() *usecase.SessionService {
 		panic(fmt.Errorf("解析会话服务失败: %w", err))
 	}
 	return sessions
+}
+
+// GetNamedRepo 获取命名仓库实例
+// name: 仓库名称，对应容器注册的名称（如 "user"）
+func (app *App) GetNamedRepo(name string) usecase.Repository[entity.Entity] {
+	var repo usecase.Repository[entity.Entity]
+	if err := app.Container.ResolveByName(name+"Repo", &repo); err != nil {
+		panic(fmt.Errorf("解析命名仓库失败: %w", err))
+	}
+	return repo
 }
 
 func (app *App) Use(opt Option) *App {

@@ -5,13 +5,15 @@ import (
 )
 
 type Config struct {
-	App    AppConfig    `mapstructure:"app"`
-	Server ServerConfig `mapstructure:"server"`
-	Log    LogConfig    `mapstructure:"log"`
-	NATS   NATsConfig   `mapstructure:"nats"`
-	SQL    SQLConfig    `mapstructure:"sql"`
-	Redis  RedisConfig  `mapstructure:"redis"`
-	Badger BadgerConfig `mapstructure:"badger"`
+	App      AppConfig      `mapstructure:"app"`
+	Server   ServerConfig   `mapstructure:"server"`
+	Log      LogConfig      `mapstructure:"log"`
+	NATS     NATsConfig     `mapstructure:"nats"`
+	SQL      SQLConfig      `mapstructure:"sql"`
+	Redis    RedisConfig    `mapstructure:"redis"`
+	Badger   BadgerConfig   `mapstructure:"badger"`
+	RabbitMQ RabbitMQConfig `mapstructure:"rabbitmq"`
+	Kafka    KafkaConfig    `mapstructure:"kafka"`
 }
 
 func SetDefaults(viper *viper.Viper) {
@@ -54,4 +56,12 @@ func SetDefaults(viper *viper.Viper) {
 	viper.SetDefault("sql.password", "postgres")
 	viper.SetDefault("sql.dbname", "postgres")
 	viper.SetDefault("sql.es_dbname", "postgres") // 作为事件存储时的数据库名
+
+	// RabbitMQ 配置
+	viper.SetDefault("rabbitmq.host", "localhost")
+	viper.SetDefault("rabbitmq.port", 5672)
+	viper.SetDefault("rabbitmq.username", "guest")
+	viper.SetDefault("rabbitmq.password", "guest")
+	viper.SetDefault("rabbitmq.vhost", "/")
+	viper.SetDefault("rabbitmq.exchange", "events")
 }
