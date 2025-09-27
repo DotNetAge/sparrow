@@ -32,13 +32,13 @@ func NewEventPublisher(eventStore usecase.EventStore, eventBus eventbus.EventBus
 func (p *EventPublisher) PublishEvents(ctx context.Context, aggregateID string) error {
 	events, err := p.eventStore.GetEvents(ctx, aggregateID)
 	if err != nil {
-		return fmt.Errorf("failed to get events from store: %w", err)
+		return fmt.Errorf("从事件存储获取事件失败: %w", err)
 	}
 
 	// 发布所有事件到事件总线
 	for _, event := range events {
 		if err := p.publishEvent(ctx, event); err != nil {
-			return fmt.Errorf("failed to publish event %s: %w", event.GetEventType(), err)
+			return fmt.Errorf("发布事件 %s 到事件总线失败: %w", event.GetEventType(), err)
 		}
 	}
 
@@ -57,7 +57,7 @@ func (p *EventPublisher) PublishUncommittedEvents(ctx context.Context, aggregate
 	// 发布事件到事件总线
 	for _, event := range events {
 		if err := p.publishEvent(ctx, event); err != nil {
-			return fmt.Errorf("failed to publish uncommitted event %s: %w", event.GetEventType(), err)
+			return fmt.Errorf("发布未提交事件 %s 到事件总线失败: %w", event.GetEventType(), err)
 		}
 	}
 
@@ -79,7 +79,7 @@ func (p *EventPublisher) publishEvent(ctx context.Context, domainEvent entity.Do
 
 	// 创建一个新的通用事件，用于在事件总线上传输
 	// 这里通过组合领域事件数据，确保事件总线上的事件包含完整的主题信息
-	genericEvent := &entity.GenericEvent{
+	genericEvent := eventbus.Event{
 		Id:        domainEvent.GetEventID(),
 		EventType: fullEventType,
 		Timestamp: domainEvent.GetCreatedAt(),

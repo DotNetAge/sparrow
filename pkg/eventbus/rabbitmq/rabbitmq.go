@@ -10,7 +10,6 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 
 	"github.com/DotNetAge/sparrow/pkg/config"
-	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/eventbus"
 	"github.com/DotNetAge/sparrow/pkg/logger"
 )
@@ -102,7 +101,7 @@ func NewRabbitMQEventBus(cfg *config.RabbitMQConfig) (eventbus.EventBus, error) 
 }
 
 // Pub 发布事件到RabbitMQ
-func (b *rabbitBus) Pub(ctx context.Context, evt entity.Event) error {
+func (b *rabbitBus) Pub(ctx context.Context, evt eventbus.Event) error {
 	b.mu.RLock()
 	closed := b.closed
 	channel := b.channel
@@ -113,9 +112,9 @@ func (b *rabbitBus) Pub(ctx context.Context, evt entity.Event) error {
 		return fmt.Errorf("事件总线已关闭")
 	}
 
-	subject := evt.GetEventType()
-	messageID := evt.GetEventID()
-	createdAt := evt.GetCreatedAt()
+	subject := evt.EventType
+	messageID := evt.Id
+	createdAt := evt.Timestamp
 
 	b.logger.Info("正在将事件发布到RabbitMQ", "subject", subject, "message_id", messageID)
 
@@ -142,6 +141,7 @@ func (b *rabbitBus) Pub(ctx context.Context, evt entity.Event) error {
 		return fmt.Errorf("发布事件到RabbitMQ失败: %w", err)
 	}
 
+	b.logger.Info("事件发布成功", "subject", subject)
 	return nil
 }
 
@@ -232,14 +232,14 @@ func (b *rabbitBus) handleMessages(subject string, handler eventbus.EventHandler
 	processorKey := fmt.Sprintf("%s-handler", subject)
 	b.runningHandlers[processorKey] = true
 	b.mu.Unlock()
-
+	
 	// 确保在函数退出时标记为不运行
 	defer func() {
 		b.mu.Lock()
 		delete(b.runningHandlers, processorKey)
 		b.mu.Unlock()
 	}()
-
+	
 	// 处理接收到的消息
 	for d := range msgs {
 		// 检查事件总线是否已关闭
@@ -249,33 +249,32 @@ func (b *rabbitBus) handleMessages(subject string, handler eventbus.EventHandler
 			break
 		}
 		b.mu.RUnlock()
-
+	
 		b.logger.Info("接收到RabbitMQ消息", "subject", subject, "message_id", d.MessageId)
-
+	
 		// 解析事件类型
 		eventType := subject
 		if eventTypeFromHeader, ok := d.Headers["event_type"].(string); ok {
 			eventType = eventTypeFromHeader
 		}
-
+	
 		// 反序列化事件数据
-		var genericEvent map[string]interface{}
-		if err := json.Unmarshal(d.Body, &genericEvent); err != nil {
+		var payload map[string]interface{}
+		if err := json.Unmarshal(d.Body, &payload); err != nil {
 			b.logger.Error("反序列化事件数据失败", "error", err, "subject", subject)
 			continue
 		}
-
+	
 		// 创建上下文并调用处理器
 		ctx := context.Background()
-		// 注意：这里需要根据实际的事件类型创建对应的事件对象
-		// 为了简化，我们使用GenericEvent作为示例
-		event := &entity.GenericEvent{
+		// 使用 eventbus.Event 类型
+		event := eventbus.Event{
 			Id:        d.MessageId,
 			EventType: eventType,
 			Timestamp: d.Timestamp,
-			Payload:   genericEvent,
+			Payload:   payload,
 		}
-
+	
 		// 调用处理器
 		if err := handler(ctx, event); err != nil {
 			b.logger.Error("处理事件失败", "error", err, "subject", subject)
@@ -283,7 +282,7 @@ func (b *rabbitBus) handleMessages(subject string, handler eventbus.EventHandler
 			b.logger.Info("成功处理事件", "subject", subject)
 		}
 	}
-
+	
 	b.logger.Info("消息通道已关闭", "subject", subject)
 }
 

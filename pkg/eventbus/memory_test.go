@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -27,13 +26,13 @@ func TestMemoryEventBus_SubAndPub(t *testing.T) {
 	// 用于验证事件处理器是否被调用
 	var wg sync.WaitGroup
 	handlerCalled := false
-	handlerEvent := entity.Event(nil)
+	handlerEvent := Event{}
 
 	// 添加等待一个处理完成
 	wg.Add(1)
 
 	// 订阅事件
-	err := bus.Sub(eventType, func(ctx context.Context, evt entity.Event) error {
+	err := bus.Sub(eventType, func(ctx context.Context, evt Event) error {
 		handlerCalled = true
 		handlerEvent = evt
 		wg.Done()
@@ -46,7 +45,12 @@ func TestMemoryEventBus_SubAndPub(t *testing.T) {
 	// assert.Equal(t, 1, subscribers)
 
 	// 发布事件
-	event := entity.NewGenericEvent(eventType, "test-payload")
+	event := Event{
+		Id:        "test-id",
+		EventType: eventType,
+		Timestamp: time.Now(),
+		Payload:   map[string]interface{}{"test": "payload"},
+	}
 	err = bus.Pub(ctx, event)
 	assert.NoError(t, err)
 
@@ -56,8 +60,8 @@ func TestMemoryEventBus_SubAndPub(t *testing.T) {
 	// 验证事件处理器被正确调用
 	assert.True(t, handlerCalled)
 	assert.NotNil(t, handlerEvent)
-	assert.Equal(t, event.GetEventID(), handlerEvent.GetEventID())
-	assert.Equal(t, event.GetEventType(), handlerEvent.GetEventType())
+	assert.Equal(t, event.Id, handlerEvent.Id)
+	assert.Equal(t, event.EventType, handlerEvent.EventType)
 }
 
 // 测试多个订阅者的情况
@@ -75,7 +79,7 @@ func TestMemoryEventBus_MultipleSubscribers(t *testing.T) {
 	wg.Add(2)
 
 	// 第一个订阅者
-	err := bus.Sub(eventType, func(ctx context.Context, evt entity.Event) error {
+	err := bus.Sub(eventType, func(ctx context.Context, evt Event) error {
 		handler1Called = true
 		wg.Done()
 		return nil
@@ -83,7 +87,7 @@ func TestMemoryEventBus_MultipleSubscribers(t *testing.T) {
 	assert.NoError(t, err)
 
 	// 第二个订阅者
-	err = bus.Sub(eventType, func(ctx context.Context, evt entity.Event) error {
+	err = bus.Sub(eventType, func(ctx context.Context, evt Event) error {
 		handler2Called = true
 		wg.Done()
 		return nil
@@ -95,7 +99,12 @@ func TestMemoryEventBus_MultipleSubscribers(t *testing.T) {
 	assert.Equal(t, 2, subscribers)
 
 	// 发布事件
-	event := entity.NewGenericEvent(eventType, "multi-sub-test")
+	event := Event{
+		Id:        "test-id",
+		EventType: eventType,
+		Timestamp: time.Now(),
+		Payload:   map[string]interface{}{"test": "multi-sub-test"},
+	}
 	err = bus.Pub(ctx, event)
 	assert.NoError(t, err)
 
@@ -113,7 +122,7 @@ func TestMemoryEventBus_Unsub(t *testing.T) {
 	eventType := "unsub-test-event"
 
 	// 订阅事件
-	err := bus.Sub(eventType, func(ctx context.Context, evt entity.Event) error {
+	err := bus.Sub(eventType, func(ctx context.Context, evt Event) error {
 		return nil
 	})
 	assert.NoError(t, err)
@@ -138,7 +147,7 @@ func TestMemoryEventBus_Close(t *testing.T) {
 	eventType := "close-test-event"
 
 	// 订阅事件
-	err := bus.Sub(eventType, func(ctx context.Context, evt entity.Event) error {
+	err := bus.Sub(eventType, func(ctx context.Context, evt Event) error {
 		return nil
 	})
 	assert.NoError(t, err)
@@ -153,13 +162,13 @@ func TestMemoryEventBus_Close(t *testing.T) {
 	assert.Equal(t, 0, subscribers)
 
 	// 尝试向已关闭的总线发布事件
-	event := entity.NewGenericEvent(eventType, "test")
-	err = bus.Pub(ctx, event)
+	event := NewEvent(eventType, "test")
+	err = bus.Pub(ctx, *event)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "closed")
 
 	// 尝试向已关闭的总线订阅事件
-	err = bus.Sub(eventType, func(ctx context.Context, evt entity.Event) error {
+	err = bus.Sub(eventType, func(ctx context.Context, evt Event) error {
 		return nil
 	})
 	assert.Error(t, err)
@@ -181,8 +190,8 @@ func TestMemoryEventBus_PubToClosedBus(t *testing.T) {
 	bus.Close()
 
 	// 尝试向已关闭的总线发布事件
-	event := entity.NewGenericEvent(eventType, "test")
-	err := bus.Pub(ctx, event)
+	event := NewEvent(eventType, "test")
+	err := bus.Pub(ctx, *event)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "closed")
 }
@@ -205,13 +214,13 @@ func TestMemoryEventBus_Stats(t *testing.T) {
 	eventType2 := "stats-event-2"
 
 	// 添加订阅者
-	bus.Sub(eventType1, func(ctx context.Context, evt entity.Event) error {
+	bus.Sub(eventType1, func(ctx context.Context, evt Event) error {
 		return nil
 	})
-	bus.Sub(eventType1, func(ctx context.Context, evt entity.Event) error {
+	bus.Sub(eventType1, func(ctx context.Context, evt Event) error {
 		return nil
 	})
-	bus.Sub(eventType2, func(ctx context.Context, evt entity.Event) error {
+	bus.Sub(eventType2, func(ctx context.Context, evt Event) error {
 		return nil
 	})
 
@@ -242,7 +251,7 @@ func TestMemoryEventBus_HandlerTimeout(t *testing.T) {
 	eventType := "timeout-event"
 
 	// 添加一个会阻塞很长时间的处理器
-	err := bus.Sub(eventType, func(ctx context.Context, evt entity.Event) error {
+	err := bus.Sub(eventType, func(ctx context.Context, evt Event) error {
 		// 故意阻塞以测试超时机制
 		time.Sleep(2 * time.Second)
 		return nil
@@ -250,8 +259,8 @@ func TestMemoryEventBus_HandlerTimeout(t *testing.T) {
 	assert.NoError(t, err)
 
 	// 发布事件
-	event := entity.NewGenericEvent(eventType, "timeout-test")
-	err = bus.Pub(ctx, event)
+	event := NewEvent(eventType, "timeout-test")
+	err = bus.Pub(ctx, *event)
 	assert.NoError(t, err)
 
 	// 不需要等待处理器完成，因为测试的是超时机制，而不是处理器执行结果
@@ -267,14 +276,14 @@ func TestMemoryEventBus_HandlerReturnsError(t *testing.T) {
 	eventType := "error-event"
 
 	// 添加一个会返回错误的处理器
-	err := bus.Sub(eventType, func(ctx context.Context, evt entity.Event) error {
+	err := bus.Sub(eventType, func(ctx context.Context, evt Event) error {
 		return assert.AnError // 使用testify提供的测试错误
 	})
 	assert.NoError(t, err)
 
 	// 发布事件
-	event := entity.NewGenericEvent(eventType, "error-test")
-	err = bus.Pub(ctx, event)
+	event := NewEvent(eventType, "error-test")
+	err = bus.Pub(ctx, *event)
 	assert.NoError(t, err)
 
 	// 验证即使处理器返回错误，发布操作仍然成功

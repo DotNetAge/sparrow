@@ -124,7 +124,7 @@ func JetStreamStore() Option {
 	}
 }
 
-// Messaging 使用事件总线作为消息发布和订阅
+// Messaging 使用事件总线作为消息发布
 func Messaging() Option {
 	return func(a *App) {
 		a.Container.Register(func() *messaging.EventPublisher {
@@ -135,15 +135,6 @@ func Messaging() Option {
 				panic("事件总线或事件存储未配置，无法创建事件发布者")
 			}
 			return messaging.NewEventPublisher(store, bus, a.Config.App.Name)
-		})
-
-		a.Container.Register(func() *messaging.EventSubscriber {
-			bus := a.GetEventBus()
-			if bus == nil {
-				a.Logger.Error("事件总线未配置，无法创建事件订阅者")
-				panic("事件总线未配置，无法创建事件订阅者")
-			}
-			return messaging.NewEventSubscriber(bus)
 		})
 	}
 }

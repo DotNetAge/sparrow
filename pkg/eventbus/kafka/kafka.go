@@ -10,7 +10,6 @@ import (
 	"github.com/IBM/sarama"
 
 	"github.com/DotNetAge/sparrow/pkg/config"
-	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/eventbus"
 	"github.com/DotNetAge/sparrow/pkg/logger"
 )
@@ -74,7 +73,7 @@ func NewKafkaEventBus(cfg *config.KafkaConfig) (eventbus.EventBus, error) {
 }
 
 // Pub 发布事件到Kafka
-func (b *kafkaBus) Pub(ctx context.Context, evt entity.Event) error {
+func (b *kafkaBus) Pub(ctx context.Context, evt eventbus.Event) error {
 	b.mu.RLock()
 	closed := b.closed
 	producer := b.producer
@@ -88,9 +87,9 @@ func (b *kafkaBus) Pub(ctx context.Context, evt entity.Event) error {
 		return fmt.Errorf("事件总线已关闭")
 	}
 
-	subject := evt.GetEventType()
-	messageID := evt.GetEventID()
-	createdAt := evt.GetCreatedAt()
+	subject := evt.EventType
+	messageID := evt.Id
+	createdAt := evt.Timestamp
 
 	b.logger.Info("正在将事件发布到Kafka", "subject", subject, "message_id", messageID, "topic", topic)
 
@@ -118,8 +117,7 @@ func (b *kafkaBus) Pub(ctx context.Context, evt entity.Event) error {
 		return fmt.Errorf("发布事件到Kafka失败: %w", err)
 	}
 
-	b.logger.Info("成功发布事件到Kafka", "subject", subject, "partition", partition, "offset", offset)
-
+	b.logger.Info("事件发布成功", "subject", subject, "partition", partition, "offset", offset)
 	return nil
 }
 
@@ -201,42 +199,33 @@ func (b *kafkaBus) handleMessages(subject string, handler eventbus.EventHandler)
 
 				select {
 				case msg := <-pc.Messages():
-					b.logger.Info("接收到Kafka消息", "subject", subject, "partition", msg.Partition, "offset", msg.Offset)
-
-					// 解析事件类型
-					eventType := subject
-					for _, header := range msg.Headers {
-						if string(header.Key) == "event_type" {
-							eventType = string(header.Value)
-							break
-						}
-					}
-
-					// 检查消息是否匹配订阅的事件类型
-					if eventType != subject {
+					// 解析主题
+					var eventType string
+					if err := extractSubject(msg.Topic, &eventType); err != nil {
+						b.logger.Error("解析主题失败", "error", err, "topic", msg.Topic)
 						continue
 					}
 
 					// 反序列化事件数据
-					var genericEvent map[string]interface{}
-					if err := json.Unmarshal(msg.Value, &genericEvent); err != nil {
-						b.logger.Error("反序列化事件数据失败", "error", err, "subject", subject)
+					var payload map[string]interface{}
+					if err := json.Unmarshal(msg.Value, &payload); err != nil {
+						b.logger.Error("反序列化事件数据失败", "error", err, "subject", eventType)
 						continue
 					}
 
 					// 创建上下文并调用处理器
 					ctx := context.Background()
-					// 使用GenericEvent作为事件对象
-					event := &entity.GenericEvent{
+					// 使用eventbus.Event作为事件对象
+					event := eventbus.Event{
 						Id:        string(msg.Key),
 						EventType: eventType,
 						Timestamp: msg.Timestamp,
-						Payload:   genericEvent,
+						Payload:   payload,
 					}
 
 					// 调用处理器
 					if err := handler(ctx, event); err != nil {
-						b.logger.Error("处理事件失败", "error", err, "subject", subject)
+						b.logger.Error("处理事件失败", "error", err, "subject", eventType)
 					}
 
 				case err := <-pc.Errors():
@@ -302,5 +291,12 @@ func (b *kafkaBus) Close() error {
 
 	b.logger.Info("Kafka事件总线已关闭")
 
+	return nil
+}
+
+// extractSubject 从主题中提取事件类型
+func extractSubject(topic string, eventType *string) error {
+	// 简化实现：直接使用主题作为事件类型
+	*eventType = topic
 	return nil
 }

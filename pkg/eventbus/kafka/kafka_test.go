@@ -10,7 +10,7 @@ import (
 	"github.com/IBM/sarama"
 
 	"github.com/DotNetAge/sparrow/pkg/config"
-	"github.com/DotNetAge/sparrow/pkg/entity"
+	"github.com/DotNetAge/sparrow/pkg/eventbus"
 	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -155,7 +155,7 @@ func TestKafkaEventBus_PubSub(t *testing.T) {
 
 	// 准备事件数据
 	const eventType = "test.event"
-	event := &entity.GenericEvent{
+	event := eventbus.Event{
 		Id:        "test-event-1",
 		EventType: eventType,
 		Timestamp: time.Now(),
@@ -166,9 +166,9 @@ func TestKafkaEventBus_PubSub(t *testing.T) {
 	eventReceived := make(chan struct{}, 1)
 
 	// 订阅事件
-	err = bus.Sub(eventType, func(ctx context.Context, evt entity.Event) error {
-		assert.Equal(t, eventType, evt.GetEventType())
-		assert.Equal(t, event.GetEventID(), evt.GetEventID())
+	err = bus.Sub(eventType, func(ctx context.Context, evt eventbus.Event) error {
+		assert.Equal(t, eventType, evt.EventType)
+		assert.Equal(t, event.Id, evt.Id)
 		eventReceived <- struct{}{}
 		return nil
 	})
@@ -207,7 +207,7 @@ func TestKafkaEventBus_MultipleSubscribers(t *testing.T) {
 
 	// 准备事件数据
 	const eventType = "test.event.multiple"
-	event := &entity.GenericEvent{
+	event := eventbus.Event{
 		Id:        "test-event-2",
 		EventType: eventType,
 		Timestamp: time.Now(),
@@ -219,17 +219,17 @@ func TestKafkaEventBus_MultipleSubscribers(t *testing.T) {
 	wg.Add(2)
 
 	// 第一个订阅者
-	err = bus1.Sub(eventType, func(ctx context.Context, evt entity.Event) error {
+	err = bus1.Sub(eventType, func(ctx context.Context, evt eventbus.Event) error {
 		defer wg.Done()
-		assert.Equal(t, eventType, evt.GetEventType())
+		assert.Equal(t, eventType, evt.EventType)
 		return nil
 	})
 	assert.NoError(t, err)
 
 	// 第二个订阅者
-	err = bus2.Sub(eventType, func(ctx context.Context, evt entity.Event) error {
+	err = bus2.Sub(eventType, func(ctx context.Context, evt eventbus.Event) error {
 		defer wg.Done()
-		assert.Equal(t, eventType, evt.GetEventType())
+		assert.Equal(t, eventType, evt.EventType)
 		return nil
 	})
 	assert.NoError(t, err)
@@ -269,7 +269,7 @@ func TestKafkaEventBus_Unsub(t *testing.T) {
 
 	// 准备事件数据
 	const eventType = "test.event.unsub"
-	event := &entity.GenericEvent{
+	event := eventbus.Event{
 		Id:        "test-event-3",
 		EventType: eventType,
 		Timestamp: time.Now(),
@@ -280,7 +280,7 @@ func TestKafkaEventBus_Unsub(t *testing.T) {
 	var counter int32 = 0
 
 	// 订阅事件
-	err = bus.Sub(eventType, func(ctx context.Context, evt entity.Event) error {
+	err = bus.Sub(eventType, func(ctx context.Context, evt eventbus.Event) error {
 		counter++
 		return nil
 	})
@@ -329,7 +329,7 @@ func TestKafkaEventBus_HandlerError(t *testing.T) {
 
 	// 准备事件数据
 	const eventType = "test.event.error"
-	event := &entity.GenericEvent{
+	event := eventbus.Event{
 		Id:        "test-event-5",
 		EventType: eventType,
 		Timestamp: time.Now(),
@@ -337,7 +337,7 @@ func TestKafkaEventBus_HandlerError(t *testing.T) {
 	}
 
 	// 错误处理器
-	err = bus.Sub(eventType, func(ctx context.Context, evt entity.Event) error {
+	err = bus.Sub(eventType, func(ctx context.Context, evt eventbus.Event) error {
 		return fmt.Errorf("故意的错误")
 	})
 	assert.NoError(t, err)
@@ -364,7 +364,7 @@ func TestKafkaEventBus_Close(t *testing.T) {
 	assert.NoError(t, err)
 
 	// 订阅一个事件类型
-	err = bus.Sub("test.event.close", func(ctx context.Context, evt entity.Event) error {
+	err = bus.Sub("test.event.close", func(ctx context.Context, evt eventbus.Event) error {
 		return nil
 	})
 	assert.NoError(t, err)
@@ -374,7 +374,7 @@ func TestKafkaEventBus_Close(t *testing.T) {
 	assert.NoError(t, err)
 
 	// 验证关闭后无法发布事件
-	event := &entity.GenericEvent{
+	event := eventbus.Event{
 		Id:        "test-event-close",
 		EventType: "test.event.close",
 		Timestamp: time.Now(),
@@ -385,7 +385,7 @@ func TestKafkaEventBus_Close(t *testing.T) {
 	assert.Error(t, err)
 
 	// 验证关闭后无法订阅事件
-	err = bus.Sub("test.event.afterclose", func(ctx context.Context, evt entity.Event) error {
+	err = bus.Sub("test.event.afterclose", func(ctx context.Context, evt eventbus.Event) error {
 		return nil
 	})
 	assert.Error(t, err)
@@ -410,7 +410,7 @@ func TestKafkaEventBus_PublishAfterClose(t *testing.T) {
 	assert.NoError(t, err)
 
 	// 尝试发布事件
-	event := &entity.GenericEvent{
+	event := eventbus.Event{
 		Id:        "test-event-after-close",
 		EventType: "test.event",
 		Timestamp: time.Now(),

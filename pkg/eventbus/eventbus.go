@@ -2,8 +2,6 @@ package eventbus
 
 import (
 	"context"
-
-	"github.com/DotNetAge/sparrow/pkg/entity"
 )
 
 // EventBus 定义事件总线接口
@@ -16,7 +14,7 @@ type EventBus interface {
 	// ctx: 上下文，用于超时控制和取消操作
 	// evt: 要发布的事件
 	// 返回值: 错误信息
-	Pub(ctx context.Context, evt entity.Event) error
+	Pub(ctx context.Context, evt Event) error
 
 	// Sub 订阅指定类型的事件
 	// eventType: 事件类型
@@ -35,4 +33,6 @@ type EventBus interface {
 }
 
 // EventHandler 事件处理器接口
-type EventHandler func(ctx context.Context, event entity.Event) error
+// 受到Go语言的限制无法从字符串中直接反射类型，因此事件处理不能直接返回有具体类型的数据，只能折中使用事件类型名称
+// 以及事件数据的字典型表示（JSON),而在接收方再对字典数据进行具体类型的反序化进行还原；
+type EventHandler func(ctx context.Context, evt Event) error

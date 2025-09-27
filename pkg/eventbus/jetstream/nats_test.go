@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/DotNetAge/sparrow/pkg/config"
-	"github.com/DotNetAge/sparrow/pkg/entity"
+	"github.com/DotNetAge/sparrow/pkg/eventbus"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
@@ -115,8 +115,8 @@ func TestJetStreamEventBus_PubSub(t *testing.T) {
 
 	// 订阅事件
 	handlerCalled := false
-	var receivedEvent entity.Event
-	err = bus.Sub(eventType, func(ctx context.Context, event entity.Event) error {
+	var receivedEvent eventbus.Event
+	err = bus.Sub(eventType, func(ctx context.Context, event eventbus.Event) error {
 		handlerCalled = true
 		receivedEvent = event
 		return nil
@@ -128,7 +128,12 @@ func TestJetStreamEventBus_PubSub(t *testing.T) {
 		"message": "hello world",
 		"number":  42,
 	}
-	testEvent := entity.NewGenericEvent(eventType, testData)
+	testEvent := eventbus.Event{
+		Id:        "test-event-id",
+		EventType: eventType,
+		Timestamp: time.Now(),
+		Payload:   testData,
+	}
 	err = bus.Pub(ctx, testEvent)
 	assert.NoError(t, err)
 
@@ -147,18 +152,16 @@ func TestJetStreamEventBus_PubSub(t *testing.T) {
 
 	// 验证接收到的事件
 	assert.NotNil(t, receivedEvent)
-	assert.Equal(t, eventType, receivedEvent.GetEventType())
-	assert.NotEmpty(t, receivedEvent.GetEventID())
-	assert.NotEmpty(t, receivedEvent.GetCreatedAt())
+	assert.Equal(t, eventType, receivedEvent.EventType)
+	assert.NotEmpty(t, receivedEvent.Id)
+	assert.NotEmpty(t, receivedEvent.Timestamp)
 
-	// 如果是GenericEvent，还可以验证其内部字段
-	if genericEvent, ok := receivedEvent.(*entity.GenericEvent); ok {
-		assert.NotNil(t, genericEvent.Payload)
-		payloadMap, ok := genericEvent.Payload.(map[string]interface{})
-		assert.True(t, ok)
-		assert.Equal(t, "hello world", payloadMap["message"])
-		assert.Equal(t, float64(42), payloadMap["number"])
-	}
+	// 验证Payload
+	assert.NotNil(t, receivedEvent.Payload)
+	payloadMap, ok := receivedEvent.Payload.(map[string]interface{})
+	assert.True(t, ok)
+	assert.Equal(t, "hello world", payloadMap["message"])
+	assert.Equal(t, float64(42), payloadMap["number"])
 }
 
 // TestJetStreamEventBus_Unsub 测试取消订阅功能
@@ -183,7 +186,7 @@ func TestJetStreamEventBus_Unsub(t *testing.T) {
 
 	// 订阅事件
 	handlerCalled := false
-	err = bus.Sub(eventType, func(ctx context.Context, event entity.Event) error {
+	err = bus.Sub(eventType, func(ctx context.Context, event eventbus.Event) error {
 		handlerCalled = true
 		return nil
 	})
@@ -194,7 +197,12 @@ func TestJetStreamEventBus_Unsub(t *testing.T) {
 	assert.NoError(t, err)
 
 	// 尝试发布事件
-	testEvent := entity.NewGenericEvent(eventType, nil)
+	testEvent := eventbus.Event{
+		Id:        "test-unsub-event-id",
+		EventType: eventType,
+		Timestamp: time.Now(),
+		Payload:   nil,
+	}
 	err = bus.Pub(ctx, testEvent)
 	assert.NoError(t, err)
 
@@ -243,15 +251,20 @@ func TestJetStreamEventBus_MultipleSubscribers(t *testing.T) {
 
 	// 定义测试事件，使用简单的事件类型名称
 	eventType := "testmultipleevent"
-	testEvent := entity.NewGenericEvent(eventType, nil)
+	testEvent := eventbus.Event{
+		Id:        "test-multiple-event-id",
+		EventType: eventType,
+		Timestamp: time.Now(),
+		Payload:   nil,
+	}
 
 	// 用于同步测试结果
-	wg := sync.WaitGroup{}
+	var wg sync.WaitGroup
 	wg.Add(2)
 
 	// 订阅者1（使用第一个总线实例）
 	subscriber1Called := false
-	err = bus1.Sub(eventType, func(ctx context.Context, event entity.Event) error {
+	err = bus1.Sub(eventType, func(ctx context.Context, event eventbus.Event) error {
 		subscriber1Called = true
 		wg.Done()
 		return nil
@@ -260,7 +273,7 @@ func TestJetStreamEventBus_MultipleSubscribers(t *testing.T) {
 
 	// 订阅者2（使用第二个总线实例）
 	subscriber2Called := false
-	err = bus2.Sub(eventType, func(ctx context.Context, event entity.Event) error {
+	err = bus2.Sub(eventType, func(ctx context.Context, event eventbus.Event) error {
 		subscriber2Called = true
 		wg.Done()
 		return nil
@@ -310,7 +323,7 @@ func TestJetStreamEventBus_Close(t *testing.T) {
 	// 订阅多个事件类型，使用简单的名称
 	for i := 0; i < 3; i++ {
 		eventType := fmt.Sprintf("testcloseevent%d", i)
-		err = bus.Sub(eventType, func(ctx context.Context, event entity.Event) error {
+		err = bus.Sub(eventType, func(ctx context.Context, event eventbus.Event) error {
 			return nil
 		})
 		assert.NoError(t, err)
@@ -321,7 +334,12 @@ func TestJetStreamEventBus_Close(t *testing.T) {
 	assert.NoError(t, err)
 
 	// 验证关闭后发布事件会失败
-	testEvent := entity.NewGenericEvent("testcloseevent", nil)
+	testEvent := eventbus.Event{
+		Id:        "test-close-event-id",
+		EventType: "testcloseevent",
+		Timestamp: time.Now(),
+		Payload:   nil,
+	}
 	err = bus.Pub(ctx, testEvent)
 	assert.Error(t, err)
 }
@@ -348,13 +366,18 @@ func TestJetStreamEventBus_HandlerError(t *testing.T) {
 	eventType := "testerrorevent"
 	
 	// 创建一个总是返回错误的处理器
-	err = bus.Sub(eventType, func(ctx context.Context, event entity.Event) error {
+	err = bus.Sub(eventType, func(ctx context.Context, event eventbus.Event) error {
 		return fmt.Errorf("simulated handler error")
 	})
 	assert.NoError(t, err)
 
 	// 发布事件
-	testEvent := entity.NewGenericEvent(eventType, nil)
+	testEvent := eventbus.Event{
+		Id:        "test-error-event-id",
+		EventType: eventType,
+		Timestamp: time.Now(),
+		Payload:   nil,
+	}
 	err = bus.Pub(ctx, testEvent)
 	assert.NoError(t, err)
 

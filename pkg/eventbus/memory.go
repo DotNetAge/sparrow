@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"sync"
 	"time"
-
-	"github.com/DotNetAge/sparrow/pkg/entity"
 )
 
 // MemoryEventBus 纯Go内存事件总线实现
@@ -32,7 +30,7 @@ func NewMemoryEventBus() EventBus {
 }
 
 // Pub 发布事件到所有订阅者
-func (b *MemoryEventBus) Pub(ctx context.Context, evt entity.Event) error {
+func (b *MemoryEventBus) Pub(ctx context.Context, evt Event) error {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
 
@@ -40,7 +38,7 @@ func (b *MemoryEventBus) Pub(ctx context.Context, evt entity.Event) error {
 		return fmt.Errorf("event bus is closed")
 	}
 
-	eventType := evt.GetEventType()
+	eventType := evt.EventType
 
 	// 处理非分组订阅者
 	if handlers, exists := b.handlers[eventType]; exists {

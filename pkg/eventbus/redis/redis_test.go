@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/DotNetAge/sparrow/pkg/config"
-	"github.com/DotNetAge/sparrow/pkg/entity"
+	"github.com/DotNetAge/sparrow/pkg/eventbus"
 	"github.com/go-redis/redis/v8"
 	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
@@ -92,7 +92,7 @@ func TestRedisEventBus_PubSub(t *testing.T) {
 	defer bus.Close()
 
 	// 测试事件数据
-	testEvent := &entity.GenericEvent{
+	testEvent := eventbus.Event{
 		Id:        "test-id-1",
 		EventType: "testevent",
 		Timestamp: time.Now(),
@@ -105,15 +105,13 @@ func TestRedisEventBus_PubSub(t *testing.T) {
 
 	// 订阅事件
 	wg.Add(1)
-	err = bus.Sub(testEvent.GetEventType(), func(ctx context.Context, event entity.Event) error {
+	err = bus.Sub(testEvent.EventType, func(ctx context.Context, event eventbus.Event) error {
 		defer wg.Done()
 		handlerCalled = true
 
 		// 验证接收到的事件数据
-		genericEvent, ok := event.(*entity.GenericEvent)
-		assert.True(t, ok, "事件应该能转换为GenericEvent")
-		assert.Equal(t, testEvent.Id, genericEvent.Id, "事件ID应该匹配")
-		assert.Equal(t, testEvent.EventType, genericEvent.EventType, "事件类型应该匹配")
+		assert.Equal(t, testEvent.Id, event.Id, "事件ID应该匹配")
+		assert.Equal(t, testEvent.EventType, event.EventType, "事件类型应该匹配")
 
 		return nil
 	})
@@ -166,7 +164,7 @@ func TestRedisEventBus_MultipleSubscribers(t *testing.T) {
 	defer busPub.Close()
 
 	// 测试事件数据
-	testEvent := &entity.GenericEvent{
+	testEvent := eventbus.Event{
 		Id:        "test-id-multi",
 		EventType: "testmultipleevent",
 		Timestamp: time.Now(),
@@ -180,7 +178,7 @@ func TestRedisEventBus_MultipleSubscribers(t *testing.T) {
 
 	// 订阅者1
 	wg.Add(1)
-	err = bus1.Sub(testEvent.GetEventType(), func(ctx context.Context, event entity.Event) error {
+	err = bus1.Sub(testEvent.EventType, func(ctx context.Context, event eventbus.Event) error {
 		defer wg.Done()
 		subscriber1Called = true
 		return nil
@@ -189,7 +187,7 @@ func TestRedisEventBus_MultipleSubscribers(t *testing.T) {
 
 	// 订阅者2
 	wg.Add(1)
-	err = bus2.Sub(testEvent.GetEventType(), func(ctx context.Context, event entity.Event) error {
+	err = bus2.Sub(testEvent.EventType, func(ctx context.Context, event eventbus.Event) error {
 		defer wg.Done()
 		subscriber2Called = true
 		return nil
@@ -240,7 +238,7 @@ func TestRedisEventBus_Unsub(t *testing.T) {
 
 	// 订阅事件
 	handlerCalled := false
-	err = bus.Sub(eventType, func(ctx context.Context, event entity.Event) error {
+	err = bus.Sub(eventType, func(ctx context.Context, event eventbus.Event) error {
 		handlerCalled = true
 		return nil
 	})
@@ -251,7 +249,7 @@ func TestRedisEventBus_Unsub(t *testing.T) {
 	assert.NoError(t, err, "取消订阅应该成功")
 
 	// 发布事件
-	testEvent := &entity.GenericEvent{
+	testEvent := eventbus.Event{
 		Id:        "test-id-unsub",
 		EventType: eventType,
 		Timestamp: time.Now(),
@@ -283,13 +281,13 @@ func TestRedisEventBus_HandlerError(t *testing.T) {
 
 	// 订阅事件，处理器返回错误
 	handlerError := fmt.Errorf("handler error")
-	err = bus.Sub("testerror", func(ctx context.Context, event entity.Event) error {
+	err = bus.Sub("testerror", func(ctx context.Context, event eventbus.Event) error {
 		return handlerError
 	})
 	assert.NoError(t, err, "订阅事件应该成功")
 
 	// 发布事件
-	testEvent := &entity.GenericEvent{
+	testEvent := eventbus.Event{
 		Id:        "test-id-error",
 		EventType: "testerror",
 		Timestamp: time.Now(),
@@ -303,14 +301,14 @@ func TestRedisEventBus_HandlerError(t *testing.T) {
 	// 此时错误应该已经在日志中记录，但不应影响事件总线的运行
 	// 我们验证可以继续发布和接收其他事件
 	successHandlerCalled := false
-	err = bus.Sub("testsuccess", func(ctx context.Context, event entity.Event) error {
+	err = bus.Sub("testsuccess", func(ctx context.Context, event eventbus.Event) error {
 		successHandlerCalled = true
 		return nil
 	})
 	assert.NoError(t, err, "订阅成功事件应该成功")
 
 	// 发布成功事件
-	successEvent := &entity.GenericEvent{
+	successEvent := eventbus.Event{
 		Id:        "test-id-success",
 		EventType: "testsuccess",
 		Timestamp: time.Now(),
@@ -357,7 +355,7 @@ func TestRedisEventBus_InvalidEvent(t *testing.T) {
 
 	// 订阅事件
 	handlerCalled := false
-	err = bus.Sub("testinvalid", func(ctx context.Context, event entity.Event) error {
+	err = bus.Sub("testinvalid", func(ctx context.Context, event eventbus.Event) error {
 		handlerCalled = true
 		return nil
 	})

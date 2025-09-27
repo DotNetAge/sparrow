@@ -84,13 +84,13 @@ func (app *App) GetPub() *messaging.EventPublisher {
 	return pub
 }
 
-func (app *App) GetSub() *messaging.EventSubscriber {
-	var sub *messaging.EventSubscriber
-	if err := app.Container.ResolveInstance(&sub); err != nil {
-		panic(fmt.Errorf("解析事件订阅器失败: %w", err))
-	}
-	return sub
-}
+// func (app *App) GetSub() *messaging.EventSubscriber {
+// 	var sub *messaging.EventSubscriber
+// 	if err := app.Container.ResolveInstance(&sub); err != nil {
+// 		panic(fmt.Errorf("解析事件订阅器失败: %w", err))
+// 	}
+// 	return sub
+// }
 
 func (app *App) GetTasks() *usecase.TaskService {
 	var tasks *usecase.TaskService
@@ -108,14 +108,24 @@ func (app *App) GetSessions() *usecase.SessionService {
 	return sessions
 }
 
-// GetNamedRepo 获取命名仓库实例
-// name: 仓库名称，对应容器注册的名称（如 "user"）
-func (app *App) GetNamedRepo(name string) usecase.Repository[any] {
+func (app *App) getNamedRepo(name string) usecase.Repository[any] {
 	var repo usecase.Repository[any]
 	if err := app.Container.ResolveByName(name+"Repo", &repo); err != nil {
 		panic(fmt.Errorf("解析命名仓库失败: %w", err))
 	}
 	return repo
+}
+
+// GetNamedRepo 获取命名仓库实例
+// name: 仓库名称，对应容器注册的名称（如 "user"）
+func GetNamedRepo[T any](app *App, name string) (usecase.Repository[T], error) {
+	repo := app.getNamedRepo(name)
+	typedRepo, ok := repo.(usecase.Repository[T])
+	if !ok {
+		app.Logger.Error("repo type mismatch", zap.String("name", name))
+		return nil, fmt.Errorf("repo type mismatch")
+	}
+	return typedRepo, nil
 }
 
 func (app *App) Use(opt Option) *App {

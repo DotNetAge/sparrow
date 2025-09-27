@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/DotNetAge/sparrow/pkg/config"
-	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/eventbus"
 	"github.com/DotNetAge/sparrow/pkg/logger"
 	"github.com/go-redis/redis/v8"
@@ -19,14 +18,14 @@ import (
 // 2024-09-26: 初始版本
 
 type redisBus struct {
-	client    *redis.Client
-	name      string
-	subs      map[string][]*redis.PubSub
-	handlers  map[string]eventbus.EventHandler
-	subID     int64
-	closed    bool
-	mu        sync.RWMutex
-	logger    *logger.Logger
+	client   *redis.Client
+	name     string
+	subs     map[string][]*redis.PubSub
+	handlers map[string]eventbus.EventHandler
+	subID    int64
+	closed   bool
+	mu       sync.RWMutex
+	logger   *logger.Logger
 }
 
 // 确保redisBus实现了EventBus接口
@@ -56,19 +55,19 @@ func NewRedisEventBus(cfg *config.RedisConfig) (eventbus.EventBus, error) {
 	}
 
 	return &redisBus{
-	client:   client,
-	name:     "redis-event-bus",
-	subs:     make(map[string][]*redis.PubSub),
-	handlers: make(map[string]eventbus.EventHandler),
-	subID:    0,
-	closed:   false,
-	logger:   logger,
-	},
-	nil
+			client:   client,
+			name:     "redis-event-bus",
+			subs:     make(map[string][]*redis.PubSub),
+			handlers: make(map[string]eventbus.EventHandler),
+			subID:    0,
+			closed:   false,
+			logger:   logger,
+		},
+		nil
 }
 
 // Pub 发布事件到Redis频道
-func (b *redisBus) Pub(ctx context.Context, evt entity.Event) error {
+func (b *redisBus) Pub(ctx context.Context, evt eventbus.Event) error {
 	b.mu.RLock()
 	closed := b.closed
 	client := b.client
@@ -78,7 +77,7 @@ func (b *redisBus) Pub(ctx context.Context, evt entity.Event) error {
 		return fmt.Errorf("event bus is closed")
 	}
 
-	subject := evt.GetEventType()
+	subject := evt.EventType
 	b.logger.Info("正在将事件发布到Redis", "subject", subject, "instance", b.name)
 
 	// 序列化事件数据
@@ -209,15 +208,15 @@ func (b *redisBus) handleMessages(ps *redis.PubSub, subject string, handler even
 			b.logger.Info("从Redis接收消息", "subject", subject, "instance", b.name)
 
 			// 解析事件数据
-			event := &entity.GenericEvent{}
+			event := &eventbus.Event{}
 			if err := json.Unmarshal([]byte(msg.Payload), event); err != nil {
 				b.logger.Error("解析事件数据失败", "error", err, "subject", subject)
 				continue
 			}
 
 			// 调用处理器
-			if err := handler(context.Background(), event); err != nil {
-				b.logger.Error("处理事件失败", "error", err, "event_type", event.GetEventType())
+			if err := handler(context.Background(), *event); err != nil {
+				b.logger.Error("处理事件失败", "error", err, "event_type", event.EventType)
 			} else {
 				b.logger.Info("成功处理事件", "subject", subject, "instance", b.name)
 			}
@@ -228,6 +227,7 @@ func (b *redisBus) handleMessages(ps *redis.PubSub, subject string, handler even
 			closed := b.closed
 			b.mu.RUnlock()
 			if closed {
+				b.logger.Info("事件总线已关闭，停止处理消息", "subject", subject)
 				return
 			}
 		}
