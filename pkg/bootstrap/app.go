@@ -20,17 +20,23 @@ import (
 )
 
 type App struct {
+	Name      string
 	Config    *config.Config // 全局配置
 	Logger    *logger.Logger // 全局日志
 	Engine    *gin.Engine    // 全局路由引擎
 	Container *Container     // 全局服务容器
 }
 
+var (
+	AppName    = ""
+	AppVersion = "v0.0.1"
+)
+
 type Option func(*App)
 
 func NewApp(opts ...Option) *App {
 	// 初始化配置
-	cfg, err := config.Load()
+	cfg, err := config.Load(AppName)
 	if err != nil {
 		panic(fmt.Errorf("加载配置失败: %w", err))
 	}
@@ -40,7 +46,16 @@ func NewApp(opts ...Option) *App {
 		panic(fmt.Errorf("创建日志记录器失败: %w", err))
 	}
 
+	if cfg.App.Name != "" {
+		AppName = cfg.App.Name
+	}
+
+	if cfg.App.Version != "" {
+		AppVersion = cfg.App.Version
+	}
+
 	app := &App{
+		Name:      AppName,
 		Config:    cfg,
 		Logger:    log,
 		Engine:    gin.Default(),

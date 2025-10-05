@@ -17,6 +17,10 @@ type Config struct {
 }
 
 func SetDefaults(viper *viper.Viper) {
+	// 应用配置默认值
+	viper.SetDefault("app.name", "sparrow")
+	viper.SetDefault("app.version", "1.0.0")
+
 	viper.SetDefault("server.host", "0.0.0.0")
 	viper.SetDefault("server.port", 8080)
 	viper.SetDefault("server.read_timeout", "30s")
