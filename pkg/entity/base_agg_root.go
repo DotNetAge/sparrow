@@ -4,12 +4,11 @@ import (
 	"time"
 )
 
-
 // BaseAggregateRoot 基础聚合根结构体，提供标准字段和方法
 // 所有聚合根都应该嵌入这个结构体来实现通用的AggregateRoot接口方法
 type BaseAggregateRoot struct {
-	BaseEntity             // 嵌入基础实体
-	Version         int    // 版本号用于乐观锁
+	BaseEntity                      // 嵌入基础实体
+	Version           int           // 版本号用于乐观锁
 	uncommittedEvents []DomainEvent // 未提交的事件列表
 }
 
@@ -22,7 +21,7 @@ func NewBaseAggregateRoot(id string) *BaseAggregateRoot {
 			CreatedAt: now,
 			UpdatedAt: now,
 		},
-		Version:         1,
+		Version:           1,
 		uncommittedEvents: []DomainEvent{},
 	}
 }
@@ -30,6 +29,11 @@ func NewBaseAggregateRoot(id string) *BaseAggregateRoot {
 // GetVersion 返回当前版本
 func (a *BaseAggregateRoot) GetVersion() int {
 	return a.Version
+}
+
+// GetAggregateID 返回聚合根的ID
+func (a *BaseAggregateRoot) GetAggregateID() string {
+	return a.Id
 }
 
 // SetVersion 设置版本号
@@ -66,6 +70,3 @@ func (a *BaseAggregateRoot) AddEvent(event DomainEvent) {
 func (a *BaseAggregateRoot) HasUncommittedEvents() bool {
 	return len(a.uncommittedEvents) > 0
 }
-
-
-

@@ -24,13 +24,6 @@ type App struct {
 	Logger    *logger.Logger // 全局日志
 	Engine    *gin.Engine    // 全局路由引擎
 	Container *Container     // 全局服务容器
-	// Bus        eventbus.EventBus          // 全局事件总线
-	// Publisher  *messaging.EventPublisher  // 全局消息发布器
-	// Subscriber *messaging.EventSubscriber // 全局消息订阅器
-	// Store      usecase.EventStore         // 全局事件存储
-	// Db         *Database                  // 全局数据库实例连接
-	// Tasks      *usecase.TaskService       // 全局任务服务
-	// Sessions   *usecase.SessionService    // 全局会话服务
 }
 
 type Option func(*App)
@@ -60,17 +53,19 @@ func NewApp(opts ...Option) *App {
 	return app
 }
 
+// GetEventBus 获取事件总线实例
 func (app *App) GetEventBus() eventbus.EventBus {
 	var bus eventbus.EventBus
-	if err := app.Container.ResolveInstance(bus); err != nil {
+	if err := app.Container.ResolveInstance(&bus); err != nil {
 		panic(fmt.Errorf("解析事件总线失败: %w", err))
 	}
 	return bus
 }
 
+// GetEventStore 获取事件存储实例
 func (app *App) GetEventStore() usecase.EventStore {
 	var store usecase.EventStore
-	if err := app.Container.ResolveInstance(store); err != nil {
+	if err := app.Container.ResolveInstance(&store); err != nil {
 		panic(fmt.Errorf("解析事件存储失败: %w", err))
 	}
 	return store
@@ -83,14 +78,6 @@ func (app *App) GetPub() *messaging.EventPublisher {
 	}
 	return pub
 }
-
-// func (app *App) GetSub() *messaging.EventSubscriber {
-// 	var sub *messaging.EventSubscriber
-// 	if err := app.Container.ResolveInstance(&sub); err != nil {
-// 		panic(fmt.Errorf("解析事件订阅器失败: %w", err))
-// 	}
-// 	return sub
-// }
 
 func (app *App) GetTasks() *usecase.TaskService {
 	var tasks *usecase.TaskService
