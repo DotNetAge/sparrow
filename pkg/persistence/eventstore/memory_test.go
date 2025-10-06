@@ -17,6 +17,51 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/logger"
 )
 
+// MemoryTestMockEvent 是用于测试的模拟事件类型
+type MemoryTestMockEvent struct {
+	ID            string
+	AggregateID   string
+	EventType     string
+	AggregateType string
+	Version       int
+	Timestamp     time.Time
+}
+
+// GetID 返回事件ID
+func (e *MemoryTestMockEvent) GetID() string {
+	return e.ID
+}
+
+// GetAggregateID 返回聚合根ID
+func (e *MemoryTestMockEvent) GetAggregateID() string {
+	return e.AggregateID
+}
+
+// GetAggregateType 返回聚合根类型
+func (e *MemoryTestMockEvent) GetAggregateType() string {
+	return e.AggregateType
+}
+
+// GetEventID 返回事件ID
+func (e *MemoryTestMockEvent) GetEventID() string {
+	return e.ID
+}
+
+// GetEventType 返回事件类型
+func (e *MemoryTestMockEvent) GetEventType() string {
+	return e.EventType
+}
+
+// GetVersion 返回事件版本
+func (e *MemoryTestMockEvent) GetVersion() int {
+	return e.Version
+}
+
+// GetCreatedAt 返回事件创建时间
+func (e *MemoryTestMockEvent) GetCreatedAt() time.Time {
+	return e.Timestamp
+}
+
 // MemoryTestMockAggregateRoot 用于测试的mock聚合根实现
 type MemoryTestMockAggregateRoot struct {
 	ID            string
@@ -622,9 +667,9 @@ func TestMemoryEventStore_ConcurrentAccess(t *testing.T) {
 			// 创建事件
 			for j := 0; j < iterations; j++ {
 				event := NewMemoryTestMockEvent(
-					aggregateID, 
-					fmt.Sprintf("ConcurrentEvent-%d-%d", workerID, j), 
-					"TestAggregate", 
+					aggregateID,
+					fmt.Sprintf("ConcurrentEvent-%d-%d", workerID, j),
+					"TestAggregate",
 					j+1,
 				)
 				events = append(events, event)
