@@ -28,7 +28,7 @@ type EventSubscriber[T entity.DomainEvent] struct {
 // T: 领域事件类型。用于声明当前的包内用于被反序列化的领域事件类型
 // serviceName: 本服务名称，用于过滤事件
 // aggType: 聚合类型
-// eventType: 事件类型，这个事件类型必须是发起方使用的事件类型名称
+// eventType: 事件类型，这个事件类型必须是发起方使用的事件类型名称。
 // bus: 事件总线实例
 func (s *EventSubscriber[T]) Init(
 	serviceName string,
@@ -135,12 +135,12 @@ func (s *EventSubscriber[T]) AddServiceHandler(serviceName string, handler Domai
 	err := s.eventBus.Sub(subject, wrappedHandler)
 
 	if err != nil {
-		s.logger.Error("订阅事件 %s 失败: %w", subject, err)
+		s.logger.Error("订阅事件", "subject", subject, "error", err)
 		return fmt.Errorf("订阅事件 %s 失败: %w", subject, err)
 	}
 
 	s.handlers[subject] = handler
-	s.logger.Info("成功订阅事件 %s", subject)
+	s.logger.Info("成功订阅事件", "subject", subject)
 	return nil
 }
 
