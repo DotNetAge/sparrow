@@ -42,14 +42,22 @@ func (s *EventSubscriber[T]) Init(serviceName string, aggregateType string, bus 
 	if aggregateType == "" {
 		s.aggType = "*"
 	} else {
-		s.aggType = aggregateType
+		s.aggType = getRealTypeName(aggregateType)
 	}
 
 	s.serviceName = serviceName
 	s.eventBus = bus
 	s.logger = logger
-	s.eventType = utils.GetTypeName[T]()
+	s.eventType = getRealTypeName(utils.GetTypeName[T]())
 	s.handlers = make(map[string]DomainEventHandler[T])
+}
+func getRealTypeName(name string) string {
+	if strings.Contains(name, ".") {
+		segements := strings.Split(name, ".")
+		return segements[len(segements)-1]
+	} else {
+		return name
+	}
 }
 
 // Subscribe 订阅指定类型的领域事件,默认使用初始化时的服务名
@@ -133,7 +141,7 @@ func (s *EventSubscriber[T]) encodeEventType(serviceName string) string {
 	if svcName == "" {
 		svcName = s.serviceName
 	}
-	return fmt.Sprintf("%s.%s", svcName, s.eventType)
+	return fmt.Sprintf("%s.%s.%s", svcName, s.aggType, s.eventType)
 }
 
 // Unsubscribe 取消订阅指定服务名称的领域事件
