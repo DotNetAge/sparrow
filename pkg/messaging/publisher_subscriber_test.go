@@ -90,10 +90,10 @@ func TestPublisherSubscriberCommunication(t *testing.T) {
 
 	// 创建两个 Subscriber 实例
 	subscriber1 := &EventSubscriber[*TestEvent]{}
-	subscriber1.Init(serviceName, "TestAggregate", bus, log)
+	subscriber1.Init(serviceName, "TestAggregate", "TestEvent", bus, log)
 
 	subscriber2 := &EventSubscriber[*TestEvent]{}
-	subscriber2.Init(serviceName, "TestAggregate", bus, log)
+	subscriber2.Init(serviceName, "TestAggregate", "TestEvent", bus, log)
 
 	// 用于同步的等待组
 	var wg sync.WaitGroup
@@ -153,7 +153,7 @@ func TestPublisherSubscriberCommunication(t *testing.T) {
 		select {
 		case receivedEvent1 := <-eventReceived1:
 			if receivedEvent1.Message != testEvent.Message {
-				t.Errorf("Subscriber1 received incorrect event message: got %v, want %v", 
+				t.Errorf("Subscriber1 received incorrect event message: got %v, want %v",
 					receivedEvent1.Message, testEvent.Message)
 			}
 		case <-timeout:
@@ -163,7 +163,7 @@ func TestPublisherSubscriberCommunication(t *testing.T) {
 		select {
 		case receivedEvent2 := <-eventReceived2:
 			if receivedEvent2.Message != testEvent.Message {
-				t.Errorf("Subscriber2 received incorrect event message: got %v, want %v", 
+				t.Errorf("Subscriber2 received incorrect event message: got %v, want %v",
 					receivedEvent2.Message, testEvent.Message)
 			}
 		case <-timeout:

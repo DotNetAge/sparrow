@@ -9,7 +9,6 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/eventbus"
 	"github.com/DotNetAge/sparrow/pkg/logger"
-	"github.com/DotNetAge/sparrow/pkg/utils"
 )
 
 // EventSubscriber 事件订阅器
@@ -26,10 +25,17 @@ type EventSubscriber[T entity.DomainEvent] struct {
 }
 
 // Init 初始化事件订阅器
+// T: 领域事件类型。用于声明当前的包内用于被反序列化的领域事件类型
 // serviceName: 本服务名称，用于过滤事件
 // aggType: 聚合类型
+// eventType: 事件类型，这个事件类型必须是发起方使用的事件类型名称
 // bus: 事件总线实例
-func (s *EventSubscriber[T]) Init(serviceName string, aggregateType string, bus eventbus.EventBus, logger *logger.Logger) {
+func (s *EventSubscriber[T]) Init(
+	serviceName string,
+	aggregateType string,
+	eventType string,
+	bus eventbus.EventBus,
+	logger *logger.Logger) {
 
 	if bus == nil {
 		panic("事件总线未进行初始化")
@@ -40,15 +46,18 @@ func (s *EventSubscriber[T]) Init(serviceName string, aggregateType string, bus 
 	}
 
 	if aggregateType == "" {
-		s.aggType = "*"
-	} else {
-		s.aggType = getRealTypeName(aggregateType)
+		panic("聚合类型不能为空")
 	}
 
+	if eventType == "" {
+		panic("事件类型不能为空")
+	}
+
+	s.aggType = getRealTypeName(aggregateType)
 	s.serviceName = serviceName
 	s.eventBus = bus
 	s.logger = logger
-	s.eventType = getRealTypeName(utils.GetTypeName[T]())
+	s.eventType = getRealTypeName(eventType)
 	s.handlers = make(map[string]DomainEventHandler[T])
 }
 func getRealTypeName(name string) string {
