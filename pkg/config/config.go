@@ -21,6 +21,8 @@ func SetDefaults(viper *viper.Viper) {
 	// 应用配置默认值
 	viper.SetDefault("app.name", "sparrow")
 	viper.SetDefault("app.version", "1.0.0")
+	// openssl rand -base64 16
+	viper.SetDefault("app.secret", "+eCa9GyoBC8rjWhnxYLq4A==")
 
 	viper.SetDefault("server.host", "0.0.0.0")
 	viper.SetDefault("server.port", 8080)

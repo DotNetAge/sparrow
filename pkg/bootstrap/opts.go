@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/DotNetAge/sparrow/pkg/adapter/http/router"
+	"github.com/DotNetAge/sparrow/pkg/auth"
 	"github.com/DotNetAge/sparrow/pkg/config"
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/eventbus"
@@ -261,5 +262,13 @@ func RedisRepo[T entity.Entity](name string) Option {
 func Middlewares(middleware ...gin.HandlerFunc) Option {
 	return func(o *App) {
 		o.Engine.Use(middleware...)
+	}
+}
+
+func WithJWT(expire time.Duration, refreshExp time.Duration) Option {
+	return func(o *App) {
+		o.Container.Register(func() auth.TokenGenerator {
+			return auth.NewTokenGenerator([]byte(o.Config.App.Secret), expire, refreshExp)
+		})
 	}
 }
