@@ -141,8 +141,10 @@ func GetNamedRepo[T any](app *App, name string) (usecase.Repository[T], error) {
 	return typedRepo, nil
 }
 
-func (app *App) Use(opt Option) *App {
-	opt(app)
+func (app *App) Use(opts ...Option) *App {
+	for _, opt := range opts {
+		opt(app)
+	}
 	return app
 }
 
