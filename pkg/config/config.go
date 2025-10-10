@@ -7,6 +7,7 @@ import (
 type Config struct {
 	App      AppConfig      `mapstructure:"app"`
 	Server   ServerConfig   `mapstructure:"server"`
+	CORS     CORSConfig     `mapstructure:"cors"`
 	Log      LogConfig      `mapstructure:"log"`
 	NATS     NATsConfig     `mapstructure:"nats"`
 	SQL      SQLConfig      `mapstructure:"sql"`
@@ -23,9 +24,16 @@ func SetDefaults(viper *viper.Viper) {
 
 	viper.SetDefault("server.host", "0.0.0.0")
 	viper.SetDefault("server.port", 8080)
-	viper.SetDefault("server.read_timeout", "30s")
-	viper.SetDefault("server.write_timeout", "30s")
-	viper.SetDefault("server.idle_timeout", "60s")
+	// viper.SetDefault("server.read_timeout", "30s")
+	// viper.SetDefault("server.write_timeout", "30s")
+	// viper.SetDefault("server.idle_timeout", "60s")
+
+	// CORS 配置
+	viper.SetDefault("cors.allow_origins", []string{"*"})
+	viper.SetDefault("cors.allow_methods", []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
+	viper.SetDefault("cors.allow_headers", []string{"Origin", "Content-Type", "Accept"})
+	viper.SetDefault("cors.allow_credentials", true)
+	viper.SetDefault("cors.max_age_hours", 1)
 
 	viper.SetDefault("log.level", "info")
 	viper.SetDefault("log.format", "json")

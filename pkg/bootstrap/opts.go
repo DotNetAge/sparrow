@@ -17,6 +17,7 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/usecase"
 	"github.com/DotNetAge/sparrow/pkg/utils"
 	"github.com/dgraph-io/badger/v4"
+	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -254,5 +255,11 @@ func RedisRepo[T entity.Entity](name string) Option {
 		o.Container.RegisterNamed(repoName, func() usecase.Repository[T] {
 			return repo.NewRedisRepository[T](redisClient, prefix, 0)
 		})
+	}
+}
+
+func Middlewares(middleware ...gin.HandlerFunc) Option {
+	return func(o *App) {
+		o.Engine.Use(middleware...)
 	}
 }

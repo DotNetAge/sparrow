@@ -15,6 +15,8 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/logger"
 	"github.com/DotNetAge/sparrow/pkg/messaging"
 	"github.com/DotNetAge/sparrow/pkg/usecase"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -54,11 +56,23 @@ func NewApp(opts ...Option) *App {
 		AppVersion = cfg.App.Version
 	}
 
+	r := gin.Default()
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     cfg.CORS.AllowOrigins,
+		AllowMethods:     cfg.CORS.AllowMethods,
+		AllowHeaders:     cfg.CORS.AllowHeaders,
+		AllowCredentials: cfg.CORS.AllowCredentials,
+		MaxAge:           time.Duration(cfg.CORS.MaxAgeHours) * time.Hour,
+	}),
+		gin.Recovery(),
+		gin.Logger(),
+		gzip.Gzip(gzip.DefaultCompression))
+
 	app := &App{
 		Name:      AppName,
 		Config:    cfg,
 		Logger:    log,
-		Engine:    gin.Default(),
+		Engine:    r,
 		Container: NewContainer(),
 	}
 
