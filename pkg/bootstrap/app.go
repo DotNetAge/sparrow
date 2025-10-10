@@ -64,8 +64,6 @@ func NewApp(opts ...Option) *App {
 		AllowCredentials: cfg.CORS.AllowCredentials,
 		MaxAge:           time.Duration(cfg.CORS.MaxAgeHours) * time.Hour,
 	}),
-		gin.Recovery(),
-		gin.Logger(),
 		gzip.Gzip(gzip.DefaultCompression))
 
 	app := &App{
