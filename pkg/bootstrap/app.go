@@ -16,6 +16,7 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/messaging"
 	"github.com/DotNetAge/sparrow/pkg/usecase"
 	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -62,9 +63,7 @@ func NewApp(opts ...Option) *App {
 		AllowHeaders:     cfg.CORS.AllowHeaders,
 		AllowCredentials: cfg.CORS.AllowCredentials,
 		MaxAge:           time.Duration(cfg.CORS.MaxAgeHours) * time.Hour,
-	}))
-
-	// gzip.Gzip(gzip.DefaultCompression)
+	}), gzip.Gzip(gzip.DefaultCompression))
 
 	app := &App{
 		Name:      AppName,
