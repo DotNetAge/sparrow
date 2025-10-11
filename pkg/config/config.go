@@ -33,7 +33,7 @@ func SetDefaults(viper *viper.Viper) {
 	// CORS 配置
 	viper.SetDefault("cors.allow_origins", []string{"*"})
 	viper.SetDefault("cors.allow_methods", []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
-	viper.SetDefault("cors.allow_headers", []string{"Origin", "Content-Type", "Accept"})
+	viper.SetDefault("cors.allow_headers", []string{"Origin", "Content-Type", "Accept", "Authorization"})
 	viper.SetDefault("cors.allow_credentials", true)
 	viper.SetDefault("cors.max_age_hours", 1)
 

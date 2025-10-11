@@ -414,7 +414,9 @@ func TestBadgerRepository_CountWithConditions(t *testing.T) {
 	tasks := []*entity.Task{
 		{BaseEntity: entity.BaseEntity{Id: "test_id_1"}, Type: "type1", Status: entity.TaskStatusPending},
 		{BaseEntity: entity.BaseEntity{Id: "test_id_2"}, Type: "type1", Status: entity.TaskStatusRunning},
-		{BaseEntity: entity.BaseEntity{Id: "test_id_3"}, Type: "type2", Status: entity.TaskStatusPending},
+		{BaseEntity: entity.BaseEntity{Id: "test_id_3"}, Type: "type2", Status: entity.TaskStatusCompleted},
+		{BaseEntity: entity.BaseEntity{Id: "test_id_4"}, Type: "type3", Status: entity.TaskStatusPending},
+		{BaseEntity: entity.BaseEntity{Id: "test_id_5"}, Type: "type123", Status: entity.TaskStatusPending},
 	}
 	for _, task := range tasks {
 		task.SetUpdatedAt(time.Now())
@@ -422,14 +424,52 @@ func TestBadgerRepository_CountWithConditions(t *testing.T) {
 		assert.NoError(t, err)
 	}
 
-	// 测试条件统计
-	conditions := []usecase.QueryCondition{
-		{Field: "Type", Operator: "EQ", Value: "type1"},
-	}
+	// 测试EQ条件
+	t.Run("测试EQ条件", func(t *testing.T) {
+		conditions := []usecase.QueryCondition{
+			{Field: "Type", Operator: "EQ", Value: "type1"},
+		}
 
-	count, err := repo.CountWithConditions(context.Background(), conditions)
-	assert.NoError(t, err)
-	assert.Equal(t, int64(2), count)
+		count, err := repo.CountWithConditions(context.Background(), conditions)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(2), count)
+	})
+
+	// 测试LIKE条件
+	t.Run("测试LIKE条件", func(t *testing.T) {
+		conditions := []usecase.QueryCondition{
+			{Field: "Type", Operator: "LIKE", Value: "type1"},
+		}
+
+		count, err := repo.CountWithConditions(context.Background(), conditions)
+		assert.NoError(t, err)
+		// type1和type123都包含type1
+		assert.Equal(t, int64(3), count)
+	})
+
+	// 测试NEQ条件
+	t.Run("测试NEQ条件", func(t *testing.T) {
+		conditions := []usecase.QueryCondition{
+			{Field: "Type", Operator: "NEQ", Value: "type1"},
+		}
+
+		count, err := repo.CountWithConditions(context.Background(), conditions)
+		assert.NoError(t, err)
+		// type2、type3、type123都不等于type1
+		assert.Equal(t, int64(3), count)
+	})
+
+	// 测试IN条件
+	t.Run("测试IN条件", func(t *testing.T) {
+		conditions := []usecase.QueryCondition{
+			{Field: "Type", Operator: "IN", Value: []string{"type1", "type2"}},
+		}
+
+		count, err := repo.CountWithConditions(context.Background(), conditions)
+		assert.NoError(t, err)
+		// type1和type2的任务总数
+		assert.Equal(t, int64(3), count)
+	})
 }
 
 // 辅助函数：生成唯一ID

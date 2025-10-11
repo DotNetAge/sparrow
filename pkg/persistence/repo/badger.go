@@ -719,25 +719,26 @@ func (r *BadgerRepository[T]) matchConditions(entity T, conditions []usecase.Que
 
 // compareField 比较字段值和条件值
 func (r *BadgerRepository[T]) compareField(fieldValue interface{}, operator string, conditionValue interface{}) bool {
-	// 简化实现，仅支持基本类型的比较
-	// 在实际项目中可能需要根据具体需求扩展
+	// 简化实现，支持基本类型的比较
 
 	fieldValueStr := fmt.Sprintf("%v", fieldValue)
-	conditionValueStr := fmt.Sprintf("%v", conditionValue)
 
 	switch operator {
 	case "EQ":
-		return fieldValueStr == conditionValueStr
+		return fieldValueStr == fmt.Sprintf("%v", conditionValue)
 	case "NEQ":
-		return fieldValueStr != conditionValueStr
+		return fieldValueStr != fmt.Sprintf("%v", conditionValue)
 	case "LIKE":
-		// 简化的LIKE实现，仅支持简单的包含
-		return strings.Contains(fieldValueStr, conditionValueStr)
+		// 简化的LIKE实现，支持简单的包含
+		return strings.Contains(fieldValueStr, fmt.Sprintf("%v", conditionValue))
 	case "IN":
 		// 检查字段值是否在条件值列表中
-		if slice, ok := conditionValue.([]interface{}); ok {
-			for _, val := range slice {
-				if fmt.Sprintf("%v", val) == fieldValueStr {
+		// 使用反射来处理各种类型的切片
+		value := reflect.ValueOf(conditionValue)
+		if value.Kind() == reflect.Slice {
+			for i := 0; i < value.Len(); i++ {
+				item := value.Index(i)
+				if fmt.Sprintf("%v", item.Interface()) == fieldValueStr {
 					return true
 				}
 			}

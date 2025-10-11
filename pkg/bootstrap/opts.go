@@ -20,6 +20,8 @@ import (
 	"github.com/dgraph-io/badger/v4"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
+
+	"github.com/DotNetAge/sparrow/pkg/adapter/http/middlewares"
 )
 
 // ServerPort 配置服务器端口
@@ -269,6 +271,10 @@ func WithJWT(expire time.Duration, refreshExp time.Duration) Option {
 	return func(o *App) {
 		o.Container.Register(func() auth.TokenGenerator {
 			return auth.NewTokenGenerator([]byte(o.Config.App.Secret), expire, refreshExp)
+		})
+
+		o.Container.RegisterNamed("authMiddleware", func() gin.HandlerFunc {
+			return middlewares.JWTAuthMiddleware([]byte(o.Config.App.Secret))
 		})
 	}
 }
