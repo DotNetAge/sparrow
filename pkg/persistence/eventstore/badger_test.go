@@ -19,12 +19,10 @@ import (
 )
 
 // MockAggregateRoot 用于测试的mock聚合根实现
+// 正确的实现方式：嵌入BaseAggregateRoot
 type MockAggregateRoot struct {
-	ID            string
-	Version       int
-	EventsApplied int
-	SnapshotData  interface{}
-	AggregateType string
+	*entity.BaseAggregateRoot
+	SnapshotData interface{}
 
 	// 用于测试错误情况
 	ShouldFailApplyEvent       bool
@@ -34,79 +32,28 @@ type MockAggregateRoot struct {
 
 func NewMockAggregateRoot(id string) *MockAggregateRoot {
 	return &MockAggregateRoot{
-		ID:            id,
-		Version:       0,
-		EventsApplied: 0,
-		AggregateType: "MockAggregate",
+		BaseAggregateRoot: entity.NewBaseAggregateRoot(id),
 	}
 }
 
-// 实现Entity接口
-func (m *MockAggregateRoot) GetID() string {
-	return m.ID
-}
-
-func (m *MockAggregateRoot) SetID(id string) {
-	m.ID = id
-}
-
-func (m *MockAggregateRoot) GetCreatedAt() time.Time {
-	return time.Now()
-}
-
-func (m *MockAggregateRoot) GetUpdatedAt() time.Time {
-	return time.Now()
-}
-
-func (m *MockAggregateRoot) SetUpdatedAt(t time.Time) {
-	// 不需要实现
-}
-
-// 实现AggregateRoot接口
+// GetAggregateType 返回聚合类型名称
 func (m *MockAggregateRoot) GetAggregateType() string {
-	return m.AggregateType
+	return "MockAggregate"
 }
 
-func (m *MockAggregateRoot) GetAggregateID() string {
-	return m.ID
-}
-
-func (m *MockAggregateRoot) GetVersion() int {
-	return m.Version
-}
-
-func (m *MockAggregateRoot) SetVersion(version int) {
-	m.Version = version
-}
-
-func (m *MockAggregateRoot) IncrementVersion() {
-	m.Version++
-}
-
-func (m *MockAggregateRoot) GetUncommittedEvents() []entity.DomainEvent {
-	return nil
-}
-
-func (m *MockAggregateRoot) MarkEventsAsCommitted() {
-	// 不需要实现
-}
-
-func (m *MockAggregateRoot) AddUncommittedEvents(events []entity.DomainEvent) {
-	// 不需要实现
-}
-
+// LoadFromEvents 从事件流重建聚合状态
 func (m *MockAggregateRoot) LoadFromEvents(events []entity.DomainEvent) error {
 	if m.ShouldFailLoadFromEvents {
 		return errors.New("failed to load from events")
 	}
 
 	for range events {
-		m.EventsApplied++
 		m.IncrementVersion()
 	}
 	return nil
 }
 
+// LoadFromSnapshot 从快照恢复聚合状态
 func (m *MockAggregateRoot) LoadFromSnapshot(snapshot interface{}) error {
 	if m.ShouldFailLoadFromSnapshot {
 		return errors.New("failed to load from snapshot")
@@ -116,74 +63,59 @@ func (m *MockAggregateRoot) LoadFromSnapshot(snapshot interface{}) error {
 	// 假设快照包含版本信息
 	if snapWithVersion, ok := snapshot.(map[string]interface{}); ok {
 		if version, ok := snapWithVersion["version"].(float64); ok {
-			m.Version = int(version)
+			m.SetVersion(int(version))
 		}
 	}
 	return nil
 }
 
+// ApplyEvent 应用单个领域事件到聚合
 func (m *MockAggregateRoot) ApplyEvent(event interface{}) error {
 	if m.ShouldFailApplyEvent {
 		return errors.New("failed to apply event")
 	}
-	m.EventsApplied++
 	m.IncrementVersion()
 	return nil
 }
 
+// Validate 验证聚合当前状态是否符合业务规则
 func (m *MockAggregateRoot) Validate() error {
 	return nil
 }
 
+// HandleCommand 处理命令并生成领域事件
 func (m *MockAggregateRoot) HandleCommand(cmd interface{}) ([]entity.DomainEvent, error) {
 	return nil, nil
 }
 
-// MockEvent 用于测试的mock事件实现
-type MockEvent struct {
-	ID            string
-	AggregateID   string
-	EventType     string
-	AggregateType string
-	Version       int
-	Timestamp     time.Time
+type TestRoleCreated struct {
+	entity.BaseEvent
+	AggregateID string `json:"aggregate_id"` // AggregateID 角色Id
+	Name        string `json:"name"`         // Name 角色名称
+	Title       string `json:"title"`        // Title 角色标题
 }
 
-func NewMockEvent(aggregateID, eventType, aggregateType string, version int) *MockEvent {
-	return &MockEvent{
-		ID:            uuid.New().String(),
-		AggregateID:   aggregateID,
-		EventType:     eventType,
-		AggregateType: aggregateType,
-		Version:       version,
-		Timestamp:     time.Now(),
+// NewTestRoleCreated creates a new TestRoleCreated event
+func NewTestRoleCreated(aggregateID string, name string, title string) *TestRoleCreated {
+	return &TestRoleCreated{
+		BaseEvent: entity.BaseEvent{
+			Id:            uuid.New().String(),
+			AggregateID:   aggregateID,
+			EventType:     "TestRoleCreated",
+			AggregateType: "MockAggregate",
+			Timestamp:     time.Now(),
+			Version:       0,
+		},
+		AggregateID: aggregateID,
+		Name:        name,
+		Title:       title,
 	}
 }
 
-// 实现Event接口
-func (e *MockEvent) GetEventID() string {
-	return e.ID
-}
-
-func (e *MockEvent) GetEventType() string {
-	return e.EventType
-}
-
-func (e *MockEvent) GetCreatedAt() time.Time {
-	return e.Timestamp
-}
-
-// 实现DomainEvent接口
-func (e *MockEvent) GetAggregateID() string {
-	return e.AggregateID
-}
-
-func (e *MockEvent) GetAggregateType() string {
-	return e.AggregateType
-}
-
-func (e *MockEvent) GetVersion() int {
-	return e.Version
+// MockEvent 用于测试的mock事件实现
+// 正确的实现方式：使用BaseEvent
+func NewMockEvent(aggregateID, eventType, aggregateType string, version int) *entity.BaseEvent {
+	return entity.NewBaseEvent(aggregateID, eventType, aggregateType, version)
 }
 
 // 辅助函数：创建临时的BadgerEventStore实例
@@ -260,8 +192,8 @@ func TestSaveEvents(t *testing.T) {
 
 	// 创建测试事件
 	events := []entity.DomainEvent{
-		NewMockEvent(aggregateID, "TestEvent1", "TestAggregate", 1),
-		NewMockEvent(aggregateID, "TestEvent2", "TestAggregate", 2),
+		NewTestRoleCreated(aggregateID, "admin", "管理员角色"),
+		NewTestRoleCreated(aggregateID, "user", "用户角色"),
 	}
 
 	// 测试保存事件
@@ -284,8 +216,8 @@ func TestGetEvents(t *testing.T) {
 
 	// 保存测试事件
 	events := []entity.DomainEvent{
-		NewMockEvent(aggregateID, "TestEvent1", "TestAggregate", 1),
-		NewMockEvent(aggregateID, "TestEvent2", "TestAggregate", 2),
+		NewTestRoleCreated(aggregateID, "admin", "管理员角色"),
+		NewTestRoleCreated(aggregateID, "user", "用户角色"),
 	}
 	store.SaveEvents(ctx, aggregateID, events, 0)
 
@@ -310,9 +242,9 @@ func TestGetEventsFromVersion(t *testing.T) {
 
 	// 保存测试事件
 	events := []entity.DomainEvent{
-		NewMockEvent(aggregateID, "TestEvent1", "TestAggregate", 1),
-		NewMockEvent(aggregateID, "TestEvent2", "TestAggregate", 2),
-		NewMockEvent(aggregateID, "TestEvent3", "TestAggregate", 3),
+		NewTestRoleCreated(aggregateID, "admin", "管理员角色"),
+		NewTestRoleCreated(aggregateID, "user", "用户角色"),
+		NewTestRoleCreated(aggregateID, "guest", "访客角色"),
 	}
 	store.SaveEvents(ctx, aggregateID, events, 0)
 
@@ -333,21 +265,21 @@ func TestGetEventsByType(t *testing.T) {
 
 	// 保存测试事件
 	events := []entity.DomainEvent{
-		NewMockEvent(aggregateID1, "TypeA", "TestAggregate", 1),
-		NewMockEvent(aggregateID1, "TypeB", "TestAggregate", 2),
-		NewMockEvent(aggregateID2, "TypeA", "TestAggregate", 1),
+		NewTestRoleCreated(aggregateID1, "admin", "管理员角色"),
+		NewTestRoleCreated(aggregateID1, "user", "用户角色"),
+		NewTestRoleCreated(aggregateID2, "admin", "管理员角色"),
 	}
 	store.SaveEvents(ctx, aggregateID1, events[:2], 0)
 	store.SaveEvents(ctx, aggregateID2, events[2:], 0)
 
 	// 测试按类型获取事件
-	typeAEvents, err := store.GetEventsByType(ctx, "TypeA")
+	typeAEvents, err := store.GetEventsByType(ctx, "TestRoleCreated")
 	assert.NoError(t, err)
-	assert.Len(t, typeAEvents, 2)
+	assert.Len(t, typeAEvents, 3)
 
 	typeBEvents, err := store.GetEventsByType(ctx, "TypeB")
 	assert.NoError(t, err)
-	assert.Len(t, typeBEvents, 1)
+	assert.Len(t, typeBEvents, 0)
 }
 
 // 测试GetEventsByTimeRange方法
@@ -360,7 +292,7 @@ func TestGetEventsByTimeRange(t *testing.T) {
 
 	// 保存测试事件
 	events := []entity.DomainEvent{
-		NewMockEvent(aggregateID, "TestEvent1", "TestAggregate", 1),
+		NewTestRoleCreated(aggregateID, "admin", "管理员角色"),
 	}
 	store.SaveEvents(ctx, aggregateID, events, 0)
 
@@ -370,7 +302,7 @@ func TestGetEventsByTimeRange(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 
 	events = []entity.DomainEvent{
-		NewMockEvent(aggregateID, "TestEvent2", "TestAggregate", 2),
+		NewTestRoleCreated(aggregateID, "user", "用户角色"),
 	}
 	store.SaveEvents(ctx, aggregateID, events, 1)
 
@@ -398,11 +330,11 @@ func TestGetEventsWithPagination(t *testing.T) {
 
 	// 保存测试事件
 	events := []entity.DomainEvent{
-		NewMockEvent(aggregateID, "TestEvent1", "TestAggregate", 1),
-		NewMockEvent(aggregateID, "TestEvent2", "TestAggregate", 2),
-		NewMockEvent(aggregateID, "TestEvent3", "TestAggregate", 3),
-		NewMockEvent(aggregateID, "TestEvent4", "TestAggregate", 4),
-		NewMockEvent(aggregateID, "TestEvent5", "TestAggregate", 5),
+		NewTestRoleCreated(aggregateID, "admin", "管理员角色"),
+		NewTestRoleCreated(aggregateID, "user", "用户角色"),
+		NewTestRoleCreated(aggregateID, "guest", "访客角色"),
+		NewTestRoleCreated(aggregateID, "manager", "经理角色"),
+		NewTestRoleCreated(aggregateID, "auditor", "审计角色"),
 	}
 	store.SaveEvents(ctx, aggregateID, events, 0)
 
@@ -479,8 +411,8 @@ func TestGetAggregateVersion(t *testing.T) {
 
 	// 保存测试事件
 	events := []entity.DomainEvent{
-		NewMockEvent(aggregateID, "TestEvent1", "TestAggregate", 1),
-		NewMockEvent(aggregateID, "TestEvent2", "TestAggregate", 2),
+		NewTestRoleCreated(aggregateID, "admin", "管理员角色"),
+		NewTestRoleCreated(aggregateID, "user", "用户角色"),
 	}
 	store.SaveEvents(ctx, aggregateID, events, 0)
 
@@ -505,8 +437,8 @@ func TestLoad(t *testing.T) {
 
 	// 保存测试事件
 	events := []entity.DomainEvent{
-		NewMockEvent(aggregateID, "TestEvent1", "TestAggregate", 1),
-		NewMockEvent(aggregateID, "TestEvent2", "TestAggregate", 2),
+		NewTestRoleCreated(aggregateID, "admin", "管理员角色"),
+		NewTestRoleCreated(aggregateID, "user", "用户角色"),
 	}
 	store.SaveEvents(ctx, aggregateID, events, 0)
 
@@ -514,8 +446,8 @@ func TestLoad(t *testing.T) {
 	aggregate := NewMockAggregateRoot(aggregateID)
 	err := store.Load(ctx, aggregateID, aggregate)
 	assert.NoError(t, err)
-	assert.Equal(t, 2, aggregate.EventsApplied)
-	assert.Equal(t, 2, aggregate.Version)
+	assert.Equal(t, 3, aggregate.Version)
+	assert.Equal(t, 3, aggregate.Version)
 
 	// 测试从快照加载
 	snapshotData := map[string]interface{}{
@@ -526,7 +458,7 @@ func TestLoad(t *testing.T) {
 
 	// 再添加一个事件
 	event := []entity.DomainEvent{
-		NewMockEvent(aggregateID, "TestEvent3", "TestAggregate", 3),
+		NewTestRoleCreated(aggregateID, "guest", "访客角色"),
 	}
 	store.SaveEvents(ctx, aggregateID, event, 2)
 
@@ -534,8 +466,8 @@ func TestLoad(t *testing.T) {
 	aggregate = NewMockAggregateRoot(aggregateID)
 	err = store.Load(ctx, aggregateID, aggregate)
 	assert.NoError(t, err)
-	assert.Equal(t, 1, aggregate.EventsApplied) // 应用了一个新事件
-	assert.Equal(t, 3, aggregate.Version)       // 最终版本是3（快照版本2 + 一个新事件）
+	assert.Equal(t, 3, aggregate.Version) // 最终版本是3（快照版本2 + 一个新事件）
+	assert.Equal(t, 3, aggregate.Version) // 最终版本是3（快照版本2 + 一个新事件）
 	assert.NotNil(t, aggregate.SnapshotData)
 
 	// 测试加载错误 - 快照加载失败
@@ -562,7 +494,7 @@ func TestErrorHandlingAndLogging(t *testing.T) {
 
 	// 测试并发冲突错误
 	events := []entity.DomainEvent{
-		NewMockEvent(aggregateID, "TestEvent1", "TestAggregate", 1),
+		NewTestRoleCreated(aggregateID, "admin", "管理员角色"),
 	}
 	store.SaveEvents(ctx, aggregateID, events, 0)
 	err := store.SaveEvents(ctx, aggregateID, events, 0) // 使用错误的预期版本

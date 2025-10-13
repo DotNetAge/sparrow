@@ -6,8 +6,8 @@ type Command interface {
 }
 
 type BaseCommand struct {
-	CommandID   string `json:"command_id"`
-	AggregateID string `json:"aggregate_id"`	
+	CommandID   string `json:"command_id" form:"command_id"`
+	AggregateID string `json:"aggregate_id" form:"aggregate_id"`
 }
 
 func (c *BaseCommand) GetCommandID() string {

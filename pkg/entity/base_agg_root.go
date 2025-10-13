@@ -8,11 +8,12 @@ import (
 // 所有聚合根都应该嵌入这个结构体来实现通用的AggregateRoot接口方法
 type BaseAggregateRoot struct {
 	BaseEntity                      // 嵌入基础实体
-	Version           int           // 版本号用于乐观锁
+	Version           int           // 版本号用于乐观锁,NOTES:聚合根的初始版本为0表示该聚合根还没有被保存到事件存储中
 	uncommittedEvents []DomainEvent // 未提交的事件列表
 }
 
 // NewBaseAggregateRoot 创建新的基础聚合根
+// NOTES: 聚合根的初始版本为0表示该聚合根还没有被保存到事件存储中
 func NewBaseAggregateRoot(id string) *BaseAggregateRoot {
 	now := time.Now()
 	return &BaseAggregateRoot{
@@ -21,7 +22,7 @@ func NewBaseAggregateRoot(id string) *BaseAggregateRoot {
 			CreatedAt: now,
 			UpdatedAt: now,
 		},
-		Version:           1,
+		Version:           0,
 		uncommittedEvents: []DomainEvent{},
 	}
 }

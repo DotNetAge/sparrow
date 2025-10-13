@@ -214,7 +214,7 @@ func Sessions(expire time.Duration) Option {
 		o.Container.RegisterNamed("sessionRepo", repo.NewMemoryRepository[*entity.Session])
 		o.Container.Register(func() *usecase.SessionService {
 			var repo usecase.Repository[*entity.Session]
-			if err := o.Container.ResolveByName("sessionRepo", &repo); err != nil {
+			if err := o.Container.ResolveByName("SessionRepo", &repo); err != nil {
 				o.Logger.Error("解析会话存储库失败", "error", err)
 				panic(err)
 			}
