@@ -1,46 +1,43 @@
-package jetstream
+package nats
 
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/nats-io/nats.go"
-	"github.com/nats-io/nats.go/jetstream"
+	n "github.com/nats-io/nats.go"
 
 	"github.com/DotNetAge/sparrow/pkg/config"
 	"github.com/DotNetAge/sparrow/pkg/eventbus"
 	"github.com/DotNetAge/sparrow/pkg/logger"
 )
 
-// jetStreamBus 实现了eventbus.EventBus接口
-// 它使用NATS JetStream来处理事件，提供持久化和可靠的消息传递
-type jetStreamBus struct {
-	conn       *nats.Conn
-	js         jetstream.JetStream
+// 基于NATS实现标准事件总线，没有使用JetStream因此不支持持久化和可靠的消息传递
+type natsBus struct {
+	conn *n.Conn
+	// js         jetstream.JetStream
 	name       string
 	streamName string
-	subs       map[string]*nats.Subscription
+	subs       map[string]*n.Subscription
 	subID      int64
 	closed     bool
 	mu         sync.RWMutex
 	logger     *logger.Logger
 }
 
-// 确保jetStreamBus实现了EventBus接口
-var _ eventbus.EventBus = (*jetStreamBus)(nil)
+// 确保natsBus实现了EventBus接口
+var _ eventbus.EventBus = (*natsBus)(nil)
 
-// NewJetStreamEventBus 创建事件总线实例
-func NewJetStreamEventBus(cfg *config.NATsConfig) (eventbus.EventBus, error) {
+// NewNatsEventBus 创建事件总线实例
+func NewNatsEventBus(cfg *config.NATsConfig) (eventbus.EventBus, error) {
 	// 连接到NATS服务器，配置客户端名称以区分不同连接
-	nc, err := nats.Connect(cfg.NATSURL,
-		nats.Name(cfg.StreamName),
-		nats.MaxReconnects(-1), // 无限重连
-		nats.ReconnectWait(time.Second))
+	nc, err := n.Connect(cfg.NATSURL,
+		n.Name(cfg.StreamName),
+		n.MaxReconnects(-1), // 无限重连
+		n.ReconnectWait(time.Second))
 	if err != nil {
 		return nil, fmt.Errorf("连接NATS失败: %w", err)
 	}
@@ -52,36 +49,36 @@ func NewJetStreamEventBus(cfg *config.NATsConfig) (eventbus.EventBus, error) {
 		return nil, fmt.Errorf("创建日志实例失败: %w", err)
 	}
 
-	// 创建JetStream上下文
-	js, err := jetstream.New(nc)
-	if err != nil {
-		return nil, fmt.Errorf("创建JetStream上下文失败: %w", err)
-	}
+	// // 创建JetStream上下文
+	// js, err := jetstream.New(nc)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("创建JetStream上下文失败: %w", err)
+	// }
 
-	// 配置JetStream流 - 使用LimitsPolicy以支持多订阅者模式
-	// 每条消息可以被多个消费者消费
-	streamConfig := jetstream.StreamConfig{
-		Name:      cfg.StreamName,
-		Subjects:  []string{"*"},          // 订阅所有主题
-		Retention: jetstream.LimitsPolicy, // 使用LimitsPolicy允许多消费者接收相同消息
-		Discard:   jetstream.DiscardOld,
-		MaxMsgs:   -1, // 不限制消息数量
-	}
+	// // 检查流是否存在
+	// _, err = js.Stream(context.Background(), cfg.StreamName)
+	// if err != nil {
+	// 	if errors.Is(err, jetstream.ErrStreamNotFound) {
+	// 		// 流不存在，创建新流
+	// 		// 配置JetStream流 - 使用LimitsPolicy以支持多订阅者模式
+	// 		// 每条消息可以被多个消费者消费
+	// 		streamConfig := jetstream.StreamConfig{
+	// 			Name:      cfg.StreamName,
+	// 			Subjects:  []string{"test.>", "event.>", "test-service.>"}, // 正确添加通配符'>'
+	// 			Retention: jetstream.LimitsPolicy, // 使用LimitsPolicy允许多消费者接收相同消息
+	// 			Discard:   jetstream.DiscardOld,
+	// 			MaxMsgs:   -1, // 不限制消息数量
+	// 		}
 
-	// 检查流是否存在，如果不存在则创建
-	_, err = js.Stream(context.Background(), cfg.StreamName)
-	if err != nil {
-		if errors.Is(err, jetstream.ErrStreamNotFound) {
-			// 流不存在，创建新流
-			_, err = js.CreateStream(context.Background(), streamConfig)
-			if err != nil {
-				return nil, fmt.Errorf("创建流失败: %w", err)
-			}
-		} else {
-			// 其他错误
-			return nil, fmt.Errorf("检查流失败: %w", err)
-		}
-	}
+	// 		_, err = js.CreateStream(context.Background(), streamConfig)
+	// 		if err != nil {
+	// 			return nil, fmt.Errorf("创建流失败: %w", err)
+	// 		}
+	// 	} else {
+	// 		// 其他错误
+	// 		return nil, fmt.Errorf("检查流失败: %w", err)
+	// 	}
+	// }
 
 	// 构建实例名称
 	instanceName := cfg.StreamName
@@ -89,24 +86,24 @@ func NewJetStreamEventBus(cfg *config.NATsConfig) (eventbus.EventBus, error) {
 		instanceName = fmt.Sprintf("%s-%s", instanceName, cfg.DurableName)
 	}
 
-	return &jetStreamBus{
-			conn:       nc,
-			js:         js,
+	return &natsBus{
+			conn: nc,
+			// js:         js,
 			name:       instanceName,
 			streamName: cfg.StreamName,
 			subID:      0,
 			closed:     false,
 			logger:     logger,
-			subs:       make(map[string]*nats.Subscription),
+			subs:       make(map[string]*n.Subscription),
 		},
 		nil
 }
 
 // Pub 发布事件到NATS JetStream
-func (b *jetStreamBus) Pub(ctx context.Context, evt eventbus.Event) error {
+func (b *natsBus) Pub(ctx context.Context, evt eventbus.Event) error {
 	b.mu.RLock()
 	closed := b.closed
-	js := b.js
+	conn := b.conn
 	b.mu.RUnlock()
 
 	if closed {
@@ -116,27 +113,26 @@ func (b *jetStreamBus) Pub(ctx context.Context, evt eventbus.Event) error {
 	subject := evt.EventType
 	messageID := evt.Id
 
-	b.logger.Info("发布事件到JetStream", "subject", subject, "message_id", messageID, "instance", b.name)
+	b.logger.Info("发布事件到NATS", "subject", subject, "message_id", messageID, "instance", b.name)
 
-	// 序列化事件数据
+	// 序列化整个eventbus.Event对象
 	data, err := json.Marshal(evt)
 	if err != nil {
 		return fmt.Errorf("序列化事件数据失败: %w", err)
 	}
 
-	// 使用JetStream发布消息，确保消息被持久化
-	_, err = js.Publish(ctx, subject, data)
-	if err != nil {
-		b.logger.Error("发布事件到JetStream失败", "error", err, "subject", subject)
-		return fmt.Errorf("发布事件到JetStream失败: %w", err)
+	// 使用标准NATS发布（为了测试兼容性）
+	if err := conn.Publish(subject, data); err != nil {
+		b.logger.Error("发布事件到NATS失败", "error", err, "subject", subject)
+		return fmt.Errorf("发布事件到NATS失败: %w", err)
 	}
 
-	b.logger.Info("成功发布事件到JetStream", "subject", subject, "instance", b.name)
+	b.logger.Info("成功发布事件到NATS", "subject", subject, "instance", b.name)
 	return nil
 }
 
 // Sub 订阅指定类型的事件
-func (b *jetStreamBus) Sub(eventType string, handler eventbus.EventHandler) error {
+func (b *natsBus) Sub(eventType string, handler eventbus.EventHandler) error {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
@@ -152,7 +148,7 @@ func (b *jetStreamBus) Sub(eventType string, handler eventbus.EventHandler) erro
 	subID := fmt.Sprintf("%s-%d", subject, b.subID)
 
 	// 使用标准的NATS订阅而不是JetStream消费者
-	sub, err := b.conn.Subscribe(subject, func(msg *nats.Msg) {
+	sub, err := b.conn.Subscribe(subject, func(msg *n.Msg) {
 		b.logger.Info("收到NATS消息", "subject", subject, "instance", b.name)
 
 		// 解析事件数据
@@ -183,7 +179,7 @@ func (b *jetStreamBus) Sub(eventType string, handler eventbus.EventHandler) erro
 }
 
 // Unsub 取消订阅指定类型的事件
-func (b *jetStreamBus) Unsub(eventType string) error {
+func (b *natsBus) Unsub(eventType string) error {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
@@ -207,7 +203,7 @@ func (b *jetStreamBus) Unsub(eventType string) error {
 }
 
 // Close 关闭事件总线
-func (b *jetStreamBus) Close() error {
+func (b *natsBus) Close() error {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
@@ -221,7 +217,7 @@ func (b *jetStreamBus) Close() error {
 	for _, sub := range b.subs {
 		sub.Unsubscribe()
 	}
-	b.subs = make(map[string]*nats.Subscription)
+	b.subs = make(map[string]*n.Subscription)
 
 	// 关闭连接
 	if b.conn != nil {

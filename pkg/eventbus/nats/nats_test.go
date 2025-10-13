@@ -1,4 +1,4 @@
-package jetstream
+package nats
 
 import (
 	"context"
@@ -84,7 +84,7 @@ func TestNewJetStreamEventBus(t *testing.T) {
 	}
 
 	// 创建事件总线
-	bus, err := NewJetStreamEventBus(cfg)
+	bus, err := NewNatsEventBus(cfg)
 	assert.NoError(t, err)
 	assert.NotNil(t, bus)
 
@@ -106,7 +106,7 @@ func TestJetStreamEventBus_PubSub(t *testing.T) {
 	}
 
 	// 创建事件总线
-	bus, err := NewJetStreamEventBus(cfg)
+	bus, err := NewNatsEventBus(cfg)
 	assert.NoError(t, err)
 	defer bus.Close()
 
@@ -177,7 +177,7 @@ func TestJetStreamEventBus_Unsub(t *testing.T) {
 	}
 
 	// 创建事件总线
-	bus, err := NewJetStreamEventBus(cfg)
+	bus, err := NewNatsEventBus(cfg)
 	assert.NoError(t, err)
 	defer bus.Close()
 
@@ -236,16 +236,16 @@ func TestJetStreamEventBus_MultipleSubscribers(t *testing.T) {
 	}
 
 	// 创建两个不同的事件总线实例用于订阅
-	bus1, err := NewJetStreamEventBus(cfg1)
+	bus1, err := NewNatsEventBus(cfg1)
 	assert.NoError(t, err)
 	defer bus1.Close()
 
-	bus2, err := NewJetStreamEventBus(cfg2)
+	bus2, err := NewNatsEventBus(cfg2)
 	assert.NoError(t, err)
 	defer bus2.Close()
 
 	// 创建一个单独的事件总线实例用于发布
-	busPub, err := NewJetStreamEventBus(cfgPub)
+	busPub, err := NewNatsEventBus(cfgPub)
 	assert.NoError(t, err)
 	defer busPub.Close()
 
@@ -317,7 +317,7 @@ func TestJetStreamEventBus_Close(t *testing.T) {
 	}
 
 	// 创建事件总线
-	bus, err := NewJetStreamEventBus(cfg)
+	bus, err := NewNatsEventBus(cfg)
 	assert.NoError(t, err)
 
 	// 订阅多个事件类型，使用简单的名称
@@ -358,13 +358,13 @@ func TestJetStreamEventBus_HandlerError(t *testing.T) {
 	}
 
 	// 创建事件总线
-	bus, err := NewJetStreamEventBus(cfg)
+	bus, err := NewNatsEventBus(cfg)
 	assert.NoError(t, err)
 	defer bus.Close()
 
 	// 定义测试事件，使用简单的事件类型名称
 	eventType := "testerrorevent"
-	
+
 	// 创建一个总是返回错误的处理器
 	err = bus.Sub(eventType, func(ctx context.Context, event eventbus.Event) error {
 		return fmt.Errorf("simulated handler error")
@@ -398,7 +398,7 @@ func TestJetStreamEventBus_InvalidEvent(t *testing.T) {
 	}
 
 	// 创建事件总线
-	bus, err := NewJetStreamEventBus(cfg)
+	bus, err := NewNatsEventBus(cfg)
 	assert.NoError(t, err)
 	defer bus.Close()
 

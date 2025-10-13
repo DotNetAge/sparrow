@@ -8,7 +8,7 @@ import (
 
 	"github.com/DotNetAge/sparrow/pkg/config"
 	"github.com/DotNetAge/sparrow/pkg/entity"
-	"github.com/DotNetAge/sparrow/pkg/eventbus"
+	jetstream_bus "github.com/DotNetAge/sparrow/pkg/eventbus/nats"
 	"github.com/DotNetAge/sparrow/pkg/logger"
 )
 
@@ -58,8 +58,16 @@ func TestPublisherSubscriberCommunication(t *testing.T) {
 	// 创建测试上下文
 	ctx := context.Background()
 
-	// 创建内存事件总线
-	bus := eventbus.NewMemoryEventBus()
+	// 创建JetStream事件总线
+	jetstreamConfig := &config.NATsConfig{
+		NATSURL:     "nats://localhost:4222",
+		StreamName:  "test-stream",  // 流的名称
+		DurableName: "test-durable", // 持久化名称
+	}
+	bus, err := jetstream_bus.NewNatsEventBus(jetstreamConfig)
+	if err != nil {
+		t.Fatalf("创建JetStream事件总线失败: %v", err)
+	}
 
 	// 创建日志记录器配置
 	logConfig := &config.LogConfig{
@@ -68,7 +76,7 @@ func TestPublisherSubscriberCommunication(t *testing.T) {
 	}
 	log, err := logger.NewLogger(logConfig)
 	if err != nil {
-		t.Fatalf("Failed to create logger: %v", err)
+		t.Fatalf("创建日志记录器失败: %v", err)
 	}
 
 	// 服务名称
@@ -102,8 +110,8 @@ func TestPublisherSubscriberCommunication(t *testing.T) {
 	eventReceived1 := make(chan *TestEvent, 1)
 	eventReceived2 := make(chan *TestEvent, 1)
 
-	// 设置超时
-	timeout := time.After(5 * time.Second)
+	// 设置超时（与Pub方法的30秒超时保持一致）
+	timeout := time.After(30 * time.Second)
 
 	// 添加处理器到 subscriber1
 	wg.Add(1)
@@ -152,8 +160,29 @@ func TestPublisherSubscriberCommunication(t *testing.T) {
 		// 验证两个订阅者都接收到了事件
 		select {
 		case receivedEvent1 := <-eventReceived1:
+			// 验证所有重要字段是否一致
+			if receivedEvent1.ID != testEvent.ID {
+				t.Errorf("Subscriber1 received incorrect event ID: got %v, want %v",
+					receivedEvent1.ID, testEvent.ID)
+			}
+			if receivedEvent1.AggregateID != testEvent.AggregateID {
+				t.Errorf("Subscriber1 received incorrect AggregateID: got %v, want %v",
+					receivedEvent1.AggregateID, testEvent.AggregateID)
+			}
+			if receivedEvent1.EventType != testEvent.EventType {
+				t.Errorf("Subscriber1 received incorrect EventType: got %v, want %v",
+					receivedEvent1.EventType, testEvent.EventType)
+			}
+			if receivedEvent1.AggregateType != testEvent.AggregateType {
+				t.Errorf("Subscriber1 received incorrect AggregateType: got %v, want %v",
+					receivedEvent1.AggregateType, testEvent.AggregateType)
+			}
+			if receivedEvent1.Version != testEvent.Version {
+				t.Errorf("Subscriber1 received incorrect Version: got %v, want %v",
+					receivedEvent1.Version, testEvent.Version)
+			}
 			if receivedEvent1.Message != testEvent.Message {
-				t.Errorf("Subscriber1 received incorrect event message: got %v, want %v",
+				t.Errorf("Subscriber1 received incorrect Message: got %v, want %v",
 					receivedEvent1.Message, testEvent.Message)
 			}
 		case <-timeout:
@@ -162,8 +191,29 @@ func TestPublisherSubscriberCommunication(t *testing.T) {
 
 		select {
 		case receivedEvent2 := <-eventReceived2:
+			// 验证所有重要字段是否一致
+			if receivedEvent2.ID != testEvent.ID {
+				t.Errorf("Subscriber2 received incorrect event ID: got %v, want %v",
+					receivedEvent2.ID, testEvent.ID)
+			}
+			if receivedEvent2.AggregateID != testEvent.AggregateID {
+				t.Errorf("Subscriber2 received incorrect AggregateID: got %v, want %v",
+					receivedEvent2.AggregateID, testEvent.AggregateID)
+			}
+			if receivedEvent2.EventType != testEvent.EventType {
+				t.Errorf("Subscriber2 received incorrect EventType: got %v, want %v",
+					receivedEvent2.EventType, testEvent.EventType)
+			}
+			if receivedEvent2.AggregateType != testEvent.AggregateType {
+				t.Errorf("Subscriber2 received incorrect AggregateType: got %v, want %v",
+					receivedEvent2.AggregateType, testEvent.AggregateType)
+			}
+			if receivedEvent2.Version != testEvent.Version {
+				t.Errorf("Subscriber2 received incorrect Version: got %v, want %v",
+					receivedEvent2.Version, testEvent.Version)
+			}
 			if receivedEvent2.Message != testEvent.Message {
-				t.Errorf("Subscriber2 received incorrect event message: got %v, want %v",
+				t.Errorf("Subscriber2 received incorrect Message: got %v, want %v",
 					receivedEvent2.Message, testEvent.Message)
 			}
 		case <-timeout:

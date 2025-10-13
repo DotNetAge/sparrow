@@ -10,7 +10,7 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/config"
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/eventbus"
-	"github.com/DotNetAge/sparrow/pkg/eventbus/jetstream"
+	"github.com/DotNetAge/sparrow/pkg/eventbus/nats"
 	"github.com/DotNetAge/sparrow/pkg/eventbus/rabbitmq"
 	redis_bus "github.com/DotNetAge/sparrow/pkg/eventbus/redis"
 	"github.com/DotNetAge/sparrow/pkg/messaging"
@@ -150,7 +150,7 @@ func Messaging() Option {
 func NatsBus() Option {
 	return func(o *App) {
 		o.Container.Register(func() eventbus.EventBus {
-			eventBus, err := jetstream.NewJetStreamEventBus(&o.Config.NATS)
+			eventBus, err := nats.NewNatsEventBus(&o.Config.NATS)
 			if err != nil {
 				o.Logger.Error("创建NATS事件总线失败", "error", err)
 				panic(err)

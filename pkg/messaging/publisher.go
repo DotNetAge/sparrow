@@ -2,6 +2,8 @@ package messaging
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 
 	"github.com/DotNetAge/sparrow/pkg/entity"
@@ -77,18 +79,19 @@ func (p *EventPublisher) publishEvent(ctx context.Context, domainEvent entity.Do
 	// 按照"服务名.聚合名.事件名"的格式生成完整的事件类型名称
 	fullEventType := fmt.Sprintf("%s.%s.%s", serviceName, domainEvent.GetAggregateType(), domainEvent.GetEventType())
 
+	playload, err := json.Marshal(domainEvent)
+	if err != nil {
+		return fmt.Errorf("序列化事件数据失败: %w", err)
+	}
+	playload64 := base64.StdEncoding.EncodeToString(playload)
+
 	// 创建一个新的通用事件，用于在事件总线上传输
 	// 这里通过组合领域事件数据，确保事件总线上的事件包含完整的主题信息
 	genericEvent := eventbus.Event{
 		Id:        domainEvent.GetEventID(),
 		EventType: fullEventType,
 		Timestamp: domainEvent.GetCreatedAt(),
-		Payload: map[string]interface{}{
-			"aggregateID":   domainEvent.GetAggregateID(),
-			"aggregateType": domainEvent.GetAggregateType(),
-			"version":       domainEvent.GetVersion(),
-			"eventData":     domainEvent,
-		},
+		Payload:   playload64,
 	}
 
 	// 将包含完整主题信息的通用事件发布到事件总线

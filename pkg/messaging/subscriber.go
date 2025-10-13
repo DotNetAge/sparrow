@@ -2,6 +2,8 @@ package messaging
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"sync"
@@ -114,24 +116,24 @@ func (s *EventSubscriber[T]) AddServiceHandler(serviceName string, handler Domai
 			}
 		}
 
-		// 从Payload中提取领域事件数据
-		payload := evt.Payload.(map[string]interface{})
-		eventData, ok := payload["eventData"]
-		if !ok {
-			s.logger.Error("事件数据中缺少领域事件数据")
-			return fmt.Errorf("事件数据中缺少领域事件数据")
+		playload, err := base64.StdEncoding.DecodeString(evt.Payload.(string))
+		if err != nil {
+			s.logger.Error("Base64解码事件数据失败", "error", err)
+			return fmt.Errorf("Base64解码事件数据失败: %w", err)
 		}
 
-		// 将事件数据转换为DomainEvent
-		domainEvent, ok := eventData.(T)
-		if !ok {
-			s.logger.Error("无效的领域事件数据格式")
-			return fmt.Errorf("无效的领域事件数据格式")
+		// 从Payload中提取领域事件数据
+		var domainEvent T
+		err = json.Unmarshal(playload, &domainEvent)
+		if err != nil {
+			s.logger.Error("反序列化事件数据失败", "error", err)
+			return fmt.Errorf("反序列化事件数据失败: %w", err)
 		}
 
 		// 调用实际的领域事件处理器
 		return handler(ctx, domainEvent)
 	}
+
 	err := s.eventBus.Sub(subject, wrappedHandler)
 
 	if err != nil {
