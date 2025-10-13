@@ -2,6 +2,7 @@ package bootstrap
 
 import (
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/DotNetAge/sparrow/pkg/adapter/http/router"
@@ -138,7 +139,9 @@ func Messaging() Option {
 				a.Logger.Error("事件总线或事件存储未配置，无法创建事件发布者")
 				panic("事件总线或事件存储未配置，无法创建事件发布者")
 			}
-			return messaging.NewEventPublisher(store, bus, utils.Pascal(utils.Snake(a.Config.App.Name)))
+
+			appName := strings.ReplaceAll(a.Config.App.Name, "-", "_")
+			return messaging.NewEventPublisher(store, bus, utils.Pascal(utils.Snake(appName)))
 		})
 	}
 }
