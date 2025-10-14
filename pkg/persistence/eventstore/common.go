@@ -11,6 +11,7 @@ import (
 
 // EventMeta 事件元数据
 type EventMeta struct {
+	EventID       string    `json:"event_id"`
 	AggregateID   string    `json:"aggregate_id"`
 	AggregateType string    `json:"aggregate_type"`
 	EventType     string    `json:"event_type"`
@@ -51,32 +52,19 @@ func DecodeEvent(data []byte) (entity.DomainEvent, error) {
 	// 解析元数据
 	var meta EventMeta
 	if err := json.Unmarshal(data, &meta); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal event metadata: %w", err)
+		return nil, fmt.Errorf("反序列化事件元数据失败: %w", err)
 	}
 
 	// 构建基础事件对象
 	event := &entity.BaseEvent{
+		Id:            meta.EventID,
 		AggregateID:   meta.AggregateID,
 		AggregateType: meta.AggregateType,
 		EventType:     meta.EventType,
 		Version:       meta.Version,
 		Timestamp:     meta.CreatedAt,
+		Payload:       meta.EventData,
 	}
-
-	// 解析事件数据
-	var payload map[string]interface{}
-	if err := json.Unmarshal(meta.EventData, &payload); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal event data: %w", err)
-	}
-
-	// 提取ID
-	if id, ok := payload["id"]; ok {
-		event.Id = utils.ToString(id)
-	} else {
-		event.Id = ""
-	}
-
-	event.Payload = meta.EventData
 
 	return event, nil
 }

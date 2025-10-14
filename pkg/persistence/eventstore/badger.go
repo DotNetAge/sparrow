@@ -84,14 +84,15 @@ func (s *BadgerEventStore) SaveEvents(ctx context.Context, aggregateID string, e
 			eventData, err := json.Marshal(evt)
 			if err != nil {
 				if s.logger != nil {
-					s.logger.Error("Failed to marshal event", "aggregate_id", aggregateID, "event_type", evt.GetEventType(), "error", err)
+					s.logger.Error("序列化事件失败", "aggregate_id", aggregateID, "event_type", evt.GetEventType(), "error", err)
 				}
-				return errs.NewEventStoreError("event_marshal", "failed to marshal event", aggregateID, err)
+				return errs.NewEventStoreError("event_marshal", "序列化事件失败", aggregateID, err)
 			}
 
 			eventKey := s.getEventKey(aggregateID, version)
 
 			eventMeta := EventMeta{
+				EventID:       evt.GetEventID(),
 				AggregateID:   aggregateID,
 				AggregateType: evt.GetAggregateType(),
 				EventType:     evt.GetEventType(),
@@ -103,16 +104,16 @@ func (s *BadgerEventStore) SaveEvents(ctx context.Context, aggregateID string, e
 			metaData, err := json.Marshal(eventMeta)
 			if err != nil {
 				if s.logger != nil {
-					s.logger.Error("Failed to marshal event metadata", "aggregate_id", aggregateID, "error", err)
+					s.logger.Error("序列化事件元数据失败", "aggregate_id", aggregateID, "error", err)
 				}
-				return errs.NewEventStoreError("metadata_marshal", "failed to marshal event metadata", aggregateID, err)
+				return errs.NewEventStoreError("metadata_marshal", "序列化事件元数据失败", aggregateID, err)
 			}
 
 			if err := txn.Set(eventKey, metaData); err != nil {
 				if s.logger != nil {
-					s.logger.Error("Failed to save event", "aggregate_id", aggregateID, "version", version, "error", err)
+					s.logger.Error("保存事件失败", "aggregate_id", aggregateID, "version", version, "error", err)
 				}
-				return errs.NewEventStoreError("event_save", "failed to save event", aggregateID, err)
+				return errs.NewEventStoreError("event_save", "保存事件失败", aggregateID, err)
 			}
 		}
 
@@ -121,9 +122,9 @@ func (s *BadgerEventStore) SaveEvents(ctx context.Context, aggregateID string, e
 		newVersion := currentVersion + len(events)
 		if err := txn.Set(versionKey, []byte(strconv.Itoa(newVersion))); err != nil {
 			if s.logger != nil {
-				s.logger.Error("Failed to update version", "aggregate_id", aggregateID, "new_version", newVersion, "error", err)
+				s.logger.Error("更新版本号失败", "aggregate_id", aggregateID, "new_version", newVersion, "error", err)
 			}
-			return errs.NewEventStoreError("version_update", "failed to update version", aggregateID, err)
+			return errs.NewEventStoreError("version_update", "更新版本号失败", aggregateID, err)
 		}
 
 		return nil
@@ -152,7 +153,7 @@ func (s *BadgerEventStore) GetEventsFromVersion(ctx context.Context, aggregateID
 			version, err := s.parseVersionFromKey(key)
 			if err != nil {
 				if s.logger != nil {
-					s.logger.Error("Failed to parse version from key", "key", key, "error", err)
+					s.logger.Error("解析事件版本号失败", "key", key, "error", err)
 				}
 				continue
 			}
@@ -168,17 +169,17 @@ func (s *BadgerEventStore) GetEventsFromVersion(ctx context.Context, aggregateID
 			})
 			if err != nil {
 				if s.logger != nil {
-					s.logger.Error("Failed to get event value", "aggregate_id", aggregateID, "error", err)
+					s.logger.Error("获取事件值失败", "aggregate_id", aggregateID, "error", err)
 				}
-				return fmt.Errorf("failed to get event value: %w", err)
+				return fmt.Errorf("获取事件值失败: %w", err)
 			}
 
 			event, err := s.deserializeEvent(metaData)
 			if err != nil {
 				if s.logger != nil {
-					s.logger.Error("Failed to deserialize event", "aggregate_id", aggregateID, "error", err)
+					s.logger.Error("反序列化事件失败", "aggregate_id", aggregateID, "error", err)
 				}
-				return fmt.Errorf("failed to deserialize event: %w", err)
+				return fmt.Errorf("反序列化事件失败: %w", err)
 			}
 
 			events = append(events, event)
@@ -189,9 +190,9 @@ func (s *BadgerEventStore) GetEventsFromVersion(ctx context.Context, aggregateID
 
 	if err != nil {
 		if s.logger != nil {
-			s.logger.Error("Failed to get events", "aggregate_id", aggregateID, "error", err)
+			s.logger.Error("获取事件失败", "aggregate_id", aggregateID, "error", err)
 		}
-		return nil, fmt.Errorf("failed to get events: %w", err)
+		return nil, fmt.Errorf("获取事件失败: %w", err)
 	}
 
 	return events, nil
@@ -216,16 +217,16 @@ func (s *BadgerEventStore) GetEventsByType(ctx context.Context, eventType string
 			})
 			if err != nil {
 				if s.logger != nil {
-					s.logger.Error("Failed to get event value", "error", err)
+					s.logger.Error("获取事件值失败", "error", err)
 				}
-				return fmt.Errorf("failed to get event value: %w", err)
+				return fmt.Errorf("获取事件值失败: %w", err)
 			}
 
 			// 先解析EventMeta以获取事件类型信息
 			var eventMeta EventMeta
 			if err := json.Unmarshal(metaData, &eventMeta); err != nil {
 				if s.logger != nil {
-					s.logger.Error("Failed to unmarshal event metadata", "error", err)
+					s.logger.Error("反序列化事件元数据失败", "error", err)
 				}
 				continue // 跳过这个事件
 			}
@@ -234,9 +235,9 @@ func (s *BadgerEventStore) GetEventsByType(ctx context.Context, eventType string
 				event, err := s.deserializeEvent(metaData)
 				if err != nil {
 					if s.logger != nil {
-						s.logger.Error("Failed to deserialize event", "error", err)
+						s.logger.Error("反序列化事件失败", "error", err)
 					}
-					return fmt.Errorf("failed to deserialize event: %w", err)
+					return fmt.Errorf("反序列化事件失败: %w", err)
 				}
 				events = append(events, event)
 			}
@@ -247,9 +248,9 @@ func (s *BadgerEventStore) GetEventsByType(ctx context.Context, eventType string
 
 	if err != nil {
 		if s.logger != nil {
-			s.logger.Error("Failed to get events by type", "event_type", eventType, "error", err)
+			s.logger.Error("获取事件失败", "event_type", eventType, "error", err)
 		}
-		return nil, fmt.Errorf("failed to get events by type: %w", err)
+		return nil, fmt.Errorf("获取事件失败: %w", err)
 	}
 
 	return events, nil
@@ -274,16 +275,16 @@ func (s *BadgerEventStore) GetEventsByTimeRange(ctx context.Context, aggregateID
 			})
 			if err != nil {
 				if s.logger != nil {
-					s.logger.Error("Failed to get event value", "aggregate_id", aggregateID, "error", err)
+					s.logger.Error("获取事件值失败", "aggregate_id", aggregateID, "error", err)
 				}
-				return fmt.Errorf("failed to get event value: %w", err)
+				return fmt.Errorf("获取事件值失败: %w", err)
 			}
 
 			// 先解析EventMeta以获取时间信息
 			var eventMeta EventMeta
 			if err := json.Unmarshal(metaData, &eventMeta); err != nil {
 				if s.logger != nil {
-					s.logger.Error("Failed to unmarshal event metadata", "aggregate_id", aggregateID, "error", err)
+					s.logger.Error("反序列化事件元数据失败", "aggregate_id", aggregateID, "error", err)
 				}
 				continue // 跳过这个事件
 			}
@@ -292,9 +293,9 @@ func (s *BadgerEventStore) GetEventsByTimeRange(ctx context.Context, aggregateID
 				event, err := s.deserializeEvent(metaData)
 				if err != nil {
 					if s.logger != nil {
-						s.logger.Error("Failed to deserialize event", "aggregate_id", aggregateID, "error", err)
+						s.logger.Error("反序列化事件失败", "aggregate_id", aggregateID, "error", err)
 					}
-					return fmt.Errorf("failed to deserialize event: %w", err)
+					return fmt.Errorf("反序列化事件失败: %w", err)
 				}
 				events = append(events, event)
 			}
@@ -305,9 +306,9 @@ func (s *BadgerEventStore) GetEventsByTimeRange(ctx context.Context, aggregateID
 
 	if err != nil {
 		if s.logger != nil {
-			s.logger.Error("Failed to get events by time range", "aggregate_id", aggregateID, "error", err)
+			s.logger.Error("获取事件失败", "aggregate_id", aggregateID, "error", err)
 		}
-		return nil, fmt.Errorf("failed to get events by time range: %w", err)
+		return nil, fmt.Errorf("获取事件失败: %w", err)
 	}
 
 	return events, nil
@@ -348,17 +349,17 @@ func (s *BadgerEventStore) GetEventsWithPagination(ctx context.Context, aggregat
 			})
 			if err != nil {
 				if s.logger != nil {
-					s.logger.Error("Failed to get event value", "aggregate_id", aggregateID, "error", err)
+					s.logger.Error("获取事件值失败", "aggregate_id", aggregateID, "error", err)
 				}
-				return fmt.Errorf("failed to get event value: %w", err)
+				return fmt.Errorf("获取事件值失败: %w", err)
 			}
 
 			event, err := s.deserializeEvent(metaData)
 			if err != nil {
 				if s.logger != nil {
-					s.logger.Error("Failed to deserialize event", "aggregate_id", aggregateID, "error", err)
+					s.logger.Error("反序列化事件失败", "aggregate_id", aggregateID, "error", err)
 				}
-				return fmt.Errorf("failed to deserialize event: %w", err)
+				return fmt.Errorf("反序列化事件失败: %w", err)
 			}
 			events = append(events, event)
 			count++
@@ -369,9 +370,9 @@ func (s *BadgerEventStore) GetEventsWithPagination(ctx context.Context, aggregat
 
 	if err != nil {
 		if s.logger != nil {
-			s.logger.Error("Failed to get events with pagination", "aggregate_id", aggregateID, "limit", limit, "offset", offset, "error", err)
+			s.logger.Error("获取事件分页失败", "aggregate_id", aggregateID, "limit", limit, "offset", offset, "error", err)
 		}
-		return nil, fmt.Errorf("failed to get events with pagination: %w", err)
+		return nil, fmt.Errorf("获取事件分页失败: %w", err)
 	}
 
 	return events, nil
@@ -383,9 +384,9 @@ func (s *BadgerEventStore) SaveSnapshot(ctx context.Context, aggregateID string,
 		snapshotData, err := json.Marshal(snapshot)
 		if err != nil {
 			if s.logger != nil {
-				s.logger.Error("Failed to marshal snapshot", "aggregate_id", aggregateID, "version", version, "error", err)
+				s.logger.Error("序列化快照失败", "aggregate_id", aggregateID, "version", version, "error", err)
 			}
-			return fmt.Errorf("failed to marshal snapshot: %w", err)
+			return fmt.Errorf("序列化快照失败: %w", err)
 		}
 
 		snapshotMeta := SnapshotMeta{
@@ -399,17 +400,17 @@ func (s *BadgerEventStore) SaveSnapshot(ctx context.Context, aggregateID string,
 		metaData, err := json.Marshal(snapshotMeta)
 		if err != nil {
 			if s.logger != nil {
-				s.logger.Error("Failed to marshal snapshot metadata", "aggregate_id", aggregateID, "version", version, "error", err)
+				s.logger.Error("序列化快照元数据失败", "aggregate_id", aggregateID, "version", version, "error", err)
 			}
-			return fmt.Errorf("failed to marshal snapshot metadata: %w", err)
+			return fmt.Errorf("序列化快照元数据失败: %w", err)
 		}
 
 		snapshotKey := s.getSnapshotKey(aggregateID)
 		if err := txn.Set(snapshotKey, metaData); err != nil {
 			if s.logger != nil {
-				s.logger.Error("Failed to save snapshot", "aggregate_id", aggregateID, "version", version, "error", err)
+				s.logger.Error("保存快照失败", "aggregate_id", aggregateID, "version", version, "error", err)
 			}
-			return fmt.Errorf("failed to save snapshot: %w", err)
+			return fmt.Errorf("保存快照失败: %w", err)
 		}
 
 		return nil
@@ -429,9 +430,9 @@ func (s *BadgerEventStore) GetLatestSnapshot(ctx context.Context, aggregateID st
 				return nil // 快照不存在
 			}
 			if s.logger != nil {
-				s.logger.Error("Failed to get snapshot", "aggregate_id", aggregateID, "error", err)
+				s.logger.Error("获取快照失败", "aggregate_id", aggregateID, "error", err)
 			}
-			return fmt.Errorf("failed to get snapshot: %w", err)
+			return fmt.Errorf("获取快照失败: %w", err)
 		}
 
 		err = item.Value(func(val []byte) error {
@@ -439,17 +440,17 @@ func (s *BadgerEventStore) GetLatestSnapshot(ctx context.Context, aggregateID st
 		})
 		if err != nil {
 			if s.logger != nil {
-				s.logger.Error("Failed to unmarshal snapshot", "aggregate_id", aggregateID, "error", err)
+				s.logger.Error("反序列化快照元数据失败", "aggregate_id", aggregateID, "error", err)
 			}
-			return fmt.Errorf("failed to unmarshal snapshot: %w", err)
+			return fmt.Errorf("反序列化快照元数据失败: %w", err)
 		}
 
 		err = json.Unmarshal(snapshotMeta.SnapshotData, &snapshot)
 		if err != nil {
 			if s.logger != nil {
-				s.logger.Error("Failed to deserialize snapshot", "aggregate_id", aggregateID, "error", err)
+				s.logger.Error("反序列化快照失败", "aggregate_id", aggregateID, "error", err)
 			}
-			return fmt.Errorf("failed to deserialize snapshot: %w", err)
+			return fmt.Errorf("反序列化快照失败: %w", err)
 		}
 
 		return nil
@@ -457,9 +458,9 @@ func (s *BadgerEventStore) GetLatestSnapshot(ctx context.Context, aggregateID st
 
 	if err != nil {
 		if s.logger != nil {
-			s.logger.Error("Failed to get latest snapshot", "aggregate_id", aggregateID, "error", err)
+			s.logger.Error("获取最新快照失败", "aggregate_id", aggregateID, "error", err)
 		}
-		return nil, 0, fmt.Errorf("failed to get latest snapshot: %w", err)
+		return nil, 0, fmt.Errorf("获取最新快照失败: %w", err)
 	}
 
 	if snapshot == nil {
@@ -481,9 +482,9 @@ func (s *BadgerEventStore) GetAggregateVersion(ctx context.Context, aggregateID 
 
 	if err != nil {
 		if s.logger != nil {
-			s.logger.Error("Failed to get aggregate version", "aggregate_id", aggregateID, "error", err)
+			s.logger.Error("获取聚合版本失败", "aggregate_id", aggregateID, "error", err)
 		}
-		return 0, fmt.Errorf("failed to get aggregate version: %w", err)
+		return 0, fmt.Errorf("获取聚合版本失败: %w", err)
 	}
 
 	return version, nil
@@ -500,9 +501,9 @@ func (s *BadgerEventStore) Load(ctx context.Context, aggregateID string, aggrega
 		// 将快照数据应用到聚合根
 		if err := aggregate.LoadFromSnapshot(snapshot); err != nil {
 			if s.logger != nil {
-				s.logger.Error("Failed to load from snapshot", "aggregate_id", aggregateID, "error", err)
+				s.logger.Error("从快照加载聚合根失败", "aggregate_id", aggregateID, "error", err)
 			}
-			return fmt.Errorf("failed to load from snapshot: %w", err)
+			return fmt.Errorf("从快照加载聚合根失败: %w", err)
 		}
 		// 获取快照版本之后的事件
 		if version > 0 {
@@ -510,9 +511,9 @@ func (s *BadgerEventStore) Load(ctx context.Context, aggregateID string, aggrega
 			events, err = s.GetEventsFromVersion(ctx, aggregateID, version+1)
 			if err != nil {
 				if s.logger != nil {
-					s.logger.Error("Failed to get events from version", "aggregate_id", aggregateID, "from_version", version+1, "error", err)
+					s.logger.Error("获取事件分页失败", "aggregate_id", aggregateID, "from_version", version+1, "error", err)
 				}
-				return fmt.Errorf("failed to get events from version: %w", err)
+				return fmt.Errorf("获取事件分页失败: %w", err)
 			}
 		}
 	} else {
@@ -521,9 +522,9 @@ func (s *BadgerEventStore) Load(ctx context.Context, aggregateID string, aggrega
 		events, err = s.GetEvents(ctx, aggregateID)
 		if err != nil {
 			if s.logger != nil {
-				s.logger.Error("Failed to get events", "aggregate_id", aggregateID, "error", err)
+				s.logger.Error("获取事件分页失败", "aggregate_id", aggregateID, "error", err)
 			}
-			return fmt.Errorf("failed to get events: %w", err)
+			return fmt.Errorf("获取事件分页失败: %w", err)
 		}
 	}
 
@@ -531,9 +532,9 @@ func (s *BadgerEventStore) Load(ctx context.Context, aggregateID string, aggrega
 	if len(events) > 0 {
 		if err := aggregate.LoadFromEvents(events); err != nil {
 			if s.logger != nil {
-				s.logger.Error("Failed to load aggregate from events", "aggregate_id", aggregateID, "events_count", len(events), "error", err)
+				s.logger.Error("从事件加载聚合根失败", "aggregate_id", aggregateID, "events_count", len(events), "error", err)
 			}
-			return fmt.Errorf("failed to load from events: %w", err)
+			return fmt.Errorf("从事件加载聚合根失败: %w", err)
 		}
 	}
 
@@ -551,9 +552,9 @@ func (s *BadgerEventStore) getCurrentVersion(txn *badger.Txn, aggregateID string
 			return 0, nil // 新聚合，版本为0
 		}
 		if s.logger != nil {
-			s.logger.Error("Failed to get version", "aggregate_id", aggregateID, "error", err)
+			s.logger.Error("获取聚合版本失败", "aggregate_id", aggregateID, "error", err)
 		}
-		return 0, fmt.Errorf("failed to get version: %w", err)
+		return 0, fmt.Errorf("获取聚合版本失败: %w", err)
 	}
 
 	var version int
@@ -561,9 +562,9 @@ func (s *BadgerEventStore) getCurrentVersion(txn *badger.Txn, aggregateID string
 		v, err := strconv.Atoi(string(val))
 		if err != nil {
 			if s.logger != nil {
-				s.logger.Error("Invalid version format", "aggregate_id", aggregateID, "error", err)
+				s.logger.Error("无效的版本格式", "aggregate_id", aggregateID, "error", err)
 			}
-			return fmt.Errorf("invalid version format: %w", err)
+			return fmt.Errorf("无效的版本格式: %w", err)
 		}
 		version = v
 		return nil
@@ -596,7 +597,7 @@ func (s *BadgerEventStore) parseVersionFromKey(key string) (int, error) {
 		}
 	}
 	if lastColon == -1 {
-		return 0, fmt.Errorf("invalid key format")
+		return 0, fmt.Errorf("无效的键格式")
 	}
 	return strconv.Atoi(string(parts[lastColon+1:]))
 }
@@ -607,9 +608,9 @@ func (s *BadgerEventStore) deserializeEvent(data []byte) (entity.DomainEvent, er
 	event, err := DecodeEvent(data)
 	if err != nil {
 		if s.logger != nil {
-			s.logger.Error("Failed to deserialize event", "error", err)
+			s.logger.Error("反序列化事件失败", "error", err)
 		}
-		return nil, fmt.Errorf("failed to deserialize event: %w", err)
+		return nil, fmt.Errorf("反序列化事件失败: %w", err)
 	}
 	return event, nil
 }
