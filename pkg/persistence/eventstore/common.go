@@ -76,7 +76,7 @@ func DecodeEvent(data []byte) (entity.DomainEvent, error) {
 		event.Id = ""
 	}
 
-	event.Payload = payload
+	event.Payload = meta.EventData
 
 	return event, nil
 }

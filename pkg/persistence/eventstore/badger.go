@@ -90,6 +90,7 @@ func (s *BadgerEventStore) SaveEvents(ctx context.Context, aggregateID string, e
 			}
 
 			eventKey := s.getEventKey(aggregateID, version)
+
 			eventMeta := EventMeta{
 				AggregateID:   aggregateID,
 				AggregateType: evt.GetAggregateType(),
