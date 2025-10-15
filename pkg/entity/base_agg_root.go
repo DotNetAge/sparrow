@@ -71,11 +71,18 @@ func (a *BaseAggregateRoot) AddUncommittedEvents(events []DomainEvent) {
 func (a *BaseAggregateRoot) AddEvent(event DomainEvent) {
 
 	if event.GetEventID() == "" {
+		fmt.Printf("事件[%s]的ID为空", event.GetEventType())
 		panic("事件ID不能为空")
 	}
 
 	if event.GetEventType() == "" {
+		fmt.Printf("事件[%s]的类型为空", event.GetEventID())
 		panic("事件类型不能为空")
+	}
+
+	if event.GetAggregateID() == "" {
+		fmt.Printf("事件%s聚合根ID为空，当前聚合根ID：%s", event.GetEventType(), a.GetAggregateID())
+		panic("事件聚合根ID不能为空")
 	}
 
 	if event.GetAggregateID() != a.GetAggregateID() {
@@ -83,13 +90,14 @@ func (a *BaseAggregateRoot) AddEvent(event DomainEvent) {
 	}
 
 	if event.GetVersion() < a.Version {
+		fmt.Printf("事件%s版本%d小于当前聚合根版本%d", event.GetEventType(), event.GetVersion(), a.Version)
 		panic("事件版本小于当前聚合根版本")
 	}
 
 	for _, i := range a.uncommittedEvents {
 		if i.GetEventID() == event.GetEventID() {
-			fmt.Printf("存在相同的事件ID：%s，当前事件ID：%s", i.GetEventID(), event.GetEventID())
-			panic("存在相同的事件ID：" + event.GetEventID())
+			fmt.Printf("存在相同的%s事件ID：%s，当前事件ID：%s", i.GetEventType(), i.GetEventID(), event.GetEventID())
+			panic("存在相同的" + i.GetEventType() + "事件ID：" + event.GetEventID())
 		}
 	}
 
