@@ -61,6 +61,7 @@ func SetDefaults(viper *viper.Viper) {
 	viper.SetDefault("badger.es_dir", "./badger/es")             // 作为事件存储时的路径
 	viper.SetDefault("badger.value_threshold", int64(1024*1024)) // 1MB
 	viper.SetDefault("badger.num_compactors", 1)
+	viper.SetDefault("badger.in_memory", false)
 
 	// SQL 配置
 	viper.SetDefault("sql.driver", "postgres")

@@ -27,6 +27,7 @@ type App struct {
 	Logger    *logger.Logger // 全局日志
 	Engine    *gin.Engine    // 全局路由引擎
 	Container *Container     // 全局服务容器
+	Debug     bool           // 是否开启调试模式
 }
 
 var (

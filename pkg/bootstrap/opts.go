@@ -58,12 +58,23 @@ func RedisDB() Option {
 func BadgerDB() Option {
 	return func(o *App) {
 		o.Container.Register(func() *badger.DB {
-			db, err := badger.Open(badger.DefaultOptions(o.Config.Badger.DataDir))
-			if err != nil {
-				o.Logger.Error("创建BadgerDB实例失败", "error", err)
-				panic(err)
+			if o.Debug {
+				db, err := badger.Open(badger.Options{
+					InMemory: o.Config.Badger.InMemory,
+				})
+				if err != nil {
+					o.Logger.Error("创建BadgerDB实例失败", "error", err)
+					panic(err)
+				}
+				return db
+			} else {
+				db, err := badger.Open(badger.DefaultOptions(o.Config.Badger.DataDir))
+				if err != nil {
+					o.Logger.Error("创建BadgerDB实例失败", "error", err)
+					panic(err)
+				}
+				return db
 			}
-			return db
 		})
 	}
 }
