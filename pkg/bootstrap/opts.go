@@ -59,11 +59,10 @@ func BadgerDB() Option {
 	return func(o *App) {
 		o.Container.Register(func() *badger.DB {
 			if o.Debug {
-				db, err := badger.Open(badger.Options{
-					InMemory: o.Config.Badger.InMemory,
-				})
+				opts := badger.DefaultOptions("").WithInMemory(true)
+				db, err := badger.Open(opts)
 				if err != nil {
-					o.Logger.Error("创建BadgerDB实例失败", "error", err)
+					o.Logger.Error("创建BadgerDB的内存实例失败", "error", err)
 					panic(err)
 				}
 				return db
