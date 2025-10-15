@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -47,27 +48,55 @@ func (a *BaseAggregateRoot) IncrementVersion() {
 	a.Version++
 }
 
-// GetUncommittedEvents 获取未提交的事件
+// GetUncommittedEvents 获取未提交的事件，用于事件存储和发布
 func (a *BaseAggregateRoot) GetUncommittedEvents() []DomainEvent {
 	return a.uncommittedEvents
 }
 
-// MarkEventsAsCommitted 标记事件为已提交
+// MarkEventsAsCommitted 标记事件为已提交，清空未提交事件列表
 func (a *BaseAggregateRoot) MarkEventsAsCommitted() {
 	a.uncommittedEvents = []DomainEvent{}
 }
 
 // AddUncommittedEvents 批量添加事件到未提交事件列表
+// NOTES: 内部方法，外部绝对不能使用，外部使用此方法就会扰乱事件流的应用与重播！
 func (a *BaseAggregateRoot) AddUncommittedEvents(events []DomainEvent) {
-	a.uncommittedEvents = append(a.uncommittedEvents, events...)
+	for _, event := range events {
+		a.AddEvent(event)
+	}
 }
 
 // AddEvent 添加单个事件到未提交事件列表
+// NOTES:内部方法，外部绝对不能使用，外部使用此方法就会扰乱事件流的应用与重播！
 func (a *BaseAggregateRoot) AddEvent(event DomainEvent) {
+
+	if event.GetEventID() == "" {
+		panic("事件ID不能为空")
+	}
+
+	if event.GetEventType() == "" {
+		panic("事件类型不能为空")
+	}
+
+	if event.GetAggregateID() != a.GetAggregateID() {
+		panic("事件的聚合根ID与当前聚合根ID不匹配")
+	}
+
+	if event.GetVersion() < a.Version {
+		panic("事件版本小于当前聚合根版本")
+	}
+
+	for _, i := range a.uncommittedEvents {
+		if i.GetEventID() == event.GetEventID() {
+			fmt.Printf("存在相同的事件ID：%s，当前事件ID：%s", i.GetEventID(), event.GetEventID())
+			panic("存在相同的事件ID：" + event.GetEventID())
+		}
+	}
+
 	a.uncommittedEvents = append(a.uncommittedEvents, event)
 }
 
-// HasUncommittedEvents 检查是否有未提交的事件
+// HasUncommittedEvents 检查是否有未提交的事件，帮助方法
 func (a *BaseAggregateRoot) HasUncommittedEvents() bool {
 	return len(a.uncommittedEvents) > 0
 }
