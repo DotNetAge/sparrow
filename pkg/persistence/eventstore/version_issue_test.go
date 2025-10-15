@@ -21,7 +21,7 @@ func TestVersionIssueAfterNineEvents(t *testing.T) {
 
 	// 生成10个不同的测试事件
 	var events []entity.DomainEvent
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 20; i++ {
 		event := NewTestRoleCreated(
 			aggregateID,
 			fmt.Sprintf("role-%d", i),
@@ -34,7 +34,7 @@ func TestVersionIssueAfterNineEvents(t *testing.T) {
 
 	// 逐个应用事件，模拟真实场景中的多次保存
 	expectedVersion := 0
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 20; i++ {
 		// 每次只保存一个事件
 		singleEvent := []entity.DomainEvent{events[i]}
 		t.Logf("尝试保存第 %d 个事件，期望版本: %d", i+1, expectedVersion)
@@ -46,7 +46,7 @@ func TestVersionIssueAfterNineEvents(t *testing.T) {
 	// 验证最终版本号是否为10
 	finalVersion, err := store.GetAggregateVersion(ctx, aggregateID)
 	assert.NoError(t, err)
-	assert.Equal(t, 10, finalVersion, "最终版本号应该是10")
+	assert.Equal(t, 20, finalVersion, "最终版本号应该是10")
 
 	// 尝试再保存一个事件，验证是否还能继续工作
 	additionalEvent := NewTestRoleCreated(aggregateID, "role-10", "Role 10")
