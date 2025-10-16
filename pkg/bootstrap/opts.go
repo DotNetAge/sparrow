@@ -290,3 +290,14 @@ func WithJWT(expire time.Duration, refreshExp time.Duration) Option {
 		})
 	}
 }
+
+func DebugMode(debug bool) Option {
+	return func(o *App) {
+		o.Debug = debug
+	}
+}
+func WithName(name string) Option {
+	return func(o *App) {
+		o.Name = name
+	}
+}
