@@ -6,8 +6,6 @@ require (
 	github.com/IBM/sarama v1.46.1
 	github.com/casbin/casbin/v2 v2.128.0
 	github.com/dgraph-io/badger/v4 v4.8.0
-	github.com/gin-contrib/cors v1.7.6
-	github.com/gin-contrib/gzip v1.2.3
 	github.com/gin-gonic/gin v1.11.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang-jwt/jwt/v5 v5.3.0

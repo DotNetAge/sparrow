@@ -20,8 +20,9 @@ func Load(appName string) (*Config, error) {
 	vp.AddConfigPath(".")
 	vp.AddConfigPath("./configs")
 	if appName != "" {
-		vp.AddConfigPath(fmt.Sprintf("/etc/%s/", appName))
-		vp.AddConfigPath(fmt.Sprintf("$HOME/.%s/", appName))
+		correct_name := snake(appName)
+		vp.AddConfigPath(fmt.Sprintf("/etc/%s/", correct_name))
+		vp.AddConfigPath(fmt.Sprintf("$HOME/.%s/", correct_name))
 	}
 
 	// 设置默认值
@@ -77,4 +78,15 @@ func validateConfig(config *Config) error {
 
 	// 可以添加更多验证规则
 	return nil
+}
+
+func snake(s string) string {
+	var result strings.Builder
+	for i, r := range s {
+		if i > 0 && r >= 'A' && r <= 'Z' {
+			result.WriteRune('_')
+		}
+		result.WriteRune(r)
+	}
+	return strings.ToLower(result.String())
 }

@@ -2,7 +2,6 @@ package logger
 
 import (
 	"github.com/DotNetAge/sparrow/pkg/config"
-
 	"go.uber.org/zap"
 )
 
