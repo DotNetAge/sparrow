@@ -4,12 +4,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/DotNetAge/sparrow/pkg/adapter/http/middlewares"
 	"github.com/DotNetAge/sparrow/pkg/adapter/http/router"
 	"github.com/DotNetAge/sparrow/pkg/auth"
 	"github.com/DotNetAge/sparrow/pkg/config"
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/eventbus"
-	"github.com/DotNetAge/sparrow/pkg/eventbus/nats"
+	sb "github.com/DotNetAge/sparrow/pkg/eventbus/nats"
 	"github.com/DotNetAge/sparrow/pkg/eventbus/rabbitmq"
 	redis_bus "github.com/DotNetAge/sparrow/pkg/eventbus/redis"
 	"github.com/DotNetAge/sparrow/pkg/messaging"
@@ -19,9 +20,8 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/utils"
 	"github.com/dgraph-io/badger/v4"
 	"github.com/gin-gonic/gin"
+	"github.com/nats-io/nats.go"
 	"github.com/redis/go-redis/v9"
-
-	"github.com/DotNetAge/sparrow/pkg/adapter/http/middlewares"
 )
 
 // ServerPort 配置服务器端口
@@ -49,6 +49,20 @@ func RedisDB() Option {
 	return func(app *App) {
 		app.Container.Register(func() *redis.Client {
 			return newRedis(&app.Config.Redis)
+		})
+	}
+}
+
+func NatsConn() Option {
+	return func(o *App) {
+		o.Container.Register(func() *nats.Conn {
+			conn, err := nats.Connect(o.Config.NATS.URL)
+			if err != nil {
+				o.Logger.Error("创建NATS连接失败", "error", err)
+				panic(err)
+			}
+			o.Logger.Info("NATS连接成功", "url", o.Config.NATS.URL)
+			return conn
 		})
 	}
 }
@@ -124,20 +138,6 @@ func SQLStore() Option {
 	}
 }
 
-// NatsStore 使用NATS作为事件存储
-func JetStreamStore() Option {
-	return func(o *App) {
-		o.Container.Register(func() usecase.EventStore {
-			store, err := eventstore.NewNatsEventStore(&o.Config.NATS, o.Logger)
-			if err != nil {
-				o.Logger.Error("创建NATS事件存储失败", "error", err)
-				panic(err)
-			}
-			return store
-		})
-	}
-}
-
 // Messaging 使用事件总线作为消息发布
 func Messaging() Option {
 	return func(a *App) {
@@ -159,7 +159,7 @@ func Messaging() Option {
 func NatsBus() Option {
 	return func(o *App) {
 		o.Container.Register(func() eventbus.EventBus {
-			eventBus, err := nats.NewNatsEventBus(&o.Config.NATS)
+			eventBus, err := sb.NewNatsEventBus(&o.Config.NATS)
 			if err != nil {
 				o.Logger.Error("创建NATS事件总线失败", "error", err)
 				panic(err)

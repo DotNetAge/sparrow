@@ -14,7 +14,7 @@ import (
 // EventPublisher 事件发布器 - 连接事件存储与投影
 // 负责从事件存储中读取事件并发布到事件总线，供投影更新器消费
 // 增强功能：支持领域事件到通用事件的转换，实现主题命名约束
-
+// NOTES: 这个事件发布器必须配合基于数据库实现的事件存储使用，因为它依赖于事件存储的事件顺序性
 type EventPublisher struct {
 	eventStore  usecase.EventStore
 	eventBus    eventbus.EventBus

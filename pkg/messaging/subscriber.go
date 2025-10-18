@@ -172,6 +172,3 @@ func (s *EventSubscriber[T]) Unsubscribe(serviceName string) error {
 	s.logger.Info("成功取消订阅事件 %s", subject)
 	return nil
 }
-
-// DomainEventHandler 领域事件处理器接口
-type DomainEventHandler[T entity.DomainEvent] func(ctx context.Context, event T) error

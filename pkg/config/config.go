@@ -42,12 +42,12 @@ func SetDefaults(viper *viper.Viper) {
 	viper.SetDefault("log.output", "stdout")
 
 	// Nats 配置
-	viper.SetDefault("nats.nats_url", "nats://localhost:4222")
-	viper.SetDefault("nats.stream_name", "events")
-	viper.SetDefault("nats.store_stream", "events_store")
-	viper.SetDefault("nats.bucket_name", "events_bucket")
-	viper.SetDefault("nats.durable_name", "default")
-	viper.SetDefault("nats.max_deliver", 10)
+	viper.SetDefault("nats.url", "nats://localhost:4222")
+	viper.SetDefault("nats.stream_name", "default_stream")
+	// viper.SetDefault("nats.store_stream", "events_store")
+	// viper.SetDefault("nats.bucket_name", "events_bucket")
+	// viper.SetDefault("nats.durable_name", "default")
+	// viper.SetDefault("nats.max_deliver", 10)
 
 	// Redis 配置
 	viper.SetDefault("redis.host", "localhost")

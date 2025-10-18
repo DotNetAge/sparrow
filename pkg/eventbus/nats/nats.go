@@ -34,7 +34,7 @@ var _ eventbus.EventBus = (*natsBus)(nil)
 // NewNatsEventBus 创建事件总线实例
 func NewNatsEventBus(cfg *config.NATsConfig) (eventbus.EventBus, error) {
 	// 连接到NATS服务器，配置客户端名称以区分不同连接
-	nc, err := n.Connect(cfg.NATSURL,
+	nc, err := n.Connect(cfg.URL,
 		n.Name(cfg.StreamName),
 		n.MaxReconnects(-1), // 无限重连
 		n.ReconnectWait(time.Second))
@@ -82,9 +82,9 @@ func NewNatsEventBus(cfg *config.NATsConfig) (eventbus.EventBus, error) {
 
 	// 构建实例名称
 	instanceName := cfg.StreamName
-	if cfg.DurableName != "" {
-		instanceName = fmt.Sprintf("%s-%s", instanceName, cfg.DurableName)
-	}
+	// if cfg.DurableName != "" {
+	// 	instanceName = fmt.Sprintf("%s-%s", instanceName, cfg.DurableName)
+	// }
 
 	return &natsBus{
 			conn: nc,

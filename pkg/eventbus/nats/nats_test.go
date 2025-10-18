@@ -79,7 +79,7 @@ func TestNewJetStreamEventBus(t *testing.T) {
 
 	// 配置
 	cfg := &config.NATsConfig{
-		NATSURL:    url,
+		URL:        url,
 		StreamName: "test-stream",
 	}
 
@@ -101,7 +101,7 @@ func TestJetStreamEventBus_PubSub(t *testing.T) {
 
 	// 配置
 	cfg := &config.NATsConfig{
-		NATSURL:    url,
+		URL:        url,
 		StreamName: "test-stream",
 	}
 
@@ -172,7 +172,7 @@ func TestJetStreamEventBus_Unsub(t *testing.T) {
 
 	// 配置
 	cfg := &config.NATsConfig{
-		NATSURL:    url,
+		URL:        url,
 		StreamName: "test-stream",
 	}
 
@@ -221,17 +221,17 @@ func TestJetStreamEventBus_MultipleSubscribers(t *testing.T) {
 
 	// 配置 - 为不同的总线实例使用不同的DurableName来避免消费者名称冲突
 	cfg1 := &config.NATsConfig{
-		NATSURL:     url,
-		StreamName:  "test-stream",
-		DurableName: "durable-1", // 唯一标识符1
+		URL:        url,
+		StreamName: "test-stream",
+		// DurableName: "durable-1", // 唯一标识符1
 	}
 	cfg2 := &config.NATsConfig{
-		NATSURL:     url,
-		StreamName:  "test-stream",
-		DurableName: "durable-2", // 唯一标识符2
+		URL:        url,
+		StreamName: "test-stream",
+		// DurableName: "durable-2", // 唯一标识符2
 	}
 	cfgPub := &config.NATsConfig{
-		NATSURL:    url,
+		URL:        url,
 		StreamName: "test-stream",
 	}
 
@@ -312,7 +312,7 @@ func TestJetStreamEventBus_Close(t *testing.T) {
 
 	// 配置
 	cfg := &config.NATsConfig{
-		NATSURL:    url,
+		URL:        url,
 		StreamName: "test-stream",
 	}
 
@@ -353,7 +353,7 @@ func TestJetStreamEventBus_HandlerError(t *testing.T) {
 
 	// 配置
 	cfg := &config.NATsConfig{
-		NATSURL:    url,
+		URL:        url,
 		StreamName: "test-stream",
 	}
 
@@ -393,7 +393,7 @@ func TestJetStreamEventBus_InvalidEvent(t *testing.T) {
 
 	// 配置
 	cfg := &config.NATsConfig{
-		NATSURL:    url,
+		URL:        url,
 		StreamName: "test-stream",
 	}
 

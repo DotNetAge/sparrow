@@ -12,6 +12,8 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/logger"
 )
 
+
+
 // TestEvent - 测试用的领域事件
 type TestEvent struct {
 	ID            string
@@ -60,9 +62,8 @@ func TestPublisherSubscriberCommunication(t *testing.T) {
 
 	// 创建JetStream事件总线
 	jetstreamConfig := &config.NATsConfig{
-		NATSURL:     "nats://localhost:4222",
-		StreamName:  "test-stream",  // 流的名称
-		DurableName: "test-durable", // 持久化名称
+		URL:        "nats://localhost:4222",
+		StreamName: "test_stream", // 流的名称
 	}
 	bus, err := jetstream_bus.NewNatsEventBus(jetstreamConfig)
 	if err != nil {
