@@ -44,18 +44,14 @@ type JetStreamSubscriber[T DomainEventConstraint] struct {
 	mu          sync.Mutex            // 保护running状态的互斥锁
 }
 
-// NewJetStreamSubscriber 创建订阅器（指定事件类型T和处理器）
-func NewJetStreamSubscriber[T DomainEventConstraint](
+func NewJetStreamNamedEventSubscriber[T DomainEventConstraint](
 	conn *nats.Conn,
 	serviceName string,
 	aggType string,
+	eventType string,
 	logger *logger.Logger,
 	handler DomainEventHandler[T],
 ) StreamSubscriber {
-	et := utils.GetTypeName[T]()
-	names := strings.Split(et, ".")
-	eventType := names[len(names)-1]
-
 	js, err := jetstream.New(conn)
 	if err != nil {
 		logger.Fatal("获取JetStream客户端失败", "error", err)
@@ -71,6 +67,21 @@ func NewJetStreamSubscriber[T DomainEventConstraint](
 		eventType:   eventType,
 		running:     false,
 	}
+}
+
+// NewJetStreamSubscriber 创建订阅器（指定事件类型T和处理器）
+func NewJetStreamSubscriber[T DomainEventConstraint](
+	conn *nats.Conn,
+	serviceName string,
+	aggType string,
+	logger *logger.Logger,
+	handler DomainEventHandler[T],
+) StreamSubscriber {
+	et := utils.GetTypeName[T]()
+	names := strings.Split(et, ".")
+	eventType := names[len(names)-1]
+
+	return NewJetStreamNamedEventSubscriber(conn, serviceName, aggType, eventType, logger, handler)
 }
 
 // Start 启动订阅（实现StreamSubscriber接口）
