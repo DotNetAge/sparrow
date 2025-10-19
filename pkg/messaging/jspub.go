@@ -63,7 +63,7 @@ func NewJetStreamPublisher(
 	aggType string,
 	logger *logger.Logger,
 	options ...JetStreamPublisherOption,
-) *JetStreamPublisher {
+) StreamPublisher {
 	pub := &JetStreamPublisher{
 		serviceName: serviceName,
 		aggType:     aggType,

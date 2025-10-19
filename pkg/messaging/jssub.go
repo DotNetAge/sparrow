@@ -33,7 +33,7 @@ func NewJetStreamSubscriber[T DomainEventConstraint](
 	aggType string,
 	logger *logger.Logger,
 	handler DomainEventHandler[T],
-) *JetStreamSubscriber[T] {
+) StreamSubscriber {
 	et := utils.GetTypeName[T]()
 	names := strings.Split(et, ".")
 	eventType := names[len(names)-1]

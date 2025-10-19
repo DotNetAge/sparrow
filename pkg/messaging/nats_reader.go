@@ -29,7 +29,7 @@ func NewJetStreamReader(
 	agType string,
 	serviceName string, // 同时用作流名称
 	logger *logger.Logger,
-) *JetStreamReader {
+) StreamReader {
 	return &JetStreamReader{
 		js:          js,
 		agType:      agType,
