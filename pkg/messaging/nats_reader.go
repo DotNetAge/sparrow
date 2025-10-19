@@ -1,4 +1,4 @@
-package eventstore
+package messaging
 
 import (
 	"context"
@@ -151,10 +151,13 @@ func (r *JetStreamEventReader) Replay(ctx context.Context, aggregateID string, a
 		return events[i].GetVersion() < events[j].GetVersion()
 	})
 
-	// 直接应用事件
-	for _, event := range events {
-		if err := aggregate.ApplyEvent(event); err != nil {
-			return fmt.Errorf("应用事件失败: %w", err)
+	// 3. 应用事件到聚合根
+	if len(events) > 0 {
+		if err := aggregate.LoadFromEvents(events); err != nil {
+			if r.logger != nil {
+				r.logger.Error("从事件加载聚合根失败", "aggregate_id", aggregateID, "events_count", len(events), "error", err)
+			}
+			return fmt.Errorf("从事件加载聚合根失败: %w", err)
 		}
 	}
 
@@ -217,10 +220,13 @@ func (r *JetStreamEventReader) ReplayFromVersion(ctx context.Context, aggregateI
 		return eventsToReplay[i].GetVersion() < eventsToReplay[j].GetVersion()
 	})
 
-	// 直接应用事件
-	for _, event := range eventsToReplay {
-		if err := aggregate.ApplyEvent(event); err != nil {
-			return fmt.Errorf("应用事件失败: %w", err)
+	// 3. 应用事件到聚合根
+	if len(eventsToReplay) > 0 {
+		if err := aggregate.LoadFromEvents(eventsToReplay); err != nil {
+			if r.logger != nil {
+				r.logger.Error("从事件加载聚合根失败", "aggregate_id", aggregateID, "events_count", len(eventsToReplay), "error", err)
+			}
+			return fmt.Errorf("从事件加载聚合根失败: %w", err)
 		}
 	}
 
@@ -314,7 +320,7 @@ func (r *JetStreamEventReader) Subscribe(ctx context.Context, aggregateID string
 	consumeChan, err := consumer.Consume(func(msg jetstream.Msg) {
 		// 反序列化事件
 		var event entity.BaseEvent
-		if err := json.Unmarshal(msg.Data(), &event); err != nil {
+		if err = json.Unmarshal(msg.Data(), &event); err != nil {
 			r.logger.Error("事件反序列化失败", "error", err)
 			msg.Nak()
 			return

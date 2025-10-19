@@ -149,7 +149,7 @@ func (uc *TaskService) ExecuteTask(ctx context.Context, id string) error {
 
 	// 执行任务
 	task.Start()
-	if err := uc.repo.Save(ctx, task); err != nil {
+	if err = uc.repo.Save(ctx, task); err != nil {
 		uc.log.Error("更新任务状态失败: %v", err)
 		return fmt.Errorf("更新任务状态失败: %w", err)
 	}

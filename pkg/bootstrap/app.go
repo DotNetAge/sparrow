@@ -96,6 +96,7 @@ func (app *App) GetEventStore() usecase.EventStore {
 	return store
 }
 
+// GetPub 获取事件发布实例(基于数据实现)
 func (app *App) GetPub() *messaging.EventPublisher {
 	var pub *messaging.EventPublisher
 	if err := app.Container.ResolveInstance(&pub); err != nil {

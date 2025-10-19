@@ -23,6 +23,7 @@ type JetStreamPublisher struct {
 	maxAge      time.Duration // 最大消息年龄（秒）
 	maxSize     int64         // 最大流大小（字节）
 	maxMsgSize  int32         // 最大消息大小（字节）
+	debug       bool
 }
 
 // WithMaxAge 设置最大消息年龄
@@ -43,6 +44,13 @@ func WithMaxSize(maxSize int64) JetStreamPublisherOption {
 func WithMaxMsgSize(maxMsgSize int32) JetStreamPublisherOption {
 	return func(p *JetStreamPublisher) {
 		p.maxMsgSize = maxMsgSize
+	}
+}
+
+// Debug 开启调试模式
+func Debug() JetStreamPublisherOption {
+	return func(p *JetStreamPublisher) {
+		p.debug = true
 	}
 }
 
@@ -104,6 +112,10 @@ func (p *JetStreamPublisher) ensureStream(ctx context.Context) error {
 		MaxAge:      p.maxAge,               // 不限制消息的过期时间
 		MaxBytes:    p.maxSize,              // 不限制流的总字节数
 		MaxMsgSize:  p.maxMsgSize,           // 不限制消息的最大大小
+	}
+
+	if p.debug {
+		cfg.Storage = jetstream.MemoryStorage
 	}
 
 	_, err = p.js.CreateStream(ctx, cfg)
