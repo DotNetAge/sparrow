@@ -40,6 +40,8 @@ func SetDefaults(viper *viper.Viper) {
 	viper.SetDefault("log.level", "info")
 	viper.SetDefault("log.format", "json")
 	viper.SetDefault("log.output", "stdout")
+	viper.SetDefault("log.filename", "./logs/info.log")
+	viper.SetDefault("log.mode", "dev")
 
 	// Nats 配置
 	viper.SetDefault("nats.url", "nats://localhost:4222")

@@ -1,6 +1,8 @@
 package logger
 
 import (
+	"strings"
+
 	"github.com/DotNetAge/sparrow/pkg/config"
 	"go.uber.org/zap"
 )
@@ -12,27 +14,30 @@ type Logger struct {
 
 // New 创建新的日志实例
 func NewLogger(cfg *config.LogConfig) (*Logger, error) {
-	zapConfig := zap.NewProductionConfig()
-	level, err := zap.ParseAtomicLevel(cfg.Level)
-	if err != nil {
-		level = zap.NewAtomicLevelAt(zap.InfoLevel) // 默认使用 Info 级别
-	}
-	zapConfig.Level = level
 
-	if cfg.Format == "console" {
-		zapConfig = zap.NewDevelopmentConfig()
-		level, err = zap.ParseAtomicLevel(cfg.Level)
-		if err != nil {
-			level = zap.NewAtomicLevelAt(zap.InfoLevel) // 默认使用 Info 级别
+	logger := NewDebugLogger(cfg)
+
+	if cfg.Mode == "prod" || cfg.Mode == "production" {
+		level := zap.DebugLevel
+		switch strings.ToLower(cfg.Level) {
+		case "info":
+			level = zap.InfoLevel
+		case "warn":
+			level = zap.WarnLevel
+		case "error":
+			level = zap.ErrorLevel
+		case "fatal":
+			level = zap.FatalLevel
 		}
-		zapConfig.Level = level
+		logger = NewRotatingLogger(
+			cfg.Filename,
+			100, // 100MB
+			10,  // 最多保留10个备份
+			7,   // 日志文件最大保存天数（如 7 天）
+			true,
+			level,
+		)
 	}
-
-	logger, err := zapConfig.Build()
-	if err != nil {
-		return nil, err
-	}
-
 	return &Logger{logger}, nil
 }
 

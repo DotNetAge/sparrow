@@ -62,7 +62,6 @@ func NatsConn() Option {
 				panic(err)
 			}
 			o.Logger.Info("NATS连接成功", "url", o.Config.NATS.URL)
-			defer conn.Close()
 			return conn
 		})
 	}
