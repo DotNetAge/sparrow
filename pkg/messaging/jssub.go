@@ -73,10 +73,12 @@ func (s *JetStreamSubscriber[T]) Start(ctx context.Context) error {
 	// 3. 获取流并创建消费者 - 使用serviceName作为流名称
 	stream, err := s.js.Stream(ctx, s.serviceName)
 	if err != nil {
+		s.logger.Fatal("获取流失败", "consumer", consumerName, "stream", s.serviceName, "error", err)
 		return fmt.Errorf("获取流失败: %w", err)
 	}
 	consumer, err := stream.CreateOrUpdateConsumer(ctx, cfg)
 	if err != nil {
+		s.logger.Fatal("创建消费者失败", "consumer", consumerName, "stream", s.serviceName, "error", err)
 		return fmt.Errorf("创建消费者失败: %w", err)
 	}
 	s.consumer = consumer
@@ -84,7 +86,8 @@ func (s *JetStreamSubscriber[T]) Start(ctx context.Context) error {
 	// 4. 开始消费消息
 	_, err = consumer.Consume(s.handleMessage) // 绑定消息处理函数，不需要传递ctx
 	if err != nil {
-		return fmt.Errorf("启动消费失败: %w", err)
+		s.logger.Fatal("启动消费者失败", "consumer", consumerName, "stream", s.serviceName, "error", err)
+		return fmt.Errorf("启动消费者失败: %w", err)
 	}
 
 	s.logger.Info("订阅器启动成功", "consumer", consumerName)
@@ -95,7 +98,7 @@ func (s *JetStreamSubscriber[T]) Start(ctx context.Context) error {
 func (s *JetStreamSubscriber[T]) Stop(ctx context.Context) error {
 	if s.consumer != nil {
 		// NATS JetStream消费者不需要显式删除
-		s.logger.Info("消费者已停止")
+		s.logger.Info("消费者已停止", "consumer", s.consumer)
 	}
 	s.logger.Info("订阅器已停止")
 	return nil
@@ -108,20 +111,20 @@ func (s *JetStreamSubscriber[T]) handleMessage(msg jetstream.Msg) {
 	// 1. 反序列化为T类型事件
 	var event T
 	if err := json.Unmarshal(msg.Data(), &event); err != nil {
-		s.logger.Error("消息反序列化失败", "error", err, "subject", msg.Subject())
+		s.logger.Error("消息反序列化失败", "consumer", s.consumer, "error", err, "subject", msg.Subject())
 		msg.Nak() // 标记处理失败
 		return
 	}
 
 	// 2. 调用类型安全的处理器
 	if err := s.handler(ctx, event); err != nil {
-		s.logger.Error("事件处理失败", "error", err, "eventID", event.GetEventID())
+		s.logger.Error("事件处理失败", "consumer", s.consumer, "error", err, "eventID", event.GetEventID())
 		msg.Nak() // 失败重试
 		return
 	}
 
 	// 3. 确认处理完成
 	if err := msg.Ack(); err != nil {
-		s.logger.Warn("消息确认失败", "error", err)
+		s.logger.Warn("消息确认失败", "consumer", s.consumer, "error", err)
 	}
 }

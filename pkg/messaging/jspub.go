@@ -80,7 +80,7 @@ func NewJetStreamPublisher(
 	// 获取JetStream客户端（使用正确的包和类型）
 	js, err := jetstream.New(conn)
 	if err != nil {
-		pub.logger.Fatal("获取JetStream客户端失败", "error", err)
+		pub.logger.Fatal("事件流发布器获取JetStream客户端失败", "stream", pub.serviceName, "error", err)
 		panic(err)
 	}
 
@@ -88,7 +88,7 @@ func NewJetStreamPublisher(
 
 	// 确保流存在
 	if err := pub.ensureStream(context.Background()); err != nil {
-		pub.logger.Fatal("确保流存在失败", "stream", pub.serviceName, "error", err)
+		pub.logger.Fatal("事件流发布器无法创建事件流", "stream", pub.serviceName, "error", err)
 		panic(err)
 	}
 
@@ -141,14 +141,14 @@ func (p *JetStreamPublisher) Publish(ctx context.Context, event entity.DomainEve
 	// 序列化事件
 	data, err := json.Marshal(event)
 	if err != nil {
-		p.logger.Error("事件序列化失败", "error", err)
+		p.logger.Error("事件流发布器在发布事件时序列化事件失败", "subject", subject, "error", err)
 		return fmt.Errorf("marshal event: %w", err)
 	}
 
 	// 发布到JetStream
 	_, err = p.js.Publish(ctx, subject, data)
 	if err != nil {
-		p.logger.Error("发布事件失败", "subject", subject, "error", err)
+		p.logger.Error("事件流发布器在发布事件时失败", "subject", subject, "error", err)
 		return fmt.Errorf("publish event: %w", err)
 	}
 	return nil

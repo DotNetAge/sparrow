@@ -9,6 +9,7 @@ import (
 
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/logger"
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
@@ -25,11 +26,19 @@ type JetStreamReader struct {
 
 // NewJetStreamEventReader 创建新的JetStream事件读取器
 func NewJetStreamReader(
-	js jetstream.JetStream,
+	conn *nats.Conn,
 	agType string,
 	serviceName string, // 同时用作流名称
 	logger *logger.Logger,
 ) StreamReader {
+
+	// 获取JetStream客户端（使用正确的包和类型）
+	js, err := jetstream.New(conn)
+	if err != nil {
+		logger.Fatal("事件流读取器获取JetStream客户端失败", "stream", serviceName, "error", err)
+		panic(err)
+	}
+
 	return &JetStreamReader{
 		js:          js,
 		agType:      agType,
@@ -42,11 +51,13 @@ func NewJetStreamReader(
 func (r *JetStreamReader) getConsumer(ctx context.Context, cfg jetstream.ConsumerConfig) (jetstream.Consumer, error) {
 	stream, err := r.js.Stream(ctx, r.serviceName)
 	if err != nil {
+		r.logger.Fatal("事件流读取器获取流失败", "stream", r.serviceName, "error", err)
 		return nil, fmt.Errorf("获取流失败: %w", err)
 	}
 
 	consumer, err := stream.CreateOrUpdateConsumer(ctx, cfg)
 	if err != nil {
+		r.logger.Fatal("事件流读取器创建消费者失败", "stream", r.serviceName, "error", err)
 		return nil, fmt.Errorf("创建消费者失败: %w", err)
 	}
 
@@ -80,6 +91,7 @@ func (r *JetStreamReader) getEvents(ctx context.Context, aggregateID string, fil
 	// 获取消息
 	batch, err := consumer.FetchNoWait(1000)
 	if err != nil {
+		r.logger.Fatal("事件流读取器获取消息失败", "stream", r.serviceName, "error", err)
 		return nil, fmt.Errorf("获取消息失败: %w", err)
 	}
 
@@ -87,7 +99,7 @@ func (r *JetStreamReader) getEvents(ctx context.Context, aggregateID string, fil
 		// 反序列化事件
 		var event entity.BaseEvent
 		if err := json.Unmarshal(msg.Data(), &event); err != nil {
-			r.logger.Error("事件反序列化失败", "error", err)
+			r.logger.Error("事件流读取器反序列化事件失败", "stream", r.serviceName, "error", err)
 			msg.Ack()
 			continue
 		}
@@ -115,7 +127,7 @@ func (r *JetStreamReader) applyEventsToAggregate(events []entity.DomainEvent, ag
 	if len(events) > 0 {
 		if err := aggregate.LoadFromEvents(events); err != nil {
 			if r.logger != nil {
-				r.logger.Error("从事件加载聚合根失败", "aggregate_id", aggregateID, "events_count", len(events), "error", err)
+				r.logger.Error("事件流读取器从事件加载聚合根失败", "stream", r.serviceName, "aggregate_id", aggregateID, "events_count", len(events), "error", err)
 			}
 			return fmt.Errorf("从事件加载聚合根失败: %w", err)
 		}
@@ -195,6 +207,7 @@ func (r *JetStreamReader) ReplayFromOffset(ctx context.Context, aggregateID stri
 	// 获取消息
 	batch, err := consumer.FetchNoWait(1000)
 	if err != nil {
+		r.logger.Fatal("事件流读取器获取消息失败", "stream", r.serviceName, "consumer", consumerName, "error", err)
 		return fmt.Errorf("获取消息失败: %w", err)
 	}
 
@@ -202,7 +215,7 @@ func (r *JetStreamReader) ReplayFromOffset(ctx context.Context, aggregateID stri
 		// 反序列化事件
 		var event entity.BaseEvent
 		if err := json.Unmarshal(msg.Data(), &event); err != nil {
-			r.logger.Error("事件反序列化失败", "error", err)
+			r.logger.Error("事件流读取器反序列化事件失败", "stream", r.serviceName, "consumer", consumerName, "error", err)
 			msg.Ack()
 			continue
 		}
