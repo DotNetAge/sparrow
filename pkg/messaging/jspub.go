@@ -149,3 +149,12 @@ func (p *JetStreamPublisher) Publish(ctx context.Context, event entity.DomainEve
 	}
 	return nil
 }
+
+func (p *JetStreamPublisher) PublishEvents(ctx context.Context, events []entity.DomainEvent) error {
+	for _, event := range events {
+		if err := p.Publish(ctx, event); err != nil {
+			return err
+		}
+	}
+	return nil
+}

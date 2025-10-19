@@ -17,6 +17,9 @@ type StreamPublisher interface {
 	// Publish 发布领域事件到事件流（发布即存储）
 	// event：待发布的领域事件（需实现entity.DomainEvent）
 	Publish(ctx context.Context, event entity.DomainEvent) error
+
+	// 批量发布事件
+	PublishEvents(ctx context.Context, events []entity.DomainEvent) error
 }
 
 // StreamSubscriber 事件流订阅器接口
