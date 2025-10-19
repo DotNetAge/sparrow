@@ -136,7 +136,7 @@ func TestJetStreamPubSub(t *testing.T) {
 	publisher := NewJetStreamPublisher(
 		conn,
 		"order-service",
-		"MockOrder",
+		[]string{"MockOrder"},
 		testLogger,
 	)
 

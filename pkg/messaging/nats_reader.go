@@ -27,8 +27,8 @@ type JetStreamReader struct {
 // NewJetStreamEventReader 创建新的JetStream事件读取器
 func NewJetStreamReader(
 	conn *nats.Conn,
-	agType string,
 	serviceName string, // 同时用作流名称
+	agType string,
 	logger *logger.Logger,
 ) StreamReader {
 
