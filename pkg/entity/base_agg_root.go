@@ -89,18 +89,17 @@ func (a *BaseAggregateRoot) AddEvent(event DomainEvent) {
 		panic("事件的聚合根ID与当前聚合根ID不匹配")
 	}
 
-	if event.GetVersion() < a.Version {
-		fmt.Printf("事件%s版本%d小于当前聚合根版本%d", event.GetEventType(), event.GetVersion(), a.Version)
-		panic("事件版本小于当前聚合根版本")
-	}
-
 	for _, i := range a.uncommittedEvents {
 		if i.GetEventID() == event.GetEventID() {
 			fmt.Printf("存在相同的%s事件ID：%s，当前事件ID：%s", i.GetEventType(), i.GetEventID(), event.GetEventID())
 			panic("存在相同的" + i.GetEventType() + "事件ID：" + event.GetEventID())
 		}
 	}
-
+	// 事件版本递增.
+	// NOTES: 这一步非常重要。其它地方是不应该去碰事件版本与聚合根版本的；
+	a.IncrementVersion()
+	event.SetVersion(a.Version)
+	a.UpdatedAt = event.GetCreatedAt()
 	a.uncommittedEvents = append(a.uncommittedEvents, event)
 }
 

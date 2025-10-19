@@ -35,7 +35,7 @@ func NewJetStreamReader(
 	// 获取JetStream客户端（使用正确的包和类型）
 	js, err := jetstream.New(conn)
 	if err != nil {
-		logger.Fatal("事件流读取器获取JetStream客户端失败", "stream", serviceName, "error", err)
+		logger.Fatal("[事件流读取器]获取JetStream客户端失败", "stream", serviceName, "error", err)
 		panic(err)
 	}
 
@@ -51,14 +51,19 @@ func NewJetStreamReader(
 func (r *JetStreamReader) getConsumer(ctx context.Context, cfg jetstream.ConsumerConfig) (jetstream.Consumer, error) {
 	stream, err := r.js.Stream(ctx, r.serviceName)
 	if err != nil {
-		r.logger.Fatal("事件流读取器获取流失败", "stream", r.serviceName, "error", err)
-		return nil, fmt.Errorf("获取流失败: %w", err)
+		if err == jetstream.ErrStreamNotFound {
+			r.logger.Warn("[事件流读取器]获取流失败,聚合根不存在可能还未创建,不进行任何读取操作。", "stream", r.serviceName, "error", err)
+			return nil, nil
+		}
+
+		r.logger.Fatal("[事件流读取器]获取流失败", "stream", r.serviceName, "error", err)
+		return nil, fmt.Errorf("[事件流读取器]获取流失败 %w", err)
 	}
 
 	consumer, err := stream.CreateOrUpdateConsumer(ctx, cfg)
 	if err != nil {
-		r.logger.Fatal("事件流读取器创建消费者失败", "stream", r.serviceName, "error", err)
-		return nil, fmt.Errorf("创建消费者失败: %w", err)
+		r.logger.Fatal("[事件流读取器]创建消费者失败", "stream", r.serviceName, "error", err)
+		return nil, fmt.Errorf("[事件流读取器]创建消费者失败: %w", err)
 	}
 
 	return consumer, nil
@@ -85,21 +90,26 @@ func (r *JetStreamReader) getEvents(ctx context.Context, aggregateID string, fil
 		return nil, err
 	}
 
+	// 当消费者为空时，证明聚合根不存在事件流，直接返回空事件列表
+	if consumer == nil {
+		return []entity.DomainEvent{}, nil
+	}
+
 	// 收集事件
 	var events []entity.DomainEvent
 
 	// 获取消息
 	batch, err := consumer.FetchNoWait(1000)
 	if err != nil {
-		r.logger.Fatal("事件流读取器获取消息失败", "stream", r.serviceName, "error", err)
-		return nil, fmt.Errorf("获取消息失败: %w", err)
+		r.logger.Fatal("[事件流读取器]获取消息失败", "stream", r.serviceName, "error", err)
+		return nil, fmt.Errorf("[事件流读取器]获取消息失败: %w", err)
 	}
 
 	for msg := range batch.Messages() {
 		// 反序列化事件
 		var event entity.BaseEvent
 		if err := json.Unmarshal(msg.Data(), &event); err != nil {
-			r.logger.Error("事件流读取器反序列化事件失败", "stream", r.serviceName, "error", err)
+			r.logger.Error("[事件流读取器]反序列化事件失败", "stream", r.serviceName, "error", err)
 			msg.Ack()
 			continue
 		}
@@ -127,9 +137,9 @@ func (r *JetStreamReader) applyEventsToAggregate(events []entity.DomainEvent, ag
 	if len(events) > 0 {
 		if err := aggregate.LoadFromEvents(events); err != nil {
 			if r.logger != nil {
-				r.logger.Error("事件流读取器从事件加载聚合根失败", "stream", r.serviceName, "aggregate_id", aggregateID, "events_count", len(events), "error", err)
+				r.logger.Error("[事件流读取器]从事件加载聚合根失败", "stream", r.serviceName, "aggregate_id", aggregateID, "events_count", len(events), "error", err)
 			}
-			return fmt.Errorf("从事件加载聚合根失败: %w", err)
+			return fmt.Errorf("[事件流读取器]从事件加载聚合根失败: %w", err)
 		}
 	}
 
@@ -159,8 +169,10 @@ func (r *JetStreamReader) Replay(ctx context.Context, aggregateID string, aggreg
 		return err
 	}
 
-	return r.applyEventsToAggregate(events, aggregateID, aggregate)
-
+	if len(events) > 0 {
+		return r.applyEventsToAggregate(events, aggregateID, aggregate)
+	}
+	return nil
 }
 
 // ReplayFromVersion 从指定版本开始重放事件（实现EventReader接口）
@@ -207,15 +219,15 @@ func (r *JetStreamReader) ReplayFromOffset(ctx context.Context, aggregateID stri
 	// 获取消息
 	batch, err := consumer.FetchNoWait(1000)
 	if err != nil {
-		r.logger.Fatal("事件流读取器获取消息失败", "stream", r.serviceName, "consumer", consumerName, "error", err)
-		return fmt.Errorf("获取消息失败: %w", err)
+		r.logger.Fatal("[事件流读取器]获取消息失败", "stream", r.serviceName, "consumer", consumerName, "error", err)
+		return fmt.Errorf("[事件流读取器]获取消息失败: %w", err)
 	}
 
 	for msg := range batch.Messages() {
 		// 反序列化事件
 		var event entity.BaseEvent
 		if err := json.Unmarshal(msg.Data(), &event); err != nil {
-			r.logger.Error("事件流读取器反序列化事件失败", "stream", r.serviceName, "consumer", consumerName, "error", err)
+			r.logger.Error("[事件流读取器]反序列化事件失败", "stream", r.serviceName, "consumer", consumerName, "error", err)
 			msg.Ack()
 			continue
 		}

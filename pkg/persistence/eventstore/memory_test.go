@@ -57,6 +57,11 @@ func (e *MemoryTestMockEvent) GetVersion() int {
 	return e.Version
 }
 
+// SetVersion 设置事件版本
+func (e *MemoryTestMockEvent) SetVersion(version int) {
+	e.Version = version
+}
+
 // GetCreatedAt 返回事件创建时间
 func (e *MemoryTestMockEvent) GetCreatedAt() time.Time {
 	return e.Timestamp

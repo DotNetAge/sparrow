@@ -43,6 +43,7 @@ type StreamReader interface {
 	// 获取聚合根的所有事件（事件流的核心读操作）
 	GetEvents(ctx context.Context, aggregateID string) ([]entity.DomainEvent, error)
 	// 将事件重放至聚合根（封装“获取事件→应用到聚合根”的逻辑）
+	// Replay 方法是可以允许传入的aggregateID不存在，而不引发错误。相当于Unexists的情况，多用于添加新聚合根时的初始化
 	Replay(ctx context.Context, aggregateID string, aggregate entity.AggregateRoot) error
 	// 事件流场景常用的“按版本/时间范围重放”（可选，但实用）
 	ReplayFromVersion(ctx context.Context, aggregateID string, fromVersion int, aggregate entity.AggregateRoot) error

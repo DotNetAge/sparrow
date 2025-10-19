@@ -24,6 +24,8 @@ type BadgerEventStore struct {
 var _ usecase.EventStore = (*BadgerEventStore)(nil)
 
 // NewBadgerEventStore 创建BadgerDB事件存储实例
+// TODO: 错误地更了事件与的版本，这个行为在事件存储中应该是不允许的，但由于非流式处理必然会面对并发冲突，因此，可以使用
+// v1.1.18 之后对 DomainEvent 新增的 SetVersion 对事件的版本进行更改；
 func NewBadgerEventStore(dbPath string, log *logger.Logger) (usecase.EventStore, error) {
 	opts := badger.DefaultOptions(dbPath)
 	opts.SyncWrites = true

@@ -44,6 +44,11 @@ func (e *BaseEvent) GetVersion() int {
 	return e.Version
 }
 
+// SetVersion 设置事件版本
+func (e *BaseEvent) SetVersion(version int) {
+	e.Version = version
+}
+
 // NewBaseEvent 创建基础事件
 func NewBaseEvent(aggregateID, eventType, aggregateType string, version int) *BaseEvent {
 	return &BaseEvent{

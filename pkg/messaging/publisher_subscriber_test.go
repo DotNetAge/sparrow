@@ -12,8 +12,6 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/logger"
 )
 
-
-
 // TestEvent - 测试用的领域事件
 type TestEvent struct {
 	ID            string
@@ -38,6 +36,11 @@ func (e *TestEvent) GetEventType() string {
 // GetCreatedAt 返回事件创建时间
 func (e *TestEvent) GetCreatedAt() time.Time {
 	return e.Timestamp
+}
+
+// SetVersion 设置事件版本
+func (e *TestEvent) SetVersion(version int) {
+	e.Version = version
 }
 
 // GetAggregateID 返回聚合根ID

@@ -11,4 +11,5 @@ type DomainEvent interface {
 	GetAggregateID() string   // 聚合根ID
 	GetAggregateType() string // 聚合根类型
 	GetVersion() int          // 事件版本，用于事件溯源
+	SetVersion(version int)   // 设置事件版本
 }
