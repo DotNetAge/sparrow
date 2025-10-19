@@ -36,20 +36,13 @@ type StreamSubscriber interface {
 type DomainEventHandler[T DomainEventConstraint] func(ctx context.Context, event T) error
 
 // 事件流专用的事件读取器接口
-type EventReader interface {
+type StreamReader interface {
 	// 获取聚合根的所有事件（事件流的核心读操作）
 	GetEvents(ctx context.Context, aggregateID string) ([]entity.DomainEvent, error)
 	// 将事件重放至聚合根（封装“获取事件→应用到聚合根”的逻辑）
 	Replay(ctx context.Context, aggregateID string, aggregate entity.AggregateRoot) error
 	// 事件流场景常用的“按版本/时间范围重放”（可选，但实用）
 	ReplayFromVersion(ctx context.Context, aggregateID string, fromVersion int, aggregate entity.AggregateRoot) error
-}
-
-// 事件流特有的扩展接口（如支持按偏移量重放、消费组等）
-type StreamEventReader interface {
-	EventReader
 	// 按事件流的物理偏移量重放（比按版本更高效）
 	ReplayFromOffset(ctx context.Context, aggregateID string, offset uint64, aggregate entity.AggregateRoot) error
-	// 订阅聚合根的实时事件（事件流的核心能力，区别于数据库的轮询）
-	Subscribe(ctx context.Context, aggregateID string, handler func(entity.DomainEvent) error) (func(), error)
 }

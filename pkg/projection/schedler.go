@@ -22,7 +22,7 @@ import (
 // 3. 建立特定的统计视图（如订单总数、用户活跃数等）
 type ProjectionScheduler struct {
 	indexer     AggregateIndexer                  // 聚合根索引器
-	eventReader messaging.EventReader             // 事件读取器
+	eventReader messaging.StreamReader            // 事件读取器
 	viewStore   usecase.Repository[entity.Entity] // 视图存储
 	projector   Projector                         // 投影逻辑（事件→视图）
 	interval    time.Duration                     // 定时周期（如24小时）
@@ -34,7 +34,7 @@ type ProjectionScheduler struct {
 // NewProjectionScheduler 创建投影任务
 func NewProjectionScheduler(
 	indexer AggregateIndexer,
-	eventReader messaging.EventReader,
+	eventReader messaging.StreamReader,
 	viewStore usecase.Repository[entity.Entity],
 	projector Projector,
 	interval time.Duration,
