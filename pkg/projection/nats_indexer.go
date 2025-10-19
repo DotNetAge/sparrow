@@ -5,21 +5,32 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/DotNetAge/sparrow/pkg/logger"
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
 // JetStreamIndexer 基于JetStream的聚合根索引实现
 type JetStreamIndexer struct {
+	AggregateIndexer
 	js jetstream.JetStream // JetStream客户端
 	// 流名称（存储所有事件的流，需提前创建，主题覆盖所有聚合根事件）
 	streamName string
+	logger     *logger.Logger
 }
 
 // NewJetStreamIndexer 创建JetStream索引器
-func NewJetStreamIndexer(js jetstream.JetStream, streamName string) *JetStreamIndexer {
+func NewJetStreamIndexer(conn *nats.Conn, streamName string, logger *logger.Logger) AggregateIndexer {
+	js, err := jetstream.New(conn)
+	if err != nil {
+		logger.Fatal("[聚合根索引器]创建JetStream客户端失败", "stream", streamName, "error", err)
+		panic(fmt.Errorf("创建JetStream客户端失败: %w", err))
+	}
+
 	return &JetStreamIndexer{
 		js:         js,
 		streamName: streamName,
+		logger:     logger,
 	}
 }
 
@@ -30,10 +41,12 @@ func (j *JetStreamIndexer) GetAllAggregateIDs(aggregateType string) ([]string, e
 	// 1. 获取流的元数据（包含所有已接收的主题）
 	stream, err := j.js.Stream(ctx, j.streamName)
 	if err != nil {
+		j.logger.Fatal("[聚合根索引器]获取流失败", "stream", j.streamName, "error", err)
 		return nil, fmt.Errorf("获取流失败: %w", err)
 	}
 	streamInfo, err := stream.Info(ctx)
 	if err != nil {
+		j.logger.Fatal("[聚合根索引器]获取流信息失败", "stream", j.streamName, "error", err)
 		return nil, fmt.Errorf("获取流信息失败: %w", err)
 	}
 
@@ -65,8 +78,3 @@ func (j *JetStreamIndexer) GetAllAggregateIDs(aggregateType string) ([]string, e
 	}
 	return ids, nil
 }
-
-// 辅助函数：检查字符串是否以prefix开头
-// func startsWithPrefix(s, prefix string) bool {
-// 	return len(s) >= len(prefix) && s[:len(prefix)] == prefix
-// }

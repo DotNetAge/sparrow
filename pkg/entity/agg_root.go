@@ -13,11 +13,11 @@ type AggregateRoot interface {
 	// 版本控制（用于乐观锁）
 	GetVersion() int        // 获取当前聚合版本
 	SetVersion(version int) // 设置聚合版本
-	IncrementVersion()      // 版本号递增
+	IncrementVersion()      // 版本号递增，
 
 	// 事件溯源支持
-	HandleCommand(cmd interface{}) ([]DomainEvent, error) // 处理命令并生成领域事件,但此时并不会对聚合根本身产生任何的影响
-	ApplyEvent(event interface{}) error                   // 将事件的属性应用到聚合根，让聚合根的状态与事件状态一至，并且将事件添加到未提交事件列表
+	HandleCommand(cmd interface{}) ([]DomainEvent, error) // 处理命令并生成领域事件, 并调用 ApplyEvent将产生的事件效果应用到聚合根，并且将事件添加到未提交事件列表
+	ApplyEvent(event interface{}) error                   // 将事件的属性应用到聚合根，让聚合根的状态与事件状态一至，
 	GetUncommittedEvents() []DomainEvent                  // 获取未提交的领域事件，用于事件存储和发布
 	MarkEventsAsCommitted()                               // 标记所有事件为已提交，用于清空未提交事件列表
 

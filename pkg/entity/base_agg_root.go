@@ -67,6 +67,7 @@ func (a *BaseAggregateRoot) AddUncommittedEvents(events []DomainEvent) {
 }
 
 // AddEvent 添加单个事件到未提交事件列表
+// 负责改变聚合根的版本号与更新时间，同时将事件添加到未提交事件列表中
 // NOTES:内部方法，外部绝对不能使用，外部使用此方法就会扰乱事件流的应用与重播！
 func (a *BaseAggregateRoot) AddEvent(event DomainEvent) {
 
