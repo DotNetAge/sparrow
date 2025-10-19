@@ -9,6 +9,7 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/logger" // 替换为实际日志包路径
 
 	"github.com/DotNetAge/sparrow/pkg/entity"
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
@@ -16,6 +17,7 @@ type JetStreamPublisherOption func(*JetStreamPublisher)
 
 // JetStreamPublisher 实现StreamPublisher接口
 type JetStreamPublisher struct {
+	StreamPublisher
 	js          jetstream.JetStream
 	serviceName string // 服务名，同时作为流名称
 	aggType     string
@@ -56,14 +58,13 @@ func Debug() JetStreamPublisherOption {
 
 // NewJetStreamPublisher 创建JetStream发布器
 func NewJetStreamPublisher(
-	js jetstream.JetStream,
+	conn *nats.Conn,
 	serviceName string,
 	aggType string,
 	logger *logger.Logger,
 	options ...JetStreamPublisherOption,
 ) *JetStreamPublisher {
 	pub := &JetStreamPublisher{
-		js:          js,
 		serviceName: serviceName,
 		aggType:     aggType,
 		logger:      logger,
@@ -76,6 +77,15 @@ func NewJetStreamPublisher(
 		opt(pub)
 	}
 
+	// 获取JetStream客户端（使用正确的包和类型）
+	js, err := jetstream.New(conn)
+	if err != nil {
+		pub.logger.Fatal("获取JetStream客户端失败", "error", err)
+		panic(err)
+	}
+
+	pub.js = js
+
 	// 确保流存在
 	if err := pub.ensureStream(context.Background()); err != nil {
 		pub.logger.Fatal("确保流存在失败", "stream", pub.serviceName, "error", err)
@@ -84,12 +94,6 @@ func NewJetStreamPublisher(
 
 	return pub
 }
-
-// func (p *JetStreamPublisher) Use(options ...JetStreamPublisherOption) {
-// 	for _, opt := range options {
-// 		opt(p)
-// 	}
-// }
 
 // ensureStream 确保流存在，如果不存在则创建
 func (p *JetStreamPublisher) ensureStream(ctx context.Context) error {

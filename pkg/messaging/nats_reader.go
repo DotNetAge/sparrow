@@ -16,6 +16,7 @@ import (
 // 实现StreamEventReader接口，提供事件流的读取、重放和订阅功能
 
 type JetStreamReader struct {
+	StreamReader
 	js          jetstream.JetStream
 	agType      string
 	logger      *logger.Logger

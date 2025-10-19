@@ -9,7 +9,6 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/logger"
 	"github.com/nats-io/nats.go"
-	"github.com/nats-io/nats.go/jetstream"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
@@ -93,12 +92,6 @@ func TestJetStreamPubSub(t *testing.T) {
 	}
 	defer conn.Close()
 
-	// 获取JetStream客户端（使用正确的包和类型）
-	js, err := jetstream.New(conn)
-	if err != nil {
-		t.Fatalf("获取JetStream客户端失败: %v", err)
-	}
-
 	// 3. 创建模拟事件
 	orderCreatedEvent := &MockOrderCreatedEvent{
 		BaseEvent: entity.BaseEvent{
@@ -141,7 +134,7 @@ func TestJetStreamPubSub(t *testing.T) {
 		t.Fatalf("创建日志器失败: %v", err)
 	}
 	publisher := NewJetStreamPublisher(
-		js,
+		conn,
 		"order-service",
 		"MockOrder",
 		testLogger,
@@ -150,7 +143,7 @@ func TestJetStreamPubSub(t *testing.T) {
 	// 5. 创建订阅器和处理器
 	orderCreatedCh := make(chan *MockOrderCreatedEvent, 1)
 	orderCreatedSubscriber := NewJetStreamSubscriber(
-		js,
+		conn,
 		"order-service",
 		"MockOrder",
 		testLogger,
@@ -162,7 +155,7 @@ func TestJetStreamPubSub(t *testing.T) {
 
 	placeOrderCh := make(chan *MockPlaceOrderEvent, 1)
 	placeOrderSubscriber := NewJetStreamSubscriber(
-		js,
+		conn,
 		"order-service",
 		"MockOrder",
 

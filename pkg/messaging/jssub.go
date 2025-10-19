@@ -9,12 +9,14 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/logger" // 替换为实际日志包路径
 	"github.com/DotNetAge/sparrow/pkg/utils"
 
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
 // JetStreamSubscriber 泛型订阅器（绑定单一事件类型T）
 // 结构体带泛型参数，方法继承泛型约束
 type JetStreamSubscriber[T DomainEventConstraint] struct {
+	StreamSubscriber
 	js          jetstream.JetStream
 	serviceName string // 服务名，同时作为流名称
 	aggType     string // 聚合类型
@@ -26,7 +28,7 @@ type JetStreamSubscriber[T DomainEventConstraint] struct {
 
 // NewJetStreamSubscriber 创建订阅器（指定事件类型T和处理器）
 func NewJetStreamSubscriber[T DomainEventConstraint](
-	js jetstream.JetStream,
+	conn *nats.Conn,
 	serviceName string,
 	aggType string,
 	logger *logger.Logger,
@@ -35,6 +37,12 @@ func NewJetStreamSubscriber[T DomainEventConstraint](
 	et := utils.GetTypeName[T]()
 	names := strings.Split(et, ".")
 	eventType := names[len(names)-1]
+
+	js, err := jetstream.New(conn)
+	if err != nil {
+		logger.Fatal("获取JetStream客户端失败", "error", err)
+		panic(err)
+	}
 
 	return &JetStreamSubscriber[T]{
 		js:          js,
