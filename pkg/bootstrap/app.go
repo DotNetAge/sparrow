@@ -20,12 +20,13 @@ import (
 )
 
 type App struct {
-	Name      string
-	Config    *config.Config // 全局配置
-	Logger    *logger.Logger // 全局日志
-	Engine    *gin.Engine    // 全局路由引擎
-	Container *Container     // 全局服务容器
-	Debug     bool           // 是否开启调试模式
+	Name         string
+	Config       *config.Config // 全局配置
+	Logger       *logger.Logger // 全局日志
+	Engine       *gin.Engine    // 全局路由引擎
+	Container    *Container     // 全局服务容器
+	Debug        bool           // 是否开启调试模式
+	SubProcesses []usecase.GracefulClose
 }
 
 var (
@@ -65,17 +66,23 @@ func NewApp(opts ...Option) *App {
 	// }), gzip.Gzip(gzip.DefaultCompression))
 
 	app := &App{
-		Name:      AppName,
-		Config:    cfg,
-		Logger:    log,
-		Engine:    r,
-		Container: NewContainer(),
+		Name:         AppName,
+		Config:       cfg,
+		Logger:       log,
+		Engine:       r,
+		Container:    NewContainer(),
+		SubProcesses: []usecase.GracefulClose{},
 	}
 
 	for _, opt := range opts {
 		opt(app)
 	}
 	return app
+}
+
+// NeedCleanup 添加需要清理的子进程
+func (app *App) NeedCleanup(process usecase.GracefulClose) {
+	app.SubProcesses = append(app.SubProcesses, process)
 }
 
 // GetEventBus 获取事件总线实例
@@ -186,5 +193,16 @@ func (app *App) Start() error {
 }
 
 func (app *App) CleanUp() {
-	// 进行清理操作，如关闭数据库连接、释放资源等
+	// 优雅关闭所有订阅器
+	for _, subscriber := range app.SubProcesses {
+		// 为每个订阅器创建5秒的超时上下文
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		if err := subscriber.Close(ctx); err != nil {
+			app.Logger.Error("清理资源失败", "error", zap.Error(err))
+		} else {
+			app.Logger.Info("资源已成功清理")
+		}
+	}
 }
