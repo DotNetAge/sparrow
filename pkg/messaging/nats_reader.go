@@ -108,11 +108,14 @@ func (r *JetStreamReader) getEvents(ctx context.Context, aggregateID string, fil
 	for msg := range batch.Messages() {
 		// 反序列化事件
 		var event entity.BaseEvent
-		if err := json.Unmarshal(msg.Data(), &event); err != nil {
+		data := msg.Data()
+		if err := json.Unmarshal(data, &event); err != nil {
 			r.logger.Error("[事件流读取器]反序列化事件失败", "stream", r.serviceName, "error", err)
 			msg.Ack()
 			continue
 		}
+		// 必须将原始数据赋值给事件负载，因为Go是无法进行类型反射，只能将反序列化推延至事件处理器之中。
+		event.Payload = data
 		eventPtr := &event
 
 		// 应用过滤函数
