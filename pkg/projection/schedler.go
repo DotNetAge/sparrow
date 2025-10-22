@@ -202,7 +202,7 @@ func (f *ProjectionScheduler) replayAndProject(aggregateType, aggregateID string
 		f.logger.Error("[投影任务]获取投影器失败", "aggregateID", aggregateID, "error", err)
 		return fmt.Errorf("获取投影器失败: %w", err)
 	}
-	view, err := projector.Project(f.ctx, aggregateType, events)
+	view, err := projector.Project(f.ctx, aggregateType, aggregateID, events)
 	if err != nil {
 		f.logger.Error("[投影任务]投影失败", "aggregateID", aggregateID, "error", err)
 		return fmt.Errorf("投影失败: %w", err)
