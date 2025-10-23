@@ -2,6 +2,7 @@ package messaging
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -156,8 +157,19 @@ func (p *JetStreamPublisher) Publish(ctx context.Context, event entity.DomainEve
 	// 构建主题：{聚合类型}.{聚合ID}.{事件类型}
 	subject := fmt.Sprintf("%s.%s.%s", event.GetAggregateType(), event.GetAggregateID(), event.GetEventType())
 
-	// 序列化事件
-	data, err := json.Marshal(event)
+	// 将原有的事件先转换为一般化的领域事件，避免Playload丢失。这是为了与StreamReader保持一致
+	playload, err := json.Marshal(event)
+	baseEvent := entity.NewBaseEvent(
+		event.GetAggregateID(),
+		event.GetEventType(),
+		event.GetAggregateType(),
+		event.GetVersion(),
+	)
+	baseEvent.Id = event.GetEventID()
+	baseEvent.Payload = base64.StdEncoding.EncodeToString(playload)
+
+	data, _ := json.Marshal(baseEvent)
+
 	if err != nil {
 		p.logger.Error("[事件流发布器]序列化事件失败", "subject", subject, "aggregateType", event.GetAggregateType(), "eventType", event.GetEventType(), "error", err)
 		return fmt.Errorf("marshal event: %w", err)

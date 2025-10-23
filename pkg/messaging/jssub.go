@@ -2,11 +2,13 @@ package messaging
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"strings"
 	"sync"
 
+	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/logger" // 替换为实际日志包路径
 	"github.com/DotNetAge/sparrow/pkg/usecase"
 	"github.com/DotNetAge/sparrow/pkg/utils"
@@ -250,10 +252,46 @@ func (s *JetStreamSubscriber[T]) handleMessage(msg jetstream.Msg) {
 	}
 
 	// 1. 反序列化为T类型事件
+	// NOTES: 这是一个间接的过程，为了让每个类都能保持强类型化与弱类型化事件的兼容，存在流中的是弱类型的通用事件BaseEvent，
+	// 而在BaseEvent.Playload 中才是强类型的序列化后的JSON字节流
 	var event T
-	if err := json.Unmarshal(msg.Data(), &event); err != nil {
+	var baseEvent entity.BaseEvent
+
+	if err := json.Unmarshal(msg.Data(), &baseEvent); err != nil {
 		consumerName := fmt.Sprintf("%s-%s-%s", s.serviceName, s.aggType, s.eventType)
 		s.logger.Error("消息反序列化失败", "consumer", consumerName, "error", err, "subject", msg.Subject())
+		msg.Nak() // 标记处理失败
+		return
+	}
+
+	data, ok := baseEvent.Payload.(string)
+
+	if !ok {
+		consumerName := fmt.Sprintf("%s-%s-%s", s.serviceName, s.aggType, s.eventType)
+		s.logger.Error("事件负载不是字符串", "consumer", consumerName, "eventID", baseEvent.Id)
+		msg.Nak() // 标记处理失败
+		return
+	}
+
+	data64, err := base64.StdEncoding.DecodeString(data)
+	if err != nil {
+		consumerName := fmt.Sprintf("%s-%s-%s", s.serviceName, s.aggType, s.eventType)
+		s.logger.Error("事件负载Base64解码失败", "consumer", consumerName, "error", err, "eventID", baseEvent.Id)
+		msg.Nak() // 标记处理失败
+		return
+	}
+
+	if data64 == nil {
+		consumerName := fmt.Sprintf("%s-%s-%s", s.serviceName, s.aggType, s.eventType)
+		s.logger.Error("事件负载为空", "consumer", consumerName, "eventID", baseEvent.Id)
+		msg.Nak() // 标记处理失败
+		return
+	}
+
+	// 3. 反序列化事件负载
+	if err := json.Unmarshal(data64, &event); err != nil {
+		consumerName := fmt.Sprintf("%s-%s-%s", s.serviceName, s.aggType, s.eventType)
+		s.logger.Error("事件负载反序列化失败", "consumer", consumerName, "error", err, "eventID", baseEvent.Id)
 		msg.Nak() // 标记处理失败
 		return
 	}

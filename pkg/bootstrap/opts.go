@@ -204,20 +204,20 @@ func MemBus() Option {
 
 // Tasks 使用任务系统
 // 任务系统使用内存作为存储
-func Tasks() Option {
-	return func(o *App) {
-		o.Container.RegisterNamed("taskRepo", repo.NewMemoryRepository[*entity.Task])
-		o.Container.Register(func() *usecase.TaskService {
-			var repo usecase.Repository[*entity.Task]
-			if err := o.Container.ResolveByName("taskRepo", &repo); err != nil {
-				o.Logger.Error("解析任务存储库失败", "error", err)
-				panic(err)
-			}
-			return usecase.NewTaskService(repo, o.Logger)
-		})
-		router.RegisterTaskRoutes(o.Engine, o.GetTasks())
-	}
-}
+// func Tasks() Option {
+// 	return func(o *App) {
+// 		o.Container.RegisterNamed("taskRepo", repo.NewMemoryRepository[*entity.Task])
+// 		o.Container.Register(func() *usecase.TaskService {
+// 			var repo usecase.Repository[*entity.Task]
+// 			if err := o.Container.ResolveByName("taskRepo", &repo); err != nil {
+// 				o.Logger.Error("解析任务存储库失败", "error", err)
+// 				panic(err)
+// 			}
+// 			return usecase.NewTaskService(repo, o.Logger)
+// 		})
+// 		router.RegisterTaskRoutes(o.Engine, o.GetTasks())
+// 	}
+// }
 
 // UseSession 使用会话系统
 // 会话系统使用内存作为存储

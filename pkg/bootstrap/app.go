@@ -112,13 +112,13 @@ func (app *App) GetPub() *messaging.EventPublisher {
 	return pub
 }
 
-func (app *App) GetTasks() *usecase.TaskService {
-	var tasks *usecase.TaskService
-	if err := app.Container.ResolveInstance(&tasks); err != nil {
-		panic(fmt.Errorf("解析任务服务失败: %w", err))
-	}
-	return tasks
-}
+// func (app *App) GetTasks() *usecase.TaskService {
+// 	var tasks *usecase.TaskService
+// 	if err := app.Container.ResolveInstance(&tasks); err != nil {
+// 		panic(fmt.Errorf("解析任务服务失败: %w", err))
+// 	}
+// 	return tasks
+// }
 
 func (app *App) GetSessions() *usecase.SessionService {
 	var sessions *usecase.SessionService

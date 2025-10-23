@@ -115,7 +115,7 @@ func (r *JetStreamReader) getEvents(ctx context.Context, aggregateID string, fil
 			continue
 		}
 		// 必须将原始数据赋值给事件负载，因为Go是无法进行类型反射，只能将反序列化推延至事件处理器之中。
-		event.Payload = data
+		// event.Payload = data
 		eventPtr := &event
 
 		// 应用过滤函数

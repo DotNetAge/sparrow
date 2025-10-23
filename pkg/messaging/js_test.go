@@ -67,7 +67,7 @@ func TestJetStreamPubSub(t *testing.T) {
 
 	// 清理资源
 	defer func() {
-		if err := container.Terminate(ctx); err != nil {
+		if err = container.Terminate(ctx); err != nil {
 			t.Fatalf("关闭NATS容器失败: %v", err)
 		}
 	}()
@@ -208,5 +208,21 @@ func TestJetStreamPubSub(t *testing.T) {
 		}
 	case <-time.After(5 * time.Second):
 		t.Fatal("未能在超时时间内接收到下单事件")
+	}
+
+	reader := NewJetStreamReader(
+		conn,
+		"order-service",
+		"MockOrder",
+		testLogger,
+	)
+
+	events, err := reader.GetEvents(ctx, "67890")
+	if err != nil {
+		t.Fatalf("读取事件失败: %v", err)
+	}
+
+	if len(events) != 2 {
+		t.Errorf("期望读取2个事件，实际读取: %d", len(events))
 	}
 }
