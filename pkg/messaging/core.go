@@ -38,6 +38,8 @@ type StreamSubscriber interface {
 // 针对特定事件类型T的处理逻辑
 type DomainEventHandler[T DomainEventConstraint] func(ctx context.Context, event T) error
 
+type DomainEventHandler2 func(ctx context.Context, event entity.DomainEvent) error
+
 // 事件流专用的事件读取器接口
 type StreamReader interface {
 	// 获取聚合根的所有事件（事件流的核心读操作）

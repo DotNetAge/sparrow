@@ -28,6 +28,12 @@ NOTES: 当前设计关键性考虑
 
 // JetStreamSubscriber 泛型订阅器（绑定单一事件类型T）
 // 结构体带泛型参数，方法继承泛型约束
+//
+// 只适用于对外部事件单一事件的订阅，并且仅对无严格事件序列要求的场合。
+// 因为如果在同一进程用启用多个Subscriber，就会进入并行运行状态，
+// 每个Subscriber都有自己的消费者实例，各自独立消费消息。
+// 这可能会导致事件处理的无序性和不一致性，
+// 特别是当多个Subscriber处理相同聚合类型的事件时。
 type JetStreamSubscriber[T DomainEventConstraint] struct {
 	StreamSubscriber
 	usecase.GracefulClose
