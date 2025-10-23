@@ -2,7 +2,6 @@ package messaging
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -264,32 +263,8 @@ func (s *JetStreamSubscriber[T]) handleMessage(msg jetstream.Msg) {
 		return
 	}
 
-	data, ok := baseEvent.Payload.(string)
-
-	if !ok {
-		consumerName := fmt.Sprintf("%s-%s-%s", s.serviceName, s.aggType, s.eventType)
-		s.logger.Error("事件负载不是字符串", "consumer", consumerName, "eventID", baseEvent.Id)
-		msg.Nak() // 标记处理失败
-		return
-	}
-
-	data64, err := base64.StdEncoding.DecodeString(data)
+	event, err := entity.UnmarshalEvent[T](&baseEvent)
 	if err != nil {
-		consumerName := fmt.Sprintf("%s-%s-%s", s.serviceName, s.aggType, s.eventType)
-		s.logger.Error("事件负载Base64解码失败", "consumer", consumerName, "error", err, "eventID", baseEvent.Id)
-		msg.Nak() // 标记处理失败
-		return
-	}
-
-	if data64 == nil {
-		consumerName := fmt.Sprintf("%s-%s-%s", s.serviceName, s.aggType, s.eventType)
-		s.logger.Error("事件负载为空", "consumer", consumerName, "eventID", baseEvent.Id)
-		msg.Nak() // 标记处理失败
-		return
-	}
-
-	// 3. 反序列化事件负载
-	if err := json.Unmarshal(data64, &event); err != nil {
 		consumerName := fmt.Sprintf("%s-%s-%s", s.serviceName, s.aggType, s.eventType)
 		s.logger.Error("事件负载反序列化失败", "consumer", consumerName, "error", err, "eventID", baseEvent.Id)
 		msg.Nak() // 标记处理失败

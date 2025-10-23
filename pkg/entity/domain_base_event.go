@@ -1,6 +1,9 @@
 package entity
 
 import (
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -59,4 +62,18 @@ func NewBaseEvent(aggregateID, eventType, aggregateType string, version int) *Ba
 		Timestamp:     time.Now(),
 		Version:       version,
 	}
+}
+
+func UnmarshalEvent[T any](event *BaseEvent) (T, error) {
+	var payload T
+	if event.Payload != nil {
+		data, err := base64.StdEncoding.DecodeString(event.Payload.(string))
+		if err != nil {
+			return payload, fmt.Errorf("decode payload: %w", err)
+		}
+		if err := json.Unmarshal(data, &payload); err != nil {
+			return payload, fmt.Errorf("unmarshal payload: %w", err)
+		}
+	}
+	return payload, nil
 }
