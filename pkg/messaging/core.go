@@ -38,7 +38,7 @@ type StreamSubscriber interface {
 // 针对特定事件类型T的处理逻辑
 type DomainEventHandler[T DomainEventConstraint] func(ctx context.Context, event T) error
 
-type DomainEventHandler2 func(ctx context.Context, event entity.DomainEvent) error
+// type DomainEventHandler2 func(ctx context.Context, event entity.DomainEvent) error
 
 // 事件流专用的事件读取器接口
 type StreamReader interface {
@@ -51,4 +51,8 @@ type StreamReader interface {
 	ReplayFromVersion(ctx context.Context, aggregateID string, fromVersion int, aggregate entity.AggregateRoot) error
 	// 按事件流的物理偏移量重放（比按版本更高效）
 	ReplayFromOffset(ctx context.Context, aggregateID string, offset uint64, aggregate entity.AggregateRoot) error
+}
+
+type Subscribers interface {
+	AddHandler(aggType, eventType string, handler DomainEventHandler[*entity.BaseEvent])
 }

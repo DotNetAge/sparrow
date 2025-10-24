@@ -172,22 +172,22 @@ func TestJetStreamBusMultiAggregate(t *testing.T) {
 	paymentFailedCh := make(chan *entity.BaseEvent, 1)
 
 	// 7. 添加事件处理器
-	bus.AddEventHandler("MockOrder", "MockOrderCreatedEvent", func(ctx context.Context, event *entity.BaseEvent) error {
+	bus.AddHandler("MockOrder", "MockOrderCreatedEvent", func(ctx context.Context, event *entity.BaseEvent) error {
 		orderCreatedCh <- event
 		return nil
 	})
 
-	bus.AddEventHandler("MockOrder", "MockPlaceOrderEvent", func(ctx context.Context, event *entity.BaseEvent) error {
+	bus.AddHandler("MockOrder", "MockPlaceOrderEvent", func(ctx context.Context, event *entity.BaseEvent) error {
 		orderUpdatedCh <- event
 		return nil
 	})
 
-	bus.AddEventHandler("MockPayment", "MockPaymentCreatedEvent", func(ctx context.Context, event *entity.BaseEvent) error {
+	bus.AddHandler("MockPayment", "MockPaymentCreatedEvent", func(ctx context.Context, event *entity.BaseEvent) error {
 		paymentCreatedCh <- event
 		return nil
 	})
 
-	bus.AddEventHandler("MockPayment", "MockPaymentFailedEvent", func(ctx context.Context, event *entity.BaseEvent) error {
+	bus.AddHandler("MockPayment", "MockPaymentFailedEvent", func(ctx context.Context, event *entity.BaseEvent) error {
 		paymentFailedCh <- event
 		return nil
 	})

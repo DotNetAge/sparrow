@@ -27,6 +27,7 @@ NOTES: 当前设计关键性考虑
 // JetStreamBus 事件流总线
 type JetStreamBus struct {
 	StreamSubscriber
+	Subscribers
 	usecase.GracefulClose
 	js             jetstream.JetStream
 	serviceName    string // 服务名，同时作为流名称
@@ -257,7 +258,7 @@ func (s *JetStreamBus) handleMessage(msg jetstream.Msg) {
 	}
 }
 
-func (s *JetStreamBus) AddEventHandler(aggType, eventType string, handler DomainEventHandler[*entity.BaseEvent]) {
+func (s *JetStreamBus) AddHandler(aggType, eventType string, handler DomainEventHandler[*entity.BaseEvent]) {
 	subject := fmt.Sprintf("%s.*.%s", aggType, eventType)
 	s.handlers[subject] = handler
 }

@@ -67,6 +67,14 @@ func NatsConn() Option {
 	}
 }
 
+func NatStreamBus() Option {
+	return func(app *App) {
+		bus := messaging.NewJetStreamBus(app.NatsConn(), app.Name, app.Logger)
+		app.NeedCleanup(bus.(usecase.GracefulClose))
+		app.Subscribers = bus.(messaging.Subscribers)
+	}
+}
+
 // BadgerStore 配置Badger数据库连接
 func BadgerDB() Option {
 	return func(o *App) {
@@ -280,14 +288,22 @@ func Middlewares(middleware ...gin.HandlerFunc) Option {
 }
 
 func WithJWT(expire time.Duration, refreshExp time.Duration) Option {
-	return func(o *App) {
-		o.Container.Register(func() auth.TokenGenerator {
-			return auth.NewTokenGenerator([]byte(o.Config.App.Secret), expire, refreshExp)
-		})
+	// return func(o *App) {
+	// 	o.Container.Register(func() auth.TokenGenerator {
+	// 		return auth.NewTokenGenerator([]byte(o.Config.App.Secret), expire, refreshExp)
+	// 	})
 
-		o.Container.RegisterNamed("authMiddleware", func() gin.HandlerFunc {
-			return middlewares.JWTAuthMiddleware([]byte(o.Config.App.Secret))
-		})
+	// 	o.Container.RegisterNamed("authMiddleware", func() gin.HandlerFunc {
+	// 		return middlewares.JWTAuthMiddleware([]byte(o.Config.App.Secret))
+	// 	})
+	// }
+	return func(app *App) {
+		app.Auth = Authorization{
+			Tokens: auth.NewTokenGenerator([]byte(app.Config.App.Secret), expire, refreshExp),
+			Middlewares: []gin.HandlerFunc{
+				middlewares.JWTAuthMiddleware([]byte(app.Config.App.Secret)),
+			},
+		}
 	}
 }
 

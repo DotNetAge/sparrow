@@ -10,14 +10,21 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/DotNetAge/sparrow/pkg/auth"
 	"github.com/DotNetAge/sparrow/pkg/config"
 	"github.com/DotNetAge/sparrow/pkg/eventbus"
 	"github.com/DotNetAge/sparrow/pkg/logger"
 	"github.com/DotNetAge/sparrow/pkg/messaging"
 	"github.com/DotNetAge/sparrow/pkg/usecase"
 	"github.com/gin-gonic/gin"
+	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"
 )
+
+type Authorization struct {
+	Tokens      auth.TokenGenerator
+	Middlewares []gin.HandlerFunc
+}
 
 type App struct {
 	Name         string
@@ -27,6 +34,8 @@ type App struct {
 	Container    *Container     // 全局服务容器
 	Debug        bool           // 是否开启调试模式
 	SubProcesses []usecase.GracefulClose
+	Subscribers  messaging.Subscribers
+	Auth         Authorization
 }
 
 var (
@@ -205,4 +214,21 @@ func (app *App) CleanUp() {
 			app.Logger.Info("资源已成功清理")
 		}
 	}
+}
+
+func (app *App) NatsConn() *nats.Conn {
+	var cnn *nats.Conn
+	if err := app.Container.ResolveInstance(&cnn); err != nil {
+		app.Logger.Error("解释 NatsConn 连接失败")
+		return nil
+	}
+	return cnn
+}
+
+func (app *App) StreamPub(appTypes ...string) messaging.StreamPublisher {
+	return messaging.NewJetStreamPublisher(app.NatsConn(), app.Name, appTypes, app.Logger)
+}
+
+func (app *App) StreamReader(appType string) messaging.StreamReader {
+	return messaging.NewJetStreamReader(app.NatsConn(), app.Name, appType, app.Logger)
 }
