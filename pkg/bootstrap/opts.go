@@ -255,13 +255,14 @@ func HealthCheck() Option {
 	}
 }
 
-func BadgerRepo[T entity.Entity](name string) Option {
+func BadgerRepo[T entity.Entity]() Option {
 	return func(o *App) {
 		var db *badger.DB
 		if err := o.Container.ResolveInstance(&db); err != nil {
 			o.Logger.Fatal("解析Badger数据库实例失败", "error", err)
 			panic(err)
 		}
+		name := utils.GetShotTypeName[T]()
 		repoName := utils.Pascal(name + "Repo")
 		prefix := utils.Snake(name)
 		o.Container.RegisterNamed(repoName, func() usecase.Repository[T] {
