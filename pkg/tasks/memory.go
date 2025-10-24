@@ -8,6 +8,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/DotNetAge/sparrow/pkg/logger"
+	"github.com/DotNetAge/sparrow/pkg/usecase"
 	"github.com/google/uuid"
 )
 
@@ -15,10 +17,18 @@ import (
 type Options struct {
 	WorkerCount        int
 	MaxConcurrentTasks int
+	Logger             *logger.Logger
 }
 
 // Option 配置函数类型
 type Option func(*Options)
+
+// WithLogger 设置日志记录器
+func WithLogger(logger *logger.Logger) Option {
+	return func(o *Options) {
+		o.Logger = logger
+	}
+}
 
 // WithWorkerCount 设置工作协程数量
 func WithWorkerCount(count int) Option {
@@ -36,6 +46,9 @@ func WithMaxConcurrentTasks(max int) Option {
 
 // MemoryTaskScheduler 基于内存的任务调度器实现
 type MemoryTaskScheduler struct {
+	usecase.GracefulClose
+	usecase.Startable
+	Logger             *logger.Logger
 	tasks              map[string]*taskWrapper       // 存储所有任务
 	taskQueue          *priorityQueue                // 优先队列，按执行时间排序
 	mu                 sync.RWMutex                  // 互斥锁，保证并发安全
@@ -79,6 +92,7 @@ func NewMemoryTaskScheduler(opts ...Option) *MemoryTaskScheduler {
 		stopChan:           make(chan struct{}),
 		workerCount:        options.WorkerCount,
 		maxConcurrentTasks: options.MaxConcurrentTasks,
+		Logger:             options.Logger,
 		workerPool:         make(chan struct{}, options.MaxConcurrentTasks),
 		cancels:            make(map[string]context.CancelFunc),
 	}
@@ -165,7 +179,7 @@ func (s *MemoryTaskScheduler) drainWorkerPool() {
 }
 
 // Close 优雅关闭任务调度器
-func (s *MemoryTaskScheduler) Close() error {
+func (s *MemoryTaskScheduler) Close(ctx context.Context) error {
 	if err := s.Stop(); err != nil {
 		return err
 	}

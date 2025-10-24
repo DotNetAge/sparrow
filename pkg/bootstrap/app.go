@@ -16,6 +16,7 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/eventbus"
 	"github.com/DotNetAge/sparrow/pkg/logger"
 	"github.com/DotNetAge/sparrow/pkg/messaging"
+	"github.com/DotNetAge/sparrow/pkg/tasks"
 	"github.com/DotNetAge/sparrow/pkg/usecase"
 	"github.com/DotNetAge/sparrow/pkg/utils"
 	"github.com/gin-gonic/gin"
@@ -38,6 +39,7 @@ type App struct {
 	SubProcesses []usecase.GracefulClose
 	Subscribers  messaging.Subscribers
 	Auth         Authorization
+	Scheduler    tasks.TaskScheduler
 }
 
 var (
@@ -166,8 +168,8 @@ func (app *App) Start() error {
 		}
 
 		if err := needStart.Start(context.Background()); err != nil {
-			app.Logger.Error("启动子进程失败", "subprocess", err)
-			return err
+			app.Logger.Warn("启动子进程失败,该服务将被忽略而不可用，后续子进程将继续启动", "subprocess", err)
+			continue
 		}
 	}
 

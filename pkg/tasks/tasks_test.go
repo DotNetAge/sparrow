@@ -10,7 +10,7 @@ import (
 
 func TestImmediateTask(t *testing.T) {
 	scheduler := NewMemoryTaskScheduler()
-	defer scheduler.Close()
+	defer scheduler.Close(nil)
 
 	err := scheduler.Start(context.Background())
 	if err != nil {
@@ -58,7 +58,7 @@ func TestImmediateTask(t *testing.T) {
 
 func TestScheduledTask(t *testing.T) {
 	scheduler := NewMemoryTaskScheduler()
-	defer scheduler.Close()
+	defer scheduler.Close(nil)
 
 	err := scheduler.Start(context.Background())
 	if err != nil {
@@ -109,7 +109,7 @@ func TestScheduledTask(t *testing.T) {
 
 func TestRecurringTask(t *testing.T) {
 	scheduler := NewMemoryTaskScheduler()
-	defer scheduler.Close()
+	defer scheduler.Close(nil)
 
 	err := scheduler.Start(context.Background())
 	if err != nil {
@@ -156,7 +156,7 @@ func TestRecurringTask(t *testing.T) {
 
 func TestCancelTask(t *testing.T) {
 	scheduler := NewMemoryTaskScheduler()
-	defer scheduler.Close()
+	defer scheduler.Close(nil)
 
 	err := scheduler.Start(context.Background())
 	if err != nil {
@@ -214,7 +214,7 @@ func TestCancelTask(t *testing.T) {
 
 func TestFailedTask(t *testing.T) {
 	scheduler := NewMemoryTaskScheduler()
-	defer scheduler.Close()
+	defer scheduler.Close(nil)
 
 	err := scheduler.Start(context.Background())
 	if err != nil {
@@ -263,7 +263,7 @@ func TestSetMaxConcurrentTasks(t *testing.T) {
 		WithMaxConcurrentTasks(2),
 		WithWorkerCount(10),
 	)
-	defer scheduler.Close()
+	defer scheduler.Close(nil)
 
 	err := scheduler.Start(context.Background())
 	if err != nil {
@@ -366,7 +366,7 @@ func TestSetMaxConcurrentTasks(t *testing.T) {
 
 func TestPanicRecovery(t *testing.T) {
 	scheduler := NewMemoryTaskScheduler()
-	defer scheduler.Close()
+	defer scheduler.Close(nil)
 
 	err := scheduler.Start(context.Background())
 	if err != nil {
@@ -518,7 +518,7 @@ func TestGracefulShutdown(t *testing.T) {
 
 	// 现在调用Close()，应该只会完成第一个任务，取消其他任务
 	start := time.Now()
-	err = scheduler.Close()
+	err = scheduler.Close(nil)
 	if err != nil {
 		t.Fatalf("expected no error, got: %v", err)
 	}
@@ -543,7 +543,7 @@ func TestGracefulShutdown(t *testing.T) {
 
 func TestListTasks(t *testing.T) {
 	scheduler := NewMemoryTaskScheduler()
-	defer scheduler.Close()
+	defer scheduler.Close(nil)
 
 	err := scheduler.Start(context.Background())
 	if err != nil {
@@ -583,7 +583,7 @@ func TestListTasks(t *testing.T) {
 
 func TestTaskContextCancellation(t *testing.T) {
 	scheduler := NewMemoryTaskScheduler()
-	defer scheduler.Close()
+	defer scheduler.Close(nil)
 
 	err := scheduler.Start(context.Background())
 	if err != nil {
