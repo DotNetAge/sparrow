@@ -20,6 +20,7 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/utils"
 	"github.com/dgraph-io/badger/v4"
 	"github.com/gin-gonic/gin"
+	"github.com/nats-io/nats.go"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -64,6 +65,14 @@ func RedisDB() Option {
 
 func NatStreamBus() Option {
 	return func(app *App) {
+		app.Container.Register(func() *nats.Conn {
+			cnn, err := nats.Connect(app.Config.NATS.URL)
+			if err != nil {
+				app.Logger.Error("连接NATS失败", "error", err)
+				panic(err)
+			}
+			return cnn
+		})
 		bus := messaging.NewJetStreamBus(app.NatsConn(), app.Name, app.Logger)
 		app.NeedCleanup(bus.(usecase.GracefulClose))
 		app.Subscribers = bus.(messaging.Subscribers)

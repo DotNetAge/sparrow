@@ -17,6 +17,7 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/logger"
 	"github.com/DotNetAge/sparrow/pkg/messaging"
 	"github.com/DotNetAge/sparrow/pkg/usecase"
+	"github.com/DotNetAge/sparrow/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"
@@ -138,24 +139,15 @@ func (app *App) GetSessions() *usecase.SessionService {
 	return sessions
 }
 
-func (app *App) getNamedRepo(name string) usecase.Repository[any] {
-	var repo usecase.Repository[any]
-	if err := app.Container.ResolveByName(name+"Repo", &repo); err != nil {
-		panic(fmt.Errorf("解析命名仓库失败: %w", err))
-	}
-	return repo
-}
-
 // GetNamedRepo 获取命名仓库实例
 // name: 仓库名称，对应容器注册的名称（如 "user"）
-func GetNamedRepo[T any](app *App, name string) (usecase.Repository[T], error) {
-	repo := app.getNamedRepo(name)
-	typedRepo, ok := repo.(usecase.Repository[T])
-	if !ok {
-		app.Logger.Error("repo type mismatch", zap.String("name", name))
-		return nil, fmt.Errorf("repo type mismatch")
+func GetNamedRepo[T entity.Entity](app *App) (usecase.Repository[T], error) {
+	var repo usecase.Repository[T]
+	name := utils.GetShotTypeName[T]()
+	if err := app.Container.ResolveByName(name+"Repo", &repo); err != nil {
+		panic(fmt.Errorf("解析命名仓库失败[%s]: %w", name, err))
 	}
-	return typedRepo, nil
+	return repo, nil
 }
 
 func (app *App) Use(opts ...Option) *App {
