@@ -242,3 +242,9 @@ func (app *App) StreamReader(appType string) messaging.StreamReader {
 func (app *App) AddSub(appType, eventType string, handler messaging.DomainEventHandler[*entity.BaseEvent]) {
 	app.Subscribers.AddHandler(appType, eventType, handler)
 }
+
+func (app *App) NewHub(serviceName string) *messaging.StreamHub {
+	hub := messaging.NewStreamBus(app.NatsConn(), serviceName, app.Logger)
+	app.NeedCleanup(hub)
+	return hub
+}
