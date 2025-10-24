@@ -29,6 +29,7 @@ type JetStreamBus struct {
 	StreamSubscriber
 	Subscribers
 	usecase.GracefulClose
+	usecase.Startable
 	js             jetstream.JetStream
 	serviceName    string // 服务名，同时作为流名称
 	logger         *logger.Logger

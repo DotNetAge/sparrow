@@ -7,3 +7,7 @@ import "context"
 type GracefulClose interface {
 	Close(ctx context.Context) error
 }
+
+type Startable interface {
+	Start(ctx context.Context) error
+}

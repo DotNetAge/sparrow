@@ -36,15 +36,15 @@ func WithMaxConcurrentTasks(max int) Option {
 
 // MemoryTaskScheduler 基于内存的任务调度器实现
 type MemoryTaskScheduler struct {
-	tasks              map[string]*taskWrapper // 存储所有任务
-	taskQueue          *priorityQueue          // 优先队列，按执行时间排序
-	mu                 sync.RWMutex            // 互斥锁，保证并发安全
-	stopChan           chan struct{}           // 停止信号通道
-	wg                 sync.WaitGroup          // 等待组，用于优雅关闭
-	started            bool                    // 调度器状态标志
-	workerCount        int                     // 工作协程数量
-	workerPool         chan struct{}           // 工作池，控制并发执行
-	maxConcurrentTasks int                     // 最大并发任务数
+	tasks              map[string]*taskWrapper       // 存储所有任务
+	taskQueue          *priorityQueue                // 优先队列，按执行时间排序
+	mu                 sync.RWMutex                  // 互斥锁，保证并发安全
+	stopChan           chan struct{}                 // 停止信号通道
+	wg                 sync.WaitGroup                // 等待组，用于优雅关闭
+	started            bool                          // 调度器状态标志
+	workerCount        int                           // 工作协程数量
+	workerPool         chan struct{}                 // 工作池，控制并发执行
+	maxConcurrentTasks int                           // 最大并发任务数
 	cancels            map[string]context.CancelFunc // 存储执行中任务的取消函数
 }
 
@@ -85,7 +85,7 @@ func NewMemoryTaskScheduler(opts ...Option) *MemoryTaskScheduler {
 }
 
 // Start 启动任务调度器
-func (s *MemoryTaskScheduler) Start() error {
+func (s *MemoryTaskScheduler) Start(ctx context.Context) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -149,7 +149,7 @@ func (s *MemoryTaskScheduler) Stop() error {
 
 	// 关闭停止信号通道
 	close(s.stopChan)
-	
+
 	// 释放锁，让工作协程能够退出
 	s.mu.Unlock()
 
@@ -186,10 +186,10 @@ func (s *MemoryTaskScheduler) Schedule(task Task) error {
 	}
 
 	wrapper := &taskWrapper{
-		task:       task,
-		status:     TaskStatusWaiting,
-		createdAt:  time.Now(),
-		updatedAt:  time.Now(),
+		task:      task,
+		status:    TaskStatusWaiting,
+		createdAt: time.Now(),
+		updatedAt: time.Now(),
 	}
 
 	s.mu.Lock()
@@ -331,7 +331,7 @@ func (s *MemoryTaskScheduler) run() {
 			s.mu.Unlock()
 			return
 		}
-		
+
 		// 检查任务队列是否为空
 		if s.taskQueue.Len() == 0 {
 			s.mu.Unlock()
@@ -412,7 +412,7 @@ func (s *MemoryTaskScheduler) executeTask(t *taskWrapper) {
 
 		// 创建可取消的上下文
 		ctx, cancel := context.WithCancel(context.Background())
-		
+
 		// 保存取消函数，以便在停止时能够取消执行中的任务
 		s.mu.Lock()
 		// 再次检查状态，防止在获取锁的过程中状态发生变化
@@ -465,7 +465,7 @@ func (s *MemoryTaskScheduler) executeTask(t *taskWrapper) {
 				return
 			}
 			s.mu.RUnlock()
-			
+
 			nextSchedule := time.Now().Add(task.task.GetInterval())
 
 			// 创建新的任务实例

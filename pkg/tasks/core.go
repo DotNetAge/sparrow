@@ -11,10 +11,11 @@ import (
 type TaskScheduler interface {
 	// GracefulClose 优雅关闭任务调度器
 	usecase.GracefulClose
+	usecase.Startable
 	// Schedule 调度一个任务
 	Schedule(task Task) error
 	// Start 启动任务调度器
-	Start() error
+	// Start() error
 	// Stop 停止任务调度器
 	Stop() error
 	// Cancel 取消指定的任务

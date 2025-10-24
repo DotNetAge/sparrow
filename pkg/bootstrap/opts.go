@@ -20,7 +20,6 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/utils"
 	"github.com/dgraph-io/badger/v4"
 	"github.com/gin-gonic/gin"
-	"github.com/nats-io/nats.go"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -53,19 +52,15 @@ func RedisDB() Option {
 	}
 }
 
-func NatsConn() Option {
-	return func(o *App) {
-		o.Container.Register(func() *nats.Conn {
-			conn, err := nats.Connect(o.Config.NATS.URL)
-			if err != nil {
-				o.Logger.Error("创建NATS连接失败", "error", err)
-				panic(err)
-			}
-			o.Logger.Info("NATS连接成功", "url", o.Config.NATS.URL)
-			return conn
-		})
-	}
-}
+// func(o *App) getConn() *nats.Conn {
+// 		var cnn *nats.Conn
+// 		if err := o.Container.ResolveInstance(&cnn); err != nil {
+// 			o.Logger.Error("解析NATS连接失败", "error", err)
+// 			panic(err)
+// 		}
+// 		return cnn
+
+// 	}
 
 func NatStreamBus() Option {
 	return func(app *App) {

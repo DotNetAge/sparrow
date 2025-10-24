@@ -12,6 +12,7 @@ import (
 
 	"github.com/DotNetAge/sparrow/pkg/auth"
 	"github.com/DotNetAge/sparrow/pkg/config"
+	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/eventbus"
 	"github.com/DotNetAge/sparrow/pkg/logger"
 	"github.com/DotNetAge/sparrow/pkg/messaging"
@@ -165,6 +166,19 @@ func (app *App) Use(opts ...Option) *App {
 }
 
 func (app *App) Start() error {
+	app.Logger.Info("启动相关子进程...")
+	for _, sub := range app.SubProcesses {
+		needStart, ok := sub.(usecase.Startable)
+		if !ok {
+			continue
+		}
+
+		if err := needStart.Start(context.Background()); err != nil {
+			app.Logger.Error("启动子进程失败", "subprocess", err)
+			return err
+		}
+	}
+
 	// 创建HTTP服务器
 	srv := &http.Server{
 		Addr:           app.Config.Server.Host + ":" + strconv.Itoa(app.Config.Server.Port),
@@ -231,4 +245,8 @@ func (app *App) StreamPub(appTypes ...string) messaging.StreamPublisher {
 
 func (app *App) StreamReader(appType string) messaging.StreamReader {
 	return messaging.NewJetStreamReader(app.NatsConn(), app.Name, appType, app.Logger)
+}
+
+func (app *App) AddSub(appType, eventType string, handler messaging.DomainEventHandler[*entity.BaseEvent]) {
+	app.Subscribers.AddHandler(appType, eventType, handler)
 }

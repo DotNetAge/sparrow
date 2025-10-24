@@ -37,6 +37,7 @@ NOTES: 当前设计关键性考虑
 type JetStreamSubscriber[T DomainEventConstraint] struct {
 	StreamSubscriber
 	usecase.GracefulClose
+	usecase.Startable
 	js          jetstream.JetStream
 	serviceName string // 服务名，同时作为流名称
 	aggType     string // 聚合类型
