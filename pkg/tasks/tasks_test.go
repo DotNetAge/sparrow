@@ -12,7 +12,7 @@ func TestImmediateTask(t *testing.T) {
 	scheduler := NewMemoryTaskScheduler()
 	defer scheduler.Close()
 
-	err := scheduler.Start()
+	err := scheduler.Start(context.Background())
 	if err != nil {
 		t.Fatalf("expected no error, got: %v", err)
 	}
@@ -60,7 +60,7 @@ func TestScheduledTask(t *testing.T) {
 	scheduler := NewMemoryTaskScheduler()
 	defer scheduler.Close()
 
-	err := scheduler.Start()
+	err := scheduler.Start(context.Background())
 	if err != nil {
 		t.Fatalf("expected no error, got: %v", err)
 	}
@@ -111,7 +111,7 @@ func TestRecurringTask(t *testing.T) {
 	scheduler := NewMemoryTaskScheduler()
 	defer scheduler.Close()
 
-	err := scheduler.Start()
+	err := scheduler.Start(context.Background())
 	if err != nil {
 		t.Fatalf("expected no error, got: %v", err)
 	}
@@ -158,7 +158,7 @@ func TestCancelTask(t *testing.T) {
 	scheduler := NewMemoryTaskScheduler()
 	defer scheduler.Close()
 
-	err := scheduler.Start()
+	err := scheduler.Start(context.Background())
 	if err != nil {
 		t.Fatalf("expected no error, got: %v", err)
 	}
@@ -216,7 +216,7 @@ func TestFailedTask(t *testing.T) {
 	scheduler := NewMemoryTaskScheduler()
 	defer scheduler.Close()
 
-	err := scheduler.Start()
+	err := scheduler.Start(context.Background())
 	if err != nil {
 		t.Fatalf("expected no error, got: %v", err)
 	}
@@ -265,7 +265,7 @@ func TestSetMaxConcurrentTasks(t *testing.T) {
 	)
 	defer scheduler.Close()
 
-	err := scheduler.Start()
+	err := scheduler.Start(context.Background())
 	if err != nil {
 		t.Fatalf("expected no error, got: %v", err)
 	}
@@ -303,8 +303,8 @@ func TestSetMaxConcurrentTasks(t *testing.T) {
 
 		err = scheduler.Schedule(task)
 		if err != nil {
-		t.Fatalf("expected no error, got: %v", err)
-	}
+			t.Fatalf("expected no error, got: %v", err)
+		}
 	}
 
 	// 等待所有任务完成
@@ -352,8 +352,8 @@ func TestSetMaxConcurrentTasks(t *testing.T) {
 
 		err = scheduler.Schedule(task)
 		if err != nil {
-		t.Fatalf("expected no error, got: %v", err)
-	}
+			t.Fatalf("expected no error, got: %v", err)
+		}
 	}
 
 	wg.Wait()
@@ -368,7 +368,7 @@ func TestPanicRecovery(t *testing.T) {
 	scheduler := NewMemoryTaskScheduler()
 	defer scheduler.Close()
 
-	err := scheduler.Start()
+	err := scheduler.Start(context.Background())
 	if err != nil {
 		t.Fatalf("expected no error, got: %v", err)
 	}
@@ -414,7 +414,7 @@ func TestPanicRecovery(t *testing.T) {
 func TestGracefulShutdown(t *testing.T) {
 	// 使用单个工作协程，确保任务按顺序执行
 	scheduler := NewMemoryTaskScheduler(WithWorkerCount(1), WithMaxConcurrentTasks(1))
-	err := scheduler.Start()
+	err := scheduler.Start(context.Background())
 	if err != nil {
 		t.Fatalf("expected no error, got: %v", err)
 	}
@@ -434,7 +434,7 @@ func TestGracefulShutdown(t *testing.T) {
 			startedTasks++
 			mu.Unlock()
 			taskStarted <- taskID
-			
+
 			// 短任务，50ms后完成
 			time.Sleep(50 * time.Millisecond)
 			mu.Lock()
@@ -454,7 +454,7 @@ func TestGracefulShutdown(t *testing.T) {
 			startedTasks++
 			mu.Unlock()
 			taskStarted <- taskID
-			
+
 			// 长任务，1000ms后完成
 			timer := time.NewTimer(1000 * time.Millisecond)
 			select {
@@ -480,7 +480,7 @@ func TestGracefulShutdown(t *testing.T) {
 			startedTasks++
 			mu.Unlock()
 			taskStarted <- taskID
-			
+
 			// 长任务，1000ms后完成
 			timer := time.NewTimer(1000 * time.Millisecond)
 			select {
@@ -545,7 +545,7 @@ func TestListTasks(t *testing.T) {
 	scheduler := NewMemoryTaskScheduler()
 	defer scheduler.Close()
 
-	err := scheduler.Start()
+	err := scheduler.Start(context.Background())
 	if err != nil {
 		t.Fatalf("expected no error, got: %v", err)
 	}
@@ -585,7 +585,7 @@ func TestTaskContextCancellation(t *testing.T) {
 	scheduler := NewMemoryTaskScheduler()
 	defer scheduler.Close()
 
-	err := scheduler.Start()
+	err := scheduler.Start(context.Background())
 	if err != nil {
 		t.Fatalf("expected no error, got: %v", err)
 	}
