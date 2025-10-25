@@ -35,8 +35,7 @@ func NewJetStreamReader(
 	// 获取JetStream客户端（使用正确的包和类型）
 	js, err := jetstream.New(conn)
 	if err != nil {
-		logger.Fatal("[事件流读取器]获取JetStream客户端失败", "stream", serviceName, "error", err)
-		panic(err)
+		logger.Panic("[事件流读取器]获取JetStream客户端失败", "stream", serviceName, "error", err)
 	}
 
 	return &JetStreamReader{
@@ -56,13 +55,13 @@ func (r *JetStreamReader) getConsumer(ctx context.Context, cfg jetstream.Consume
 			return nil, nil
 		}
 
-		r.logger.Fatal("[事件流读取器]获取流失败", "stream", r.serviceName, "error", err)
+		r.logger.Error("[事件流读取器]获取流失败", "stream", r.serviceName, "error", err)
 		return nil, fmt.Errorf("[事件流读取器]获取流失败 %w", err)
 	}
 
 	consumer, err := stream.CreateOrUpdateConsumer(ctx, cfg)
 	if err != nil {
-		r.logger.Fatal("[事件流读取器]创建消费者失败", "stream", r.serviceName, "error", err)
+		r.logger.Error("[事件流读取器]创建消费者失败", "stream", r.serviceName, "error", err)
 		return nil, fmt.Errorf("[事件流读取器]创建消费者失败: %w", err)
 	}
 
@@ -101,7 +100,7 @@ func (r *JetStreamReader) getEvents(ctx context.Context, aggregateID string, fil
 	// 获取消息
 	batch, err := consumer.FetchNoWait(1000)
 	if err != nil {
-		r.logger.Fatal("[事件流读取器]获取消息失败", "stream", r.serviceName, "error", err)
+		r.logger.Error("[事件流读取器]获取消息失败", "stream", r.serviceName, "error", err)
 		return nil, fmt.Errorf("[事件流读取器]获取消息失败: %w", err)
 	}
 
@@ -222,7 +221,7 @@ func (r *JetStreamReader) ReplayFromOffset(ctx context.Context, aggregateID stri
 	// 获取消息
 	batch, err := consumer.FetchNoWait(1000)
 	if err != nil {
-		r.logger.Fatal("[事件流读取器]获取消息失败", "stream", r.serviceName, "consumer", consumerName, "error", err)
+		r.logger.Error("[事件流读取器]获取消息失败", "stream", r.serviceName, "consumer", consumerName, "error", err)
 		return fmt.Errorf("[事件流读取器]获取消息失败: %w", err)
 	}
 

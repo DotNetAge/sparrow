@@ -26,8 +26,7 @@ func NewJetStreamEventReader(
 ) EventReader {
 	js, err := jetstream.New(conn)
 	if err != nil {
-		logger.Fatal("[事件流读取器]创建JetStream客户端失败", "error", err)
-		return nil
+		logger.Panic("[事件流读取器]创建JetStream客户端失败", "error", err)
 	}
 
 	return &JetStreamEventReader{
@@ -62,13 +61,13 @@ func (j *JetStreamEventReader) GetEvents(aggregateType string, eventType string)
 			return nil, nil
 		}
 
-		j.logger.Fatal("[事件流读取器]获取流失败", "stream", j.streamName, "error", err)
+		j.logger.Error("[事件流读取器]获取流失败", "stream", j.streamName, "error", err)
 		return nil, fmt.Errorf("[事件流读取器]获取流失败 %w", err)
 	}
 
 	consumer, err := stream.CreateOrUpdateConsumer(ctx, cfg)
 	if err != nil {
-		j.logger.Fatal("[事件流读取器]创建消费者失败", "stream", j.streamName, "error", err)
+		j.logger.Error("[事件流读取器]创建消费者失败", "stream", j.streamName, "error", err)
 		return nil, fmt.Errorf("[事件流读取器]创建消费者失败: %w", err)
 	}
 	// 使用map存储每个AggregateID对应的最高版本事件
@@ -80,7 +79,7 @@ func (j *JetStreamEventReader) GetEvents(aggregateType string, eventType string)
 		// 获取消息批次
 		batch, err := consumer.FetchNoWait(batchSize)
 		if err != nil {
-			j.logger.Fatal("[事件流读取器]获取消息失败", "stream", j.streamName, "error", err)
+			j.logger.Error("[事件流读取器]获取消息失败", "stream", j.streamName, "error", err)
 			return nil, fmt.Errorf("[事件流读取器]获取消息失败: %w", err)
 		}
 

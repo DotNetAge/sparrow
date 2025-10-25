@@ -62,8 +62,7 @@ func NewJetStreamNamedEventSubscriber[T DomainEventConstraint](
 ) StreamSubscriber {
 	js, err := jetstream.New(conn)
 	if err != nil {
-		logger.Fatal("获取JetStream客户端失败", "error", err)
-		panic(err)
+		logger.Panic("获取JetStream客户端失败", "error", err)
 	}
 
 	return &JetStreamSubscriber[T]{
@@ -122,14 +121,14 @@ func (s *JetStreamSubscriber[T]) Start(ctx context.Context) error {
 	// 2. 获取流并创建消费者
 	stream, err := s.js.Stream(ctx, s.serviceName)
 	if err != nil {
-		s.logger.Fatal("获取流失败", "consumer", consumerName, "stream", s.serviceName, "error", err)
+		s.logger.Error("获取流失败", "consumer", consumerName, "stream", s.serviceName, "error", err)
 		s.cleanup()
 		return fmt.Errorf("获取流失败: %w", err)
 	}
 
 	consumer, err := stream.CreateOrUpdateConsumer(ctx, cfg)
 	if err != nil {
-		s.logger.Fatal("创建消费者失败", "consumer", consumerName, "stream", s.serviceName, "error", err)
+		s.logger.Error("创建消费者失败", "consumer", consumerName, "stream", s.serviceName, "error", err)
 		s.cleanup()
 		return fmt.Errorf("创建消费者失败: %w", err)
 	}

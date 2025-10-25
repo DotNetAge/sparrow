@@ -24,8 +24,7 @@ type JetStreamIndexer struct {
 func NewJetStreamIndexer(conn *nats.Conn, streamName string, logger *logger.Logger) AggregateIndexer {
 	js, err := jetstream.New(conn)
 	if err != nil {
-		logger.Fatal("[聚合根索引器]创建JetStream客户端失败", "stream", streamName, "error", err)
-		panic(fmt.Errorf("创建JetStream客户端失败: %w", err))
+		logger.Panic("[聚合根索引器]创建JetStream客户端失败", "stream", streamName, "error", err)
 	}
 
 	return &JetStreamIndexer{
@@ -61,13 +60,13 @@ func (j *JetStreamIndexer) GetAllAggregateIDs(aggregateType string) ([]string, e
 			return nil, nil
 		}
 
-		j.logger.Fatal("[事件流读取器]获取流失败", "stream", j.streamName, "error", err)
+		j.logger.Error("[事件流读取器]获取流失败", "stream", j.streamName, "error", err)
 		return nil, fmt.Errorf("[事件流读取器]获取流失败 %w", err)
 	}
 
 	consumer, err := stream.CreateOrUpdateConsumer(ctx, cfg)
 	if err != nil {
-		j.logger.Fatal("[事件流读取器]创建消费者失败", "stream", j.streamName, "error", err)
+		j.logger.Error("[事件流读取器]创建消费者失败", "stream", j.streamName, "error", err)
 		return nil, fmt.Errorf("[事件流读取器]创建消费者失败: %w", err)
 	}
 	// 收集事件
@@ -79,10 +78,10 @@ func (j *JetStreamIndexer) GetAllAggregateIDs(aggregateType string) ([]string, e
 		// 获取消息批次
 		batch, err := consumer.FetchNoWait(batchSize)
 		if err != nil {
-			j.logger.Fatal("[事件流读取器]获取消息失败", "stream", j.streamName, "error", err)
+			j.logger.Error("[事件流读取器]获取消息失败", "stream", j.streamName, "error", err)
 			return nil, fmt.Errorf("[事件流读取器]获取消息失败: %w", err)
 		}
-		
+
 		// 处理批次中的所有消息
 		messageCount := 0
 		for msg := range batch.Messages() {
@@ -109,7 +108,7 @@ func (j *JetStreamIndexer) GetAllAggregateIDs(aggregateType string) ([]string, e
 			// 确认消息，防止重复处理
 			_ = msg.Ack()
 		}
-		
+
 		// 如果当前批次没有消息，说明已经读取完所有消息，退出循环
 		if messageCount == 0 {
 			break
@@ -123,7 +122,7 @@ func (j *JetStreamIndexer) GetAllAggregateIDs(aggregateType string) ([]string, e
 	}
 	// 删除临时消费者
 	if err := stream.DeleteConsumer(ctx, consumerName); err != nil {
-		j.logger.Fatal("[聚合根索引器]删除临时消费者失败", "stream", j.streamName, "error", err)
+		j.logger.Error("[聚合根索引器]删除临时消费者失败", "stream", j.streamName, "error", err)
 		return nil, fmt.Errorf("[聚合根索引器]删除临时消费者失败: %w", err)
 	}
 	return allKeys, nil

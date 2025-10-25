@@ -94,7 +94,6 @@ func NewJetStreamPublisher(
 	js, err := jetstream.New(conn)
 	if err != nil {
 		pub.logger.Fatal("事件流发布器获取JetStream客户端失败", "stream", pub.serviceName, "error", err)
-		panic(err)
 	}
 
 	pub.js = js
@@ -102,7 +101,6 @@ func NewJetStreamPublisher(
 	// 确保流存在
 	if err := pub.ensureStream(context.Background()); err != nil {
 		pub.logger.Fatal("事件流发布器无法创建事件流", "stream", pub.serviceName, "error", err)
-		panic(err)
 	}
 
 	return pub

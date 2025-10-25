@@ -254,8 +254,7 @@ func BadgerRepo[T entity.Entity]() Option {
 	return func(o *App) {
 		var db *badger.DB
 		if err := o.Container.ResolveInstance(&db); err != nil {
-			o.Logger.Fatal("解析Badger数据库实例失败", "error", err)
-			panic(err)
+			o.Logger.Panic("解析Badger数据库实例失败", "error", err)
 		}
 		name := utils.GetShotTypeName[T]()
 		repoName := utils.Pascal(name + "Repo")
@@ -271,7 +270,6 @@ func RedisRepo[T entity.Entity](name string) Option {
 		var redisClient *redis.Client
 		if err := o.Container.ResolveInstance(&redisClient); err != nil {
 			o.Logger.Fatal("解析Redis客户端失败", "error", err)
-			panic(err)
 		}
 		repoName := utils.Pascal(name + "Repo")
 		prefix := utils.Snake(name)

@@ -56,6 +56,10 @@ func (l *Logger) Fatal(msg string, fields ...interface{}) {
 	l.Logger.Sugar().Fatalw(msg, fields...)
 }
 
+func (l *Logger) Panic(msg string, fields ...interface{}) {
+	l.Logger.Sugar().Panicw(msg, fields...)
+}
+
 // Debug 记录调试日志
 func (l *Logger) Debug(msg string, fields ...interface{}) {
 	l.Logger.Sugar().Debugw(msg, fields...)
