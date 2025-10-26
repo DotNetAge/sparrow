@@ -45,11 +45,8 @@ func SetDefaults(viper *viper.Viper) {
 
 	// Nats 配置
 	viper.SetDefault("nats.url", "nats://localhost:4222")
-	viper.SetDefault("nats.stream_name", "default_stream")
-	// viper.SetDefault("nats.store_stream", "events_store")
-	// viper.SetDefault("nats.bucket_name", "events_bucket")
-	// viper.SetDefault("nats.durable_name", "default")
-	// viper.SetDefault("nats.max_deliver", 10)
+	viper.SetDefault("nats.stream_name", "default_stream") // 用于事件总线的流(兼容使用标准事件流)
+	viper.SetDefault("nats.max_age", 0)                    // 事件流最大保存时间，单位天，默认0表示永久保存
 
 	// Redis 配置
 	viper.SetDefault("redis.host", "localhost")

@@ -40,6 +40,7 @@ type App struct {
 	Subscribers  messaging.Subscribers
 	Auth         Authorization
 	Scheduler    tasks.TaskScheduler
+	retryCancel  context.CancelFunc // 用于取消重试goroutine的函数
 }
 
 var (
@@ -161,6 +162,68 @@ func (app *App) Use(opts ...Option) *App {
 
 func (app *App) Start() error {
 	app.Logger.Info("启动相关子进程...")
+
+	// 创建一个通道用于传递需要重试的子进程
+	type retryItem struct {
+		process usecase.Startable
+		attempt int
+	}
+	retryChan := make(chan retryItem, len(app.SubProcesses))
+
+	// 启动重试goroutine
+	retryCtx, retryCancel := context.WithCancel(context.Background())
+	app.retryCancel = retryCancel // 保存取消函数到App结构体
+
+	go func() {
+		for {
+			select {
+			case item := <-retryChan:
+				// 指数退避重试
+				backoffTime := time.Duration(1<<item.attempt) * time.Second
+				if backoffTime > 1*time.Minute {
+					backoffTime = 1 * time.Minute // 最大等待时间1分钟
+				}
+
+				app.Logger.Info("准备重试启动子进程",
+					"attempt", item.attempt+1,
+					"backoff", backoffTime,
+				)
+
+				// 等待退避时间
+				select {
+				case <-time.After(backoffTime):
+					if err := item.process.Start(context.Background()); err != nil {
+						app.Logger.Warn("子进程重试启动失败，将在稍后再次尝试",
+							"attempt", item.attempt+1,
+							"error", err,
+						)
+						// 继续重试，但限制最大重试次数
+						if item.attempt < 10 { // 最多重试10次
+							retryChan <- retryItem{
+								process: item.process,
+								attempt: item.attempt + 1,
+							}
+						} else {
+							app.Logger.Error("子进程达到最大重试次数，放弃重试",
+								"max_attempts", 10,
+								"error", err,
+							)
+						}
+					} else {
+						app.Logger.Info("子进程重试启动成功",
+							"attempt", item.attempt+1,
+						)
+					}
+				case <-retryCtx.Done():
+					return
+				}
+			case <-retryCtx.Done():
+				return
+			}
+		}
+	}()
+
+	// 启动所有子进程
 	for _, sub := range app.SubProcesses {
 		needStart, ok := sub.(usecase.Startable)
 		if !ok {
@@ -168,8 +231,14 @@ func (app *App) Start() error {
 		}
 
 		if err := needStart.Start(context.Background()); err != nil {
-			app.Logger.Warn("启动子进程失败,该服务将被忽略而不可用，后续子进程将继续启动", "subprocess", err)
-			continue
+			app.Logger.Warn("启动子进程失败，将在后台重试", "error", err)
+			// 将失败的进程添加到重试队列
+			retryChan <- retryItem{
+				process: needStart,
+				attempt: 0,
+			}
+		} else {
+			app.Logger.Info("子进程启动成功")
 		}
 	}
 
@@ -210,6 +279,12 @@ func (app *App) Start() error {
 }
 
 func (app *App) CleanUp() {
+	// 取消重试goroutine
+	if app.retryCancel != nil {
+		app.retryCancel()
+		app.Logger.Info("已取消所有子进程重试任务")
+	}
+
 	// 优雅关闭所有订阅器
 	for _, subscriber := range app.SubProcesses {
 		// 为每个订阅器创建5秒的超时上下文
@@ -234,7 +309,13 @@ func (app *App) NatsConn() *nats.Conn {
 }
 
 func (app *App) StreamPub(appTypes ...string) messaging.StreamPublisher {
-	return messaging.NewJetStreamPublisher(app.NatsConn(), app.Name, appTypes, app.Logger)
+	return messaging.NewJetStreamPublisher(
+		app.NatsConn(),
+		app.Name,
+		appTypes,
+		app.Logger,
+		messaging.WithMaxAge(time.Duration(app.Config.NATS.MaxAge)*24*time.Hour), // 转换为天
+	)
 }
 
 func (app *App) StreamReader(appType string) messaging.StreamReader {
