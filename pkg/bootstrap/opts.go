@@ -20,6 +20,7 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/usecase"
 	"github.com/DotNetAge/sparrow/pkg/utils"
 	"github.com/dgraph-io/badger/v4"
+	"github.com/dgraph-io/badger/v4/options"
 	"github.com/gin-gonic/gin"
 	"github.com/nats-io/nats.go"
 	"github.com/redis/go-redis/v9"
@@ -64,6 +65,21 @@ func RedisDB() Option {
 
 // 	}
 
+// Nats 配置NATS连接
+func Nats() Option {
+	return func(app *App) {
+		app.Container.Register(func() *nats.Conn {
+			cnn, err := nats.Connect(app.Config.NATS.URL)
+			if err != nil {
+				app.Logger.Error("连接NATS失败", "error", err)
+				panic(err)
+			}
+			return cnn
+		})
+	}
+}
+
+// NatStreamBus 配置NATS JetStream事件总线
 func NatStreamBus() Option {
 	return func(app *App) {
 		app.Container.Register(func() *nats.Conn {
@@ -93,7 +109,21 @@ func BadgerDB() Option {
 				}
 				return db
 			} else {
-				db, err := badger.Open(badger.DefaultOptions(o.Config.Badger.DataDir))
+				// 当前为可应对每年10万行数据的吞吐量优化配置
+				opts := badger.DefaultOptions(o.Config.Badger.DataDir).
+					WithValueLogFileSize(256 << 20). // 256 MB
+					WithValueThreshold(2 * 1024).    // 2 KB
+					WithMemTableSize(64 << 20).      // 64 MB
+					WithNumMemtables(2).
+					WithCompression(options.ZSTD) // 或 badger.Snappy
+					// 这是一个针对2万行数据的优化配置
+					// WithValueLogFileSize(64 << 20). // 64 MB
+					// WithValueThreshold(1024).       // 1 KB: 小于该值的 value 存在 LSM
+					// WithNumMemtables(2).
+					// WithMemTableSize(64 << 20).   // 64 MB
+					// WithCompression(options.ZSTD) // 或 badger.Snappy
+
+				db, err := badger.Open(opts)
 				if err != nil {
 					o.Logger.Error("创建BadgerDB实例失败", "error", err)
 					panic(err)

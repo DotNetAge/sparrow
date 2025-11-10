@@ -326,7 +326,7 @@ func (r *BadgerRepository[T]) FindByIDs(ctx context.Context, ids []string) ([]T,
 
 			err = item.Value(func(val []byte) error {
 				var entity T
-				if err := json.Unmarshal(val, &entity); err != nil {
+				if err = json.Unmarshal(val, &entity); err != nil {
 					return fmt.Errorf("failed to unmarshal entity: %w", err)
 				}
 				entities = append(entities, entity)
