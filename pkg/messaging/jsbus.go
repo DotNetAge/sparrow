@@ -10,6 +10,7 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/logger" // 替换为实际日志包路径
 	"github.com/DotNetAge/sparrow/pkg/usecase"
+	"gorm.io/gorm/utils"
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
@@ -261,4 +262,12 @@ func (s *JetStreamBus) handleMessage(msg jetstream.Msg) {
 func (s *JetStreamBus) AddHandler(aggType, eventType string, handler DomainEventHandler[*entity.BaseEvent]) {
 	subject := fmt.Sprintf("%s.*.%s", aggType, eventType)
 	s.handlers[subject] = handler
+
+	if s.filterSubjects == nil {
+		s.filterSubjects = []string{subject}
+	} else {
+		if !utils.Contains(s.filterSubjects, subject) {
+			s.filterSubjects = append(s.filterSubjects, subject)
+		}
+	}
 }
