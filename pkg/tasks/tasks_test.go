@@ -12,11 +12,6 @@ func TestImmediateTask(t *testing.T) {
 	scheduler := NewMemoryTaskScheduler()
 	defer scheduler.Close(nil)
 
-	err := scheduler.Start(context.Background())
-	if err != nil {
-		t.Fatalf("expected no error, got: %v", err)
-	}
-
 	var executed bool
 	var executionErr error
 
@@ -32,11 +27,15 @@ func TestImmediateTask(t *testing.T) {
 		}).
 		Build()
 
-	err = scheduler.Schedule(task)
+	err := scheduler.Schedule(task)
 	if err != nil {
 		t.Fatalf("expected no error, got: %v", err)
 	}
 
+	err = scheduler.Start(context.Background())
+	if err != nil {
+		t.Fatalf("expected no error, got: %v", err)
+	}
 	// 等待任务执行
 	time.Sleep(200 * time.Millisecond)
 
@@ -545,11 +544,6 @@ func TestListTasks(t *testing.T) {
 	scheduler := NewMemoryTaskScheduler()
 	defer scheduler.Close(nil)
 
-	err := scheduler.Start(context.Background())
-	if err != nil {
-		t.Fatalf("expected no error, got: %v", err)
-	}
-
 	// 创建3个任务
 	task1 := NewTaskBuilder().WithType("type1").Immediate().WithHandler(func(ctx context.Context) error { return nil }).Build()
 	task2 := NewTaskBuilder().WithType("type2").ScheduleAt(time.Now().Add(10 * time.Second)).WithHandler(func(ctx context.Context) error { return nil }).Build()
@@ -558,6 +552,11 @@ func TestListTasks(t *testing.T) {
 	scheduler.Schedule(task1)
 	scheduler.Schedule(task2)
 	scheduler.Schedule(task3)
+
+	err := scheduler.Start(context.Background())
+	if err != nil {
+		t.Fatalf("expected no error, got: %v", err)
+	}
 
 	tasks := scheduler.ListTasks()
 	if len(tasks) != 3 {

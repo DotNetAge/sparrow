@@ -209,11 +209,6 @@ func (s *MemoryTaskScheduler) Schedule(task Task) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	// 如果调度器已停止，拒绝新任务
-	if !s.started {
-		return fmt.Errorf("调度器已停止，无法调度新任务")
-	}
-
 	if _, exists := s.tasks[task.ID()]; exists {
 		return fmt.Errorf("任务ID已存在: %s", task.ID())
 	}

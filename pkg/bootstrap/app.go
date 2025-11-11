@@ -20,6 +20,7 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/usecase"
 	"github.com/DotNetAge/sparrow/pkg/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"
 )
@@ -330,4 +331,36 @@ func (app *App) NewHub(serviceName string) *messaging.StreamHub {
 	hub := messaging.NewStreamBus(app.NatsConn(), serviceName, app.Logger)
 	app.NeedCleanup(hub)
 	return hub
+}
+
+func (app *App) RunTaskAt(at time.Time, handler func(ctx context.Context) error) string {
+	taskId := uuid.New().String()
+	task := tasks.NewTaskBuilder().
+		WithID(taskId).
+		ScheduleAt(at).
+		WithHandler(handler).
+		Build()
+	app.Scheduler.Schedule(task)
+	return taskId
+}
+func (app *App) RunTaskRecurring(interval time.Duration, handler func(ctx context.Context) error) string {
+	taskId := uuid.New().String()
+	task := tasks.NewTaskBuilder().
+		WithID(taskId).
+		ScheduleRecurring(interval).
+		WithHandler(handler).
+		Build()
+	app.Scheduler.Schedule(task)
+	return taskId
+}
+
+func (app *App) RunTask(handler func(ctx context.Context) error) string {
+	taskId := uuid.New().String()
+	task := tasks.NewTaskBuilder().
+		WithID(taskId).
+		Immediate().
+		WithHandler(handler).
+		Build()
+	app.Scheduler.Schedule(task)
+	return taskId
 }
