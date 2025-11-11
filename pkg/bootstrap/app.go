@@ -323,12 +323,18 @@ func (app *App) StreamReader(appType string) messaging.StreamReader {
 	return messaging.NewJetStreamReader(app.NatsConn(), app.Name, appType, app.Logger)
 }
 
+// AddSub 添加一个订阅者
+//
+// 此方法用于添加一个订阅者到事件总线。订阅者会处理指定应用类型和事件类型的事件。
 func (app *App) AddSub(appType, eventType string, handler messaging.DomainEventHandler[*entity.BaseEvent]) {
 	app.Subscribers.AddHandler(appType, eventType, handler)
 }
 
+// NewHub 创建一个新的流处理中心
+//
+// 此方法用于增加一个订阅外部事件的流处理中心。
 func (app *App) NewHub(serviceName string) *messaging.StreamHub {
-	hub := messaging.NewStreamBus(app.NatsConn(), serviceName, app.Logger)
+	hub := messaging.NewStreamBus(app.NatsConn(), app.Name, serviceName, app.Logger)
 	app.NeedCleanup(hub)
 	return hub
 }

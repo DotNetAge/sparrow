@@ -158,6 +158,7 @@ func TestJetStreamBusMultiAggregate(t *testing.T) {
 	// 5. 创建JetStreamBus
 	bus := NewJetStreamBus(
 		conn,
+		"test-service",
 		"multi-aggregate-service",
 		testLogger,
 	).(*JetStreamBus)

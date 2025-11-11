@@ -32,6 +32,7 @@ type JetStreamBus struct {
 	usecase.GracefulClose
 	usecase.Startable
 	js             jetstream.JetStream
+	name           string // 本服务名，用作消费者的唯一名
 	serviceName    string // 服务名，同时作为流名称
 	logger         *logger.Logger
 	handlers       map[string]DomainEventHandler[*entity.BaseEvent]
@@ -47,6 +48,7 @@ type JetStreamBus struct {
 
 func NewJetStreamBus(
 	conn *nats.Conn,
+	name string,
 	serviceName string,
 	logger *logger.Logger,
 ) StreamSubscriber {
@@ -55,10 +57,15 @@ func NewJetStreamBus(
 		logger.Panic("获取JetStream客户端失败", "error", err)
 	}
 
+	// RULES: 同一个流之下，所有消费者名称必须唯一，否则后创建的消费者就会覆盖前一个的配置！
+	// 消费者名称格式：{服务名}.{服务实例名}.Consumer
+	consumerName := fmt.Sprintf("%s-%s-Consumer", name, serviceName)
+
 	return &JetStreamBus{
 		js:           js,
+		name:         name,
 		serviceName:  serviceName,
-		consumerName: fmt.Sprintf("%s-CONSUMER", strings.ToUpper(serviceName)),
+		consumerName: consumerName,
 		handlers:     make(map[string]DomainEventHandler[*entity.BaseEvent]),
 		logger:       logger,
 		running:      false,
@@ -71,7 +78,7 @@ func (s *JetStreamBus) Start(ctx context.Context) error {
 	// 检查是否已经在运行
 	if s.running {
 		s.mu.Unlock()
-		s.logger.Warn("订阅器已经在运行中", "consumer", s.serviceName)
+		s.logger.Warn("订阅器已经在运行中", "serviceName", s.serviceName, "consumerName", s.consumerName)
 		return nil
 	}
 	s.running = true

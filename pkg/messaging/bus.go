@@ -13,16 +13,19 @@ type StreamHub struct {
 	usecase.GracefulClose
 	usecase.Startable
 	Subscribers Subscribers
+	localName   string // 本服务名，用作消费者的唯一名
 	serviceName string
 	logger      *logger.Logger
 }
 
 // NewStreamBus 创建一个新的事件流总线
 func NewStreamBus(conn *nats.Conn,
+	localName string,
 	serviceName string,
 	logger *logger.Logger) *StreamHub {
-	subscribers := NewJetStreamBus(conn, serviceName, logger)
+	subscribers := NewJetStreamBus(conn, localName, serviceName, logger)
 	return &StreamHub{
+		localName:   localName,
 		serviceName: serviceName,
 		Subscribers: subscribers.(Subscribers),
 		logger:      logger,

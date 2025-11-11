@@ -81,6 +81,7 @@ func TestFilterSubjectsIssue(t *testing.T) {
 	// 5. 创建JetStreamBus
 	bus := NewJetStreamBus(
 		conn,
+		"local-test-service",
 		"filter-test-service",
 		testLogger,
 	).(*JetStreamBus)

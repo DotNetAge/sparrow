@@ -80,6 +80,8 @@ func Nats() Option {
 }
 
 // NatStreamBus 配置NATS JetStream事件总线
+//
+// 此方法会自动配置Nats连接实例与一个用于订阅本服务的事件总线。用于本服务的投影器处理服务内的领域事件。
 func NatStreamBus() Option {
 	return func(app *App) {
 		app.Container.Register(func() *nats.Conn {
@@ -90,7 +92,8 @@ func NatStreamBus() Option {
 			}
 			return cnn
 		})
-		bus := messaging.NewJetStreamBus(app.NatsConn(), app.Name, app.Logger)
+		// 订阅本服务的事件总线
+		bus := messaging.NewJetStreamBus(app.NatsConn(), app.Name, app.Name, app.Logger)
 		app.NeedCleanup(bus.(usecase.GracefulClose))
 		app.Subscribers = bus.(messaging.Subscribers)
 	}
