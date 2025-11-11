@@ -114,7 +114,7 @@ func (s *JetStreamBus) Start(ctx context.Context) error {
 		s.runConsumer(consumeCtx, consumer)
 	}()
 
-	s.logger.Info("订阅器启动成功", "consumer", s.consumerName)
+	s.logger.Info("订阅器启动成功", "consumer", s.consumerName, "stream", s.serviceName, "subjects", cfg.FilterSubjects)
 	return nil
 }
 

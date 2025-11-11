@@ -179,6 +179,7 @@ func (p *JetStreamPublisher) Publish(ctx context.Context, event entity.DomainEve
 		p.logger.Error("[事件流发布器]发布事件失败", "stream", p.serviceName, "subject", subject, "aggregateType", event.GetAggregateType(), "eventType", event.GetEventType(), "error", err)
 		return fmt.Errorf("publish event: %w", err)
 	}
+	p.logger.Info("[事件流发布器] 发布事件成功", "stream", p.serviceName, "subject", subject, "aggregateType", event.GetAggregateType(), "eventType", event.GetEventType())
 	return nil
 }
 
