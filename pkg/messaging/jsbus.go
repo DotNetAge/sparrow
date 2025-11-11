@@ -71,7 +71,7 @@ func (s *JetStreamBus) Start(ctx context.Context) error {
 	// 检查是否已经在运行
 	if s.running {
 		s.mu.Unlock()
-		s.logger.Warn("订阅器已经在运行中", "consumer", fmt.Sprintf("%s", s.serviceName))
+		s.logger.Warn("订阅器已经在运行中", "consumer", s.serviceName)
 		return nil
 	}
 	s.running = true
@@ -89,6 +89,12 @@ func (s *JetStreamBus) Start(ctx context.Context) error {
 		FilterSubjects: s.filterSubjects,
 		DeliverPolicy:  jetstream.DeliverAllPolicy,    // 从最早的消息开始投递，支持事件重放
 		ReplayPolicy:   jetstream.ReplayInstantPolicy, // 立即重放所有消息
+		// 核心新增：跨进程消费者共享的分组名称（所有消费者实例必须相同）
+		DeliverGroup: fmt.Sprintf("%s.Consumer.Group", s.serviceName),
+		// 可选优化：确保连接稳定
+		// FlowControl:   true,             // 启用流量控制，避免消息过载
+		// IdleHeartbeat: 15 * time.Second, // 15秒心跳，检测连接状态
+		// MaxAckPending: 1000,             // 最大未确认消息数（根据业务调整）
 	}
 
 	// 2. 获取流并创建消费者
