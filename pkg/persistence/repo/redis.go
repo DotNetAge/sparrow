@@ -56,6 +56,20 @@ func NewRedisRepository[T entity.Entity](client *redis.Client, prefix string, tt
 	}
 }
 
+func NewCustomRedisRepository[T entity.Entity](client *redis.Client, prefix string, entityType string, ttl time.Duration) usecase.Repository[T] {
+	// 确保前缀以冒号结尾
+	if prefix != "" && !strings.HasSuffix(prefix, ":") {
+		prefix += ":"
+	}
+	return &RedisRepository[T]{
+		BaseRepository: usecase.BaseRepository[T]{},
+		client:         client,
+		prefix:         prefix,
+		entityType:     entityType,
+		ttl:            ttl,
+	}
+}
+
 // Save 保存实体（插入或更新）
 // 如果实体ID已存在则执行更新，否则执行插入
 func (r *RedisRepository[T]) Save(ctx context.Context, entity T) error {
