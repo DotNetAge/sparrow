@@ -16,6 +16,7 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/messaging"
 	"github.com/DotNetAge/sparrow/pkg/persistence/eventstore"
 	"github.com/DotNetAge/sparrow/pkg/persistence/repo"
+	"github.com/DotNetAge/sparrow/pkg/projection"
 	"github.com/DotNetAge/sparrow/pkg/tasks"
 	"github.com/DotNetAge/sparrow/pkg/usecase"
 	"github.com/DotNetAge/sparrow/pkg/utils"
@@ -54,16 +55,6 @@ func RedisDB() Option {
 		})
 	}
 }
-
-// func(o *App) getConn() *nats.Conn {
-// 		var cnn *nats.Conn
-// 		if err := o.Container.ResolveInstance(&cnn); err != nil {
-// 			o.Logger.Error("解析NATS连接失败", "error", err)
-// 			panic(err)
-// 		}
-// 		return cnn
-
-// 	}
 
 // Nats 配置NATS连接
 func Nats() Option {
@@ -346,5 +337,19 @@ func DebugMode(debug bool) Option {
 func WithName(name string) Option {
 	return func(o *App) {
 		o.Name = name
+	}
+}
+
+// WithProjection 使用全量投影
+//
+// 此方法用于注册一个全量投影，该投影会从NATS流中读取事件并更新索引。
+func WithProjection() Option {
+	return func(o *App) {
+		o.Container.Register(func() *projection.FullProjection {
+			return projection.NewFullProjection(
+				projection.NewJetStreamEventReader(o.NatsConn(), o.Name, o.Logger),
+				projection.NewJetStreamIndexer(o.NatsConn(), o.Name, o.Logger),
+			)
+		})
 	}
 }
