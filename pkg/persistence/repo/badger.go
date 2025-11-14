@@ -85,7 +85,9 @@ func (r *BadgerRepository[T]) insert(ctx context.Context, entity T) error {
 	}
 	createdAtField := entityValue.FieldByName("CreatedAt")
 	if createdAtField.IsValid() && createdAtField.CanSet() && createdAtField.Type() == reflect.TypeOf(time.Time{}) {
-		createdAtField.Set(reflect.ValueOf(time.Now()))
+		if createdAtField.IsZero() { // 没有值的时候才更新
+			createdAtField.Set(reflect.ValueOf(time.Now()))
+		}
 	}
 	entity.SetUpdatedAt(time.Now())
 
@@ -279,7 +281,9 @@ func (r *BadgerRepository[T]) SaveBatch(ctx context.Context, entities []T) error
 				}
 				createdAtField := entityValue.FieldByName("CreatedAt")
 				if createdAtField.IsValid() && createdAtField.CanSet() && createdAtField.Type() == reflect.TypeOf(time.Time{}) {
-					createdAtField.Set(reflect.ValueOf(time.Now()))
+					if createdAtField.IsZero() { // 没有值的时候才更新
+						createdAtField.Set(reflect.ValueOf(time.Now()))
+					}
 				}
 				entity.SetUpdatedAt(time.Now())
 			} else if err != nil {
