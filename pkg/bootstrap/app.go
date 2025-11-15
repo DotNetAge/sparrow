@@ -13,7 +13,6 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/auth"
 	"github.com/DotNetAge/sparrow/pkg/config"
 	"github.com/DotNetAge/sparrow/pkg/entity"
-	"github.com/DotNetAge/sparrow/pkg/eventbus"
 	"github.com/DotNetAge/sparrow/pkg/logger"
 	"github.com/DotNetAge/sparrow/pkg/messaging"
 	"github.com/DotNetAge/sparrow/pkg/tasks"
@@ -101,22 +100,22 @@ func (app *App) NeedCleanup(process usecase.GracefulClose) {
 }
 
 // GetEventBus 获取事件总线实例
-func (app *App) GetEventBus() eventbus.EventBus {
-	var bus eventbus.EventBus
-	if err := app.Container.ResolveInstance(&bus); err != nil {
-		panic(fmt.Errorf("解析事件总线失败: %w", err))
-	}
-	return bus
-}
+// func (app *App) GetEventBus() eventbus.EventBus {
+// 	var bus eventbus.EventBus
+// 	if err := app.Container.ResolveInstance(&bus); err != nil {
+// 		panic(fmt.Errorf("解析事件总线失败: %w", err))
+// 	}
+// 	return bus
+// }
 
-// GetEventStore 获取事件存储实例
-func (app *App) GetEventStore() usecase.EventStore {
-	var store usecase.EventStore
-	if err := app.Container.ResolveInstance(&store); err != nil {
-		panic(fmt.Errorf("解析事件存储失败: %w", err))
-	}
-	return store
-}
+// // GetEventStore 获取事件存储实例
+// func (app *App) GetEventStore() usecase.EventStore {
+// 	var store usecase.EventStore
+// 	if err := app.Container.ResolveInstance(&store); err != nil {
+// 		panic(fmt.Errorf("解析事件存储失败: %w", err))
+// 	}
+// 	return store
+// }
 
 // GetPub 获取事件发布实例(基于数据实现)
 func (app *App) GetPub() *messaging.EventPublisher {

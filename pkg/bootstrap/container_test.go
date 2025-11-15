@@ -361,25 +361,25 @@ func TestContainer_CustomTypes(t *testing.T) {
 	}
 }
 
-// 测试App的实例化和事件总线获取
-func TestApp_InstantiationWithEventBus(t *testing.T) {
-	// 由于这是单元测试环境，直接使用Mock配置来避免实际的外部依赖
-	t.Setenv("APP_NAME", "test-app")
-	t.Setenv("BADGER_DATA_DIR", "/tmp/test-badger")
-	t.Setenv("BADGER_EVENT_STORE_DIR", "/tmp/test-badger-events")
-	
-	// 实例化App，按照用户指定的格式
-	app := NewApp(
-		HealthCheck(),     // 健康度检查
-		BadgerDB(),        // 数据存储
-		BadgerStore(),     // 事件存储
-		NatsBus(),         // 事件总线
-		Messaging(),       // 消息处理（实例化Pub/Sub）
-	)
+// // 测试App的实例化和事件总线获取
+// func TestApp_InstantiationWithEventBus(t *testing.T) {
+// 	// 由于这是单元测试环境，直接使用Mock配置来避免实际的外部依赖
+// 	t.Setenv("APP_NAME", "test-app")
+// 	t.Setenv("BADGER_DATA_DIR", "/tmp/test-badger")
+// 	t.Setenv("BADGER_EVENT_STORE_DIR", "/tmp/test-badger-events")
 
-	// 测试获取事件总线
-	bus := app.GetEventBus()
-	if bus == nil {
-		t.Fatal("Expected non-nil event bus")
-	}
-}
+// 	// 实例化App，按照用户指定的格式
+// 	app := NewApp(
+// 		HealthCheck(),     // 健康度检查
+// 		BadgerDB(),        // 数据存储
+// 		BadgerStore(),     // 事件存储
+// 		NatsBus(),         // 事件总线
+// 		Messaging(),       // 消息处理（实例化Pub/Sub）
+// 	)
+
+// 	// 测试获取事件总线
+// 	bus := app.GetEventBus()
+// 	if bus == nil {
+// 		t.Fatal("Expected non-nil event bus")
+// 	}
+// }

@@ -10,9 +10,8 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/config"
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/eventbus"
-	sb "github.com/DotNetAge/sparrow/pkg/eventbus/nats"
-	"github.com/DotNetAge/sparrow/pkg/eventbus/rabbitmq"
-	redis_bus "github.com/DotNetAge/sparrow/pkg/eventbus/redis"
+
+	// "github.com/DotNetAge/sparrow/pkg/eventbus"
 	"github.com/DotNetAge/sparrow/pkg/messaging"
 	"github.com/DotNetAge/sparrow/pkg/persistence/eventstore"
 	"github.com/DotNetAge/sparrow/pkg/persistence/repo"
@@ -176,61 +175,61 @@ func SQLStore() Option {
 }
 
 // Messaging 使用事件总线作为消息发布
-func Messaging() Option {
-	return func(a *App) {
-		a.Container.Register(func() *messaging.EventPublisher {
-			bus := a.GetEventBus()
-			store := a.GetEventStore()
-			if bus == nil || store == nil {
-				a.Logger.Error("事件总线或事件存储未配置，无法创建事件发布者")
-				panic("事件总线或事件存储未配置，无法创建事件发布者")
-			}
+// func Messaging() Option {
+// 	return func(a *App) {
+// 		a.Container.Register(func() *messaging.EventPublisher {
+// 			bus := a.GetEventBus()
+// 			store := a.GetEventStore()
+// 			if bus == nil || store == nil {
+// 				a.Logger.Error("事件总线或事件存储未配置，无法创建事件发布者")
+// 				panic("事件总线或事件存储未配置，无法创建事件发布者")
+// 			}
 
-			// appName := strings.ReplaceAll(a.Config.App.Name, "-", "_")
-			return messaging.NewEventPublisher(store, bus, a.Name)
-		})
-	}
-}
+// 			// appName := strings.ReplaceAll(a.Config.App.Name, "-", "_")
+// 			return messaging.NewEventPublisher(store, bus, a.Name)
+// 		})
+// 	}
+// }
 
-// NatsBus 使用NATS作为事件总线
-func NatsBus() Option {
-	return func(o *App) {
-		o.Container.Register(func() eventbus.EventBus {
-			eventBus, err := sb.NewNatsEventBus(&o.Config.NATS)
-			if err != nil {
-				o.Logger.Error("创建NATS事件总线失败", "error", err)
-				panic(err)
-			}
-			return eventBus
-		})
-	}
-}
+// // NatsBus 使用NATS作为事件总线
+// func NatsBus() Option {
+// 	return func(o *App) {
+// 		o.Container.Register(func() eventbus.EventBus {
+// 			eventBus, err := sb.NewNatsEventBus(&o.Config.NATS)
+// 			if err != nil {
+// 				o.Logger.Error("创建NATS事件总线失败", "error", err)
+// 				panic(err)
+// 			}
+// 			return eventBus
+// 		})
+// 	}
+// }
 
-func RedisBus() Option {
-	return func(o *App) {
-		o.Container.Register(func() eventbus.EventBus {
-			eventBus, err := redis_bus.NewRedisEventBus(&o.Config.Redis)
-			if err != nil {
-				o.Logger.Error("创建Redis事件总线失败", "error", err)
-				panic(err)
-			}
-			return eventBus
-		})
-	}
-}
+// func RedisBus() Option {
+// 	return func(o *App) {
+// 		o.Container.Register(func() eventbus.EventBus {
+// 			eventBus, err := redis_bus.NewRedisEventBus(&o.Config.Redis)
+// 			if err != nil {
+// 				o.Logger.Error("创建Redis事件总线失败", "error", err)
+// 				panic(err)
+// 			}
+// 			return eventBus
+// 		})
+// 	}
+// }
 
-func RabbitMQBus() Option {
-	return func(o *App) {
-		o.Container.Register(func() eventbus.EventBus {
-			eventBus, err := rabbitmq.NewRabbitMQEventBus(&o.Config.RabbitMQ)
-			if err != nil {
-				o.Logger.Error("创建RabbitMQ事件总线失败", "error", err)
-				panic(err)
-			}
-			return eventBus
-		})
-	}
-}
+// func RabbitMQBus() Option {
+// 	return func(o *App) {
+// 		o.Container.Register(func() eventbus.EventBus {
+// 			eventBus, err := rabbitmq.NewRabbitMQEventBus(&o.Config.RabbitMQ)
+// 			if err != nil {
+// 				o.Logger.Error("创建RabbitMQ事件总线失败", "error", err)
+// 				panic(err)
+// 			}
+// 			return eventBus
+// 		})
+// 	}
+// }
 
 // MemBus 使用内存作为事件总线
 func MemBus() Option {
