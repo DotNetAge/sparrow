@@ -737,21 +737,41 @@ func (r *BadgerRepository[T]) compareField(fieldValue interface{}, operator stri
 		return strings.Contains(fieldValueStr, fmt.Sprintf("%v", conditionValue))
 	case "IN":
 		// 检查字段值是否在条件值列表中
-		// 使用反射来处理各种类型的切片
-		value := reflect.ValueOf(conditionValue)
-		if value.Kind() == reflect.Slice {
-			for i := 0; i < value.Len(); i++ {
-				item := value.Index(i)
-				if fmt.Sprintf("%v", item.Interface()) == fieldValueStr {
+		// 首先检查字段值是否是数组/切片类型
+		fieldReflectValue := reflect.ValueOf(fieldValue)
+		if fieldReflectValue.Kind() == reflect.Slice || fieldReflectValue.Kind() == reflect.Array {
+			// 如果字段值是数组，检查数组中是否有元素在条件值列表中
+			for i := 0; i < fieldReflectValue.Len(); i++ {
+				fieldElement := fmt.Sprintf("%v", fieldReflectValue.Index(i).Interface())
+				if r.isValueInSlice(fieldElement, conditionValue) {
 					return true
 				}
 			}
+			return false
+		} else {
+			// 如果字段值不是数组，直接检查字段值是否在条件值列表中
+			return r.isValueInSlice(fieldValueStr, conditionValue)
 		}
-		return false
 	default:
 		// 其他操作符可以根据需要实现
 		return false
 	}
+}
+
+// isValueInSlice 检查值是否在切片中
+func (r *BadgerRepository[T]) isValueInSlice(value string, slice interface{}) bool {
+	sliceValue := reflect.ValueOf(slice)
+	if sliceValue.Kind() != reflect.Slice {
+		return false
+	}
+	
+	for i := 0; i < sliceValue.Len(); i++ {
+		item := fmt.Sprintf("%v", sliceValue.Index(i).Interface())
+		if item == value {
+			return true
+		}
+	}
+	return false
 }
 
 // sortEntities 对实体列表进行排序
