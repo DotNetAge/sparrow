@@ -39,21 +39,21 @@ func (j *JetStreamIndexer) GetAllAggregateIDs(aggregateType string) ([]string, e
 	ctx := context.Background()
 
 	// 设置上下文超时
-	_, cancel := context.WithTimeout(ctx, 30*time.Second)
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
 	// 构建消费者配置
-	consumerName := fmt.Sprintf("TMP_INDEXER_%s_%s", j.streamName, aggregateType)
+	// consumerName := fmt.Sprintf("TMP_INDEXER_%s_%s", j.streamName, aggregateType)
 
 	cfg := jetstream.ConsumerConfig{
-		Durable:       consumerName,
+		// Durable:       consumerName,
 		AckPolicy:     jetstream.AckExplicitPolicy,
 		FilterSubject: fmt.Sprintf("%s.*.*", aggregateType),
 		DeliverPolicy: jetstream.DeliverAllPolicy,
 		ReplayPolicy:  jetstream.ReplayInstantPolicy,
 	}
 
-	stream, err := j.js.Stream(ctx, j.streamName)
+	stream, err := j.js.Stream(ctxWithTimeout, j.streamName)
 	if err != nil {
 		if err == jetstream.ErrStreamNotFound {
 			j.logger.Warn("[事件流读取器]获取流失败,聚合根不存在可能还未创建,不进行任何读取操作。", "stream", j.streamName, "error", err)
@@ -64,7 +64,7 @@ func (j *JetStreamIndexer) GetAllAggregateIDs(aggregateType string) ([]string, e
 		return nil, fmt.Errorf("[事件流读取器]获取流失败 %w", err)
 	}
 
-	consumer, err := stream.CreateOrUpdateConsumer(ctx, cfg)
+	consumer, err := stream.CreateConsumer(ctxWithTimeout, cfg)
 	if err != nil {
 		j.logger.Error("[事件流读取器]创建消费者失败", "stream", j.streamName, "error", err)
 		return nil, fmt.Errorf("[事件流读取器]创建消费者失败: %w", err)
@@ -121,9 +121,9 @@ func (j *JetStreamIndexer) GetAllAggregateIDs(aggregateType string) ([]string, e
 		allKeys = append(allKeys, k)
 	}
 	// 删除临时消费者
-	if err := stream.DeleteConsumer(ctx, consumerName); err != nil {
-		j.logger.Error("[聚合根索引器]删除临时消费者失败", "stream", j.streamName, "error", err)
-		return nil, fmt.Errorf("[聚合根索引器]删除临时消费者失败: %w", err)
-	}
+	// if err := stream.DeleteConsumer(ctx, consumerName); err != nil {
+	// 	j.logger.Error("[聚合根索引器]删除临时消费者失败", "stream", j.streamName, "error", err)
+	// 	return nil, fmt.Errorf("[聚合根索引器]删除临时消费者失败: %w", err)
+	// }
 	return allKeys, nil
 }

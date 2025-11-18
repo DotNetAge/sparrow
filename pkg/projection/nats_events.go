@@ -44,10 +44,10 @@ func (j *JetStreamEventReader) GetEvents(aggregateType string, eventType string)
 	defer cancel()
 
 	// 构建消费者配置
-	consumerName := fmt.Sprintf("TMP_EVENT_READER_%s_%s", j.streamName, aggregateType)
+	// consumerName := fmt.Sprintf("TMP_EVENT_READER_%s_%s", j.streamName, aggregateType)
 
 	cfg := jetstream.ConsumerConfig{
-		Durable:       consumerName,
+		// Durable:       consumerName,
 		AckPolicy:     jetstream.AckExplicitPolicy,
 		FilterSubject: fmt.Sprintf("%s.*.*", aggregateType),
 		DeliverPolicy: jetstream.DeliverAllPolicy,
@@ -65,7 +65,7 @@ func (j *JetStreamEventReader) GetEvents(aggregateType string, eventType string)
 		return nil, fmt.Errorf("[事件流读取器]获取流失败 %w", err)
 	}
 
-	consumer, err := stream.CreateOrUpdateConsumer(ctx, cfg)
+	consumer, err := stream.CreateConsumer(ctx, cfg)
 	if err != nil {
 		j.logger.Error("[事件流读取器]创建消费者失败", "stream", j.streamName, "error", err)
 		return nil, fmt.Errorf("[事件流读取器]创建消费者失败: %w", err)
@@ -124,10 +124,10 @@ func (j *JetStreamEventReader) GetEvents(aggregateType string, eventType string)
 	}
 
 	// 删除临时消费者，清理资源
-	if err := stream.DeleteConsumer(ctx, consumerName); err != nil {
-		j.logger.Error("[事件流读取器]删除临时消费者失败", "stream", j.streamName, "error", err)
-		// 不返回错误，因为主要功能已完成
-	}
+	// if err := stream.DeleteConsumer(ctx, consumerName); err != nil {
+	// 	j.logger.Error("[事件流读取器]删除临时消费者失败", "stream", j.streamName, "error", err)
+	// 	// 不返回错误，因为主要功能已完成
+	// }
 
 	// 将map中的事件转换为切片
 	events := make([]entity.DomainEvent, 0, len(highestVersionEvents))
