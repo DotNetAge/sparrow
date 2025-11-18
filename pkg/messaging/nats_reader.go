@@ -76,7 +76,8 @@ func (r *JetStreamReader) getEvents(ctx context.Context, aggregateID string, fil
 	defer cancel()
 
 	// 构建消费者配置
-	consumerName := fmt.Sprintf("%s-%s-%s", r.serviceName, r.agType, aggregateID)
+	// 此消费者名称必须每次都是变的，否则会导致无法拉取到数据
+	consumerName := fmt.Sprintf("%s-%s-%s-%d", r.serviceName, r.agType, aggregateID, time.Now().UnixNano())
 	cfg := jetstream.ConsumerConfig{
 		// Durable:       consumerName, // 持久化消费者，用于订阅事件流，此处是不能使用的，否则会拉取不到数据。
 		Name:          consumerName,                                  // 临时消费者
