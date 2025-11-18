@@ -14,8 +14,9 @@ import (
 )
 
 // JetStreamEventReader 基于NATS JetStream实现的事件读取器
-// 实现StreamEventReader接口，提供事件流的读取、重放和订阅功能
-
+//
+// 实现StreamEventReader接口，提供事件流的读取、重放和订阅功能。
+// 此事件读取器采用临时事件消费者模式（非持久化消费者），确保每一次都能全量拉取到消息正确地重播聚合根。每次消费完成后，会自动删除消费者。
 type JetStreamReader struct {
 	StreamReader
 	js          jetstream.JetStream
@@ -77,11 +78,12 @@ func (r *JetStreamReader) getEvents(ctx context.Context, aggregateID string, fil
 	// 构建消费者配置
 	consumerName := fmt.Sprintf("%s-%s-%s", r.serviceName, r.agType, aggregateID)
 	cfg := jetstream.ConsumerConfig{
-		Durable:       consumerName,
-		AckPolicy:     jetstream.AckExplicitPolicy,
-		FilterSubject: fmt.Sprintf("%s.%s.*", r.agType, aggregateID),
-		DeliverPolicy: jetstream.DeliverAllPolicy,
-		ReplayPolicy:  jetstream.ReplayInstantPolicy,
+		// Durable:       consumerName, // 持久化消费者，用于订阅事件流，此处是不能使用的，否则会拉取不到数据。
+		Name:          consumerName,                                  // 临时消费者
+		AckPolicy:     jetstream.AckExplicitPolicy,                   // 确认模式
+		FilterSubject: fmt.Sprintf("%s.%s.*", r.agType, aggregateID), // 单独过滤器
+		DeliverPolicy: jetstream.DeliverAllPolicy,                    // 获取所有事件,全量重播
+		ReplayPolicy:  jetstream.ReplayInstantPolicy,                 // 立即重放所有消息(用于控制重播速率)
 	}
 
 	consumer, err := r.getConsumer(ctxWithTimeout, cfg)

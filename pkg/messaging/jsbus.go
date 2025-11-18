@@ -94,10 +94,11 @@ func (s *JetStreamBus) Start(ctx context.Context) error {
 		Durable:        s.consumerName,              // 持久化消费者（重启不丢失进度）
 		AckPolicy:      jetstream.AckExplicitPolicy, // 保持显式确认以确保可靠处理
 		FilterSubjects: s.filterSubjects,
-		DeliverPolicy:  jetstream.DeliverAllPolicy,    // 从最早的消息开始投递，支持事件重放
-		ReplayPolicy:   jetstream.ReplayInstantPolicy, // 立即重放所有消息
+		// DeliverPolicy:  jetstream.DeliverLastPolicy, // 首次启动从最新消息开始（避免重复处理历史）
+		MaxAckPending: 1000, // 流控阈值（避免未确认消息堆积）
+		RateLimit:     500,  // 速率限制（每秒 500 条，保护投影处理）		ReplayPolicy:   jetstream.ReplayInstantPolicy, // 立即重放所有消息
 		// 核心新增：跨进程消费者共享的分组名称（所有消费者实例必须相同）
-		DeliverGroup: fmt.Sprintf("%s.Consumer.Group", s.serviceName),
+		DeliverGroup: fmt.Sprintf("%s.Consumer.Group", s.serviceName), // 启用负载均衡，确保消息均匀分布。投递组是竞争模式，确保每个消息只被一个消费者处理。
 		// 可选优化：确保连接稳定
 		// FlowControl:   true,             // 启用流量控制，避免消息过载
 		// IdleHeartbeat: 15 * time.Second, // 15秒心跳，检测连接状态
