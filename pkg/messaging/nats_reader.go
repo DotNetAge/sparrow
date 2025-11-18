@@ -76,25 +76,28 @@ func (r *JetStreamReader) getEvents(ctx context.Context, aggregateID string, fil
 	defer cancel()
 
 	// 构建消费者配置
-	// 此消费者名称必须每次都是变的，否则会导致无法拉取到数据
-	consumerName := fmt.Sprintf("%s-%s-%s-%d", r.serviceName, r.agType, aggregateID, time.Now().UnixNano())
+	// 使用 ephemeral consumer（不设置 Name/Durable），由服务端在没有订阅时自动清理，避免频繁 Create/Delete 的控制平面压力
 	cfg := jetstream.ConsumerConfig{
-		// Durable:       consumerName, // 持久化消费者，用于订阅事件流，此处是不能使用的，否则会拉取不到数据。
-		Name:          consumerName,                                  // 临时消费者
 		AckPolicy:     jetstream.AckExplicitPolicy,                   // 确认模式
 		FilterSubject: fmt.Sprintf("%s.%s.*", r.agType, aggregateID), // 单独过滤器
 		DeliverPolicy: jetstream.DeliverAllPolicy,                    // 获取所有事件,全量重播
 		ReplayPolicy:  jetstream.ReplayInstantPolicy,                 // 立即重放所有消息(用于控制重播速率)
 	}
 
-	consumer, err := r.getConsumer(ctxWithTimeout, cfg)
+	// 直接在 stream 上创建 ephemeral consumer，避免 CreateOrUpdateConsumer 复用已有持久 consumer
+	stream, err := r.js.Stream(ctxWithTimeout, r.serviceName)
 	if err != nil {
-		return nil, err
+		if err == jetstream.ErrStreamNotFound {
+			return []entity.DomainEvent{}, nil
+		}
+		r.logger.Error("[事件流读取器]获取流失败", "stream", r.serviceName, "error", err)
+		return nil, fmt.Errorf("[事件流读取器]获取流失败: %w", err)
 	}
 
-	// 当消费者为空时，证明聚合根不存在事件流，直接返回空事件列表
-	if consumer == nil {
-		return []entity.DomainEvent{}, nil
+	consumer, err := stream.CreateConsumer(ctxWithTimeout, cfg)
+	if err != nil {
+		r.logger.Error("[事件流读取器]创建临时消费者失败", "stream", r.serviceName, "error", err)
+		return nil, fmt.Errorf("[事件流读取器]创建临时消费者失败: %w", err)
 	}
 
 	// 收集事件
@@ -203,9 +206,9 @@ func (r *JetStreamReader) ReplayFromOffset(ctx context.Context, aggregateID stri
 	defer cancel()
 
 	// 构建消费者配置，从指定偏移量开始
-	consumerName := fmt.Sprintf("%s-%s-%s-offset", r.serviceName, r.agType, aggregateID)
+	// consumerName := fmt.Sprintf("%s-%s-%s-offset", r.serviceName, r.agType, aggregateID)
 	cfg := jetstream.ConsumerConfig{
-		Durable:       consumerName,
+		// Durable:       consumerName,
 		AckPolicy:     jetstream.AckExplicitPolicy,
 		FilterSubject: fmt.Sprintf("%s.%s.*", r.agType, aggregateID),
 		DeliverPolicy: jetstream.DeliverByStartSequencePolicy,
@@ -224,7 +227,7 @@ func (r *JetStreamReader) ReplayFromOffset(ctx context.Context, aggregateID stri
 	// 获取消息
 	batch, err := consumer.FetchNoWait(1000)
 	if err != nil {
-		r.logger.Error("[事件流读取器]获取消息失败", "stream", r.serviceName, "consumer", consumerName, "error", err)
+		r.logger.Error("[事件流读取器]获取消息失败", "stream", r.serviceName, "error", err)
 		return fmt.Errorf("[事件流读取器]获取消息失败: %w", err)
 	}
 
@@ -232,7 +235,7 @@ func (r *JetStreamReader) ReplayFromOffset(ctx context.Context, aggregateID stri
 		// 反序列化事件
 		var event entity.BaseEvent
 		if err := json.Unmarshal(msg.Data(), &event); err != nil {
-			r.logger.Error("[事件流读取器]反序列化事件失败", "stream", r.serviceName, "consumer", consumerName, "error", err)
+			r.logger.Error("[事件流读取器]反序列化事件失败", "stream", r.serviceName, "error", err)
 			msg.Ack()
 			continue
 		}
