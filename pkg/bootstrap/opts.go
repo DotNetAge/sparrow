@@ -475,11 +475,11 @@ func WithPipelineType(taskTypes ...string) AdvancedTaskOption {
 
 // RetryConfig 重试配置
 type RetryConfig struct {
-	MaxRetries       int           // 最大重试次数，默认3次
-	InitialBackoff   time.Duration // 初始退避时间，默认1秒
-	MaxBackoff       time.Duration // 最大退避时间，默认30秒
-	BackoffMultiplier float64      // 退避倍数，默认2.0（指数退避）
-	Enabled          bool          // 是否启用重试，默认true
+	MaxRetries        int           // 最大重试次数，默认3次
+	InitialBackoff    time.Duration // 初始退避时间，默认1秒
+	MaxBackoff        time.Duration // 最大退避时间，默认30秒
+	BackoffMultiplier float64       // 退避倍数，默认2.0（指数退避）
+	Enabled           bool          // 是否启用重试，默认true
 }
 
 // DefaultRetryConfig 默认重试配置
@@ -501,24 +501,13 @@ func WithRetry(opts ...RetryOption) Option {
 		for _, opt := range opts {
 			opt(config)
 		}
-		
+
 		// 保存重试配置到App结构体
 		app.retryConfig = config
-		
+
 		// 确保使用支持重试的调度器
 		if app.Scheduler == nil {
 			// 如果没有调度器，创建支持重试的混合调度器
-			app.Scheduler = tasks.NewHybridTaskScheduler(
-				tasks.WithHybridLogger(app.Logger),
-				tasks.WithHybridWorkerCount(5, 1, 1),
-				tasks.WithHybridMaxConcurrentTasks(10),
-			)
-			app.NeedCleanup(app.Scheduler.(usecase.GracefulClose))
-		}
-		
-		// 检查当前调度器是否支持重试
-		if _, ok := app.Scheduler.(*tasks.MemoryTaskScheduler); ok {
-			app.Logger.Warn("当前调度器不支持重试，已自动切换到混合调度器")
 			app.Scheduler = tasks.NewHybridTaskScheduler(
 				tasks.WithHybridLogger(app.Logger),
 				tasks.WithHybridWorkerCount(5, 1, 1),
