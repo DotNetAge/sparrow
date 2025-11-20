@@ -1,35 +1,32 @@
 # Sparrow 任务调度系统
 
-## 概述
-
-Sparrow 任务调度系统是一个灵活、高效的任务调度框架，支持多种执行模式和调度器类型。系统采用模块化设计，遵循 SOLID 原则，提供了丰富的配置选项和扩展能力。
+Sparrow 任务调度系统是一个轻量级、高性能的Go语言任务调度框架，支持多种执行模式、重试机制和清理策略。
 
 ## 核心特性
 
-- **多种执行模式**：支持并发、顺序、流水线三种执行模式
-- **混合调度器**：根据任务类型自动选择最优执行策略
-- **任务生命周期管理**：完整的任务状态跟踪和控制
-- **优雅关闭**：支持任务的优雅关闭和资源清理
-- **统计监控**：提供详细的执行统计信息
-- **高度可配置**：通过 Option 模式提供灵活的配置选项
+- **多种调度器类型**：支持单一调度器和混合调度器
+- **执行模式**：并发、顺序、流水线三种执行模式
+- **重试机制**：支持多种退避策略和可配置的重试策略
+- **任务生命周期管理**：完整的任务状态跟踪和管理
+- **自动清理**：基于时间和数量的任务清理策略
+- **统计监控**：提供详细的执行统计和重试监控
+- **优雅关闭**：支持任务的优雅取消和资源清理
 
-## 1. 架构设计
+## 架构设计
 
-### 1.1 核心接口
+### 核心接口
 
 #### TaskScheduler 接口
 ```go
 type TaskScheduler interface {
     usecase.GracefulClose
+    usecase.Startable
     Schedule(task Task) error
-    Start(ctx context.Context) error
     Stop() error
     Cancel(taskID string) error
     GetTaskStatus(taskID string) (TaskStatus, error)
     ListTasks() []TaskInfo
     SetMaxConcurrentTasks(max int) error
-    SetExecutionMode(mode ExecutionMode) error
-    GetExecutionMode() ExecutionMode
 }
 ```
 
@@ -47,536 +44,433 @@ type Task interface {
 }
 ```
 
-### 1.2 执行模式
+### 任务状态
+
+- `waiting`: 等待执行
+- `running`: 正在执行
+- `completed`: 执行成功
+- `failed`: 执行失败
+- `cancelled`: 已取消
+- `retrying`: 重试中
+- `dead_letter`: 死信（重试次数耗尽）
+
+### 执行模式
+
+- `ExecutionModeConcurrent`: 并发执行（默认）
+- `ExecutionModeSequential`: 顺序执行
+- `ExecutionModePipeline`: 流水线执行
+
+## 调度器类型
+
+### 1. MemoryTaskScheduler - 单一调度器
+
+内存任务调度器，支持所有基础功能：
 
 ```go
-type ExecutionMode int
-
-const (
-    ExecutionModeConcurrent ExecutionMode = iota  // 并发执行
-    ExecutionModeSequential                       // 顺序执行
-    ExecutionModePipeline                         // 流水线执行
-)
-```
-
-### 1.3 任务状态
-
-```go
-type TaskStatus string
-
-const (
-    TaskStatusWaiting   TaskStatus = "waiting"    // 等待中
-    TaskStatusRunning   TaskStatus = "running"    // 执行中
-    TaskStatusCompleted TaskStatus = "completed"  // 已完成
-    TaskStatusCancelled TaskStatus = "cancelled"  // 已取消
-    TaskStatusFailed    TaskStatus = "failed"     // 执行失败
-)
-```
-
-## 2. 调度器类型
-
-### 2.1 MemoryTaskScheduler（单一调度器）
-
-基于内存的任务调度器，支持三种执行模式：
-
-**特性**：
-- 支持并发、顺序、流水线三种执行模式
-- 优先级队列调度
-- 工作池管理
-- 任务取消和状态管理
-
-**适用场景**：
-- 简单的任务调度需求
-- 单一执行模式的应用
-- 对性能要求较高的场景
-
-**使用方式**：
-
-```go
-// 基础用法
-app, err := bootstrap.NewApp(
-    bootstrap.Tasks(), // 默认并发调度器
+// 创建调度器
+scheduler := NewMemoryTaskScheduler(
+    WithWorkerCount(5),              // 工作协程数
+    WithMaxConcurrentTasks(10),      // 最大并发任务数
+    WithCleanupPolicy(policy),       // 清理策略
+    WithLogger(logger),              // 日志记录器
 )
 
-// 高级配置
-app, err := bootstrap.NewApp(
-    bootstrap.Tasks(
-        bootstrap.WithWorkerCount(5),           // 工作协程数
-        bootstrap.WithMaxConcurrentTasks(20),   // 最大并发任务数
-    ),
-)
-```
-
-### 2.2 HybridTaskScheduler（混合调度器）
-
-智能任务调度器，根据任务类型自动选择执行策略：
-
-**特性**：
-- 根据任务类型自动选择执行模式
-- 支持动态策略注册
-- 提供执行统计信息
-- 多调度器协调管理
-
-**执行策略**：
-```go
-type TaskExecutionPolicy string
-
-const (
-    PolicyConcurrent TaskExecutionPolicy = "concurrent"  // 并发执行
-    PolicySequential TaskExecutionPolicy = "sequential"  // 顺序执行
-    PolicyPipeline   TaskExecutionPolicy = "pipeline"    // 流水线执行
-)
-```
-
-**适用场景**：
-- 复杂的任务调度需求
-- 多种类型任务并存
-- 需要精细控制执行策略
-- 需要监控和统计的场景
-
-## 3. 使用指南
-
-### 3.1 使用方式对比
-
-**推荐使用简洁方式**，符合Go语言哲学：
-
-| 方式 | 推荐度 | 代码行数 | 适用场景 |
-|------|--------|----------|----------|
-| `app.RunTask()` | ⭐⭐⭐⭐⭐ | 1行 | 90%的日常使用场景 |
-| `app.RunTypedTask()` | ⭐⭐⭐⭐⭐ | 1行 | 混合调度器中的类型化任务 |
-| `tasks.NewTaskBuilder()` | ⭐⭐ | 5-10行 | 延迟执行、周期性任务等特殊需求 |
-
-**为什么推荐简洁方式？**
-- ✅ 符合Go的简洁哲学
-- ✅ 减少样板代码
-- ✅ 自动处理任务ID生成
-- ✅ 代码更易读和维护
-
-### 3.2 快速开始 - 最简洁的方式
-
-**推荐使用 `app.RunTask` 方式**，这是最符合Go语言简洁哲学的用法：
-
-```go
-package main
-
-import (
-    "context"
-    "log"
-    "time"
-    
-    "github.com/DotNetAge/sparrow/pkg/bootstrap"
-)
-
-func main() {
-    // 创建应用实例 - 默认并发调度器
-    app, err := bootstrap.NewApp(bootstrap.Tasks())
-    if err != nil {
-        log.Fatalf("创建应用失败: %v", err)
-    }
-    
-    // 启动应用
-    if err := app.Start(); err != nil {
-        log.Fatalf("启动应用失败: %v", err)
-    }
-    defer app.CleanUp()
-    
-    // 提交任务 - 最简洁的方式
-    taskID := app.RunTask(func(ctx context.Context) error {
-        log.Println("执行任务...")
-        time.Sleep(2 * time.Second)
-        log.Println("任务完成")
-        return nil
-    })
-    
-    log.Printf("任务已提交，ID: %s", taskID)
-    
-    // 等待任务完成
-    time.Sleep(5 * time.Second)
+// 启动调度器
+ctx := context.Background()
+err := scheduler.Start(ctx)
+if err != nil {
+    log.Fatal(err)
 }
+defer scheduler.Close(ctx)
 ```
 
-### 3.3 单一调度器配置
+#### 执行模式控制
+
+单一调度器支持动态切换执行模式：
 
 ```go
-package main
+// 设置为顺序执行模式
+scheduler.SetExecutionMode(ExecutionModeSequential)
 
-import (
-    "log"
-    
-    "github.com/DotNetAge/sparrow/pkg/bootstrap"
+// 设置为流水线执行模式  
+scheduler.SetExecutionMode(ExecutionModePipeline)
+
+// 设置为并发执行模式
+scheduler.SetExecutionMode(ExecutionModeConcurrent)
+
+// 获取当前执行模式
+mode := scheduler.GetExecutionMode()
+```
+
+### 2. HybridTaskScheduler - 混合调度器
+
+混合调度器根据任务类型自动选择执行策略：
+
+```go
+// 创建混合调度器
+scheduler := NewHybridTaskScheduler(
+    WithHybridWorkerCount(5, 1, 1),     // 并发、顺序、流水线工作协程数
+    WithHybridMaxConcurrentTasks(10),    // 最大并发任务数
+    WithHybridLogger(logger),            // 日志记录器
 )
 
-func main() {
-    // 创建应用实例 - 带配置
-    app, err := bootstrap.NewApp(
-        bootstrap.Tasks(
-            bootstrap.WithWorkerCount(10),          // 10个工作协程
-            bootstrap.WithMaxConcurrentTasks(50),   // 最大50个并发任务
-            bootstrap.WithSequentialMode(),         // 顺序执行模式
-        ),
-    )
-    if err != nil {
-        log.Fatalf("创建应用失败: %v", err)
-    }
-    
-    // 启动应用
-    if err := app.Start(); err != nil {
-        log.Fatalf("启动应用失败: %v", err)
-    }
-    defer app.CleanUp()
-    
-    // 提交多个任务
-    for i := 0; i < 5; i++ {
-        taskID := app.RunTask(func(ctx context.Context) error {
-            log.Printf("执行任务 %d", i+1)
-            return nil
-        })
-        log.Printf("任务 %d 已提交，ID: %s", i+1, taskID)
-    }
+// 启动调度器
+err := scheduler.Start(ctx)
+if err != nil {
+    log.Fatal(err)
 }
+defer scheduler.Close(ctx)
+
+// 注册任务类型策略
+scheduler.RegisterTaskPolicy("concurrent-task", PolicyConcurrent)
+scheduler.RegisterTaskPolicy("sequential-task", PolicySequential)
+scheduler.RegisterTaskPolicy("pipeline-task", PolicyPipeline)
 ```
 
-### 3.4 混合调度器配置
+#### 执行策略
+
+- `PolicyConcurrent`: 并发执行策略（默认）
+- `PolicySequential`: 顺序执行策略
+- `PolicyPipeline`: 流水线执行策略
+
+## 重试机制
+
+### 重试策略配置
 
 ```go
-package main
-
-import (
-    "log"
-    
-    "github.com/DotNetAge/sparrow/pkg/bootstrap"
-)
-
-func main() {
-    // 创建混合调度器应用
-    app, err := bootstrap.NewApp(
-        bootstrap.AdvancedTasks(
-            bootstrap.WithConcurrentWorkers(5),           // 并发调度器工作协程数
-            bootstrap.EnableSequentialExecution(),        // 启用顺序执行模式
-            bootstrap.EnablePipelineExecution(),          // 启用流水线执行模式
-            bootstrap.WithMaxConcurrentTasks(20),          // 最大并发任务数
-            // 配置任务类型策略
-            bootstrap.WithSequentialType("email", "report"),
-            bootstrap.WithConcurrentType("image", "notification"),
-            bootstrap.WithPipelineType("data-processing"),
-        ),
-    )
-    if err != nil {
-        log.Fatalf("创建应用失败: %v", err)
-    }
-    
-    // 启动应用
-    if err := app.Start(); err != nil {
-        log.Fatalf("启动应用失败: %v", err)
-    }
-    defer app.CleanUp()
-    
-    // 提交不同类型的任务 - 简洁方式
-    emailTaskID := app.RunTypedTask("email", func(ctx context.Context) error {
-        log.Println("发送邮件...")
-        return nil
-    })
-    
-    imageTaskID := app.RunTypedTask("image", func(ctx context.Context) error {
-        log.Println("处理图片...")
-        return nil
-    })
-    
-    dataTaskID := app.RunTypedTask("data-processing", func(ctx context.Context) error {
-        log.Println("处理数据...")
-        return nil
-    })
-    
-    log.Printf("邮件任务: %s", emailTaskID)
-    log.Printf("图片任务: %s", imageTaskID)
-    log.Printf("数据处理任务: %s", dataTaskID)
-}
-```
-
-### 3.5 高级任务创建 - TaskBuilder（可选）
-
-对于需要精细控制任务属性的场景，可以使用TaskBuilder：
-
-```go
-import "github.com/DotNetAge/sparrow/pkg/tasks"
-
-// 即时执行任务
-task := tasks.NewTaskBuilder().
-    WithID("task-1").
-    WithType("email").
+// 使用TaskBuilder创建可重试任务
+task := NewTaskBuilder().
+    WithType("retryable-task").
+    Immediate().
     WithHandler(func(ctx context.Context) error {
-        return sendEmail()
+        // 任务逻辑
+        return doWork()
     }).
-    WithImmediateExecution().
+    WithRetry(3).                                    // 最大重试3次
+    WithExponentialBackoff(1 * time.Second).        // 指数退避，初始1秒
+    WithMaxDelay(30 * time.Second).                 // 最大延迟30秒
+    Build()
+```
+
+### 退避策略
+
+- `BackoffStrategyFixed`: 固定间隔重试
+- `BackoffStrategyLinear`: 线性增长间隔
+- `BackoffStrategyExponential`: 指数增长间隔（默认）
+
+### 重试监控
+
+```go
+// 获取重试统计
+stats := scheduler.GetRetryStats()
+fmt.Printf("总重试次数: %d\n", stats["total_retries"])
+fmt.Printf("成功重试: %d\n", stats["successful_retries"])
+fmt.Printf("失败重试: %d\n", stats["failed_retries"])
+fmt.Printf("死信任务: %d\n", stats["dead_letter_count"])
+fmt.Printf("平均重试时间: %s\n", stats["average_retry_time"])
+```
+
+## 任务创建
+
+### 基础任务
+
+```go
+// 即时执行任务
+task := NewTaskBuilder().
+    WithType("immediate-task").
+    Immediate().
+    WithHandler(func(ctx context.Context) error {
+        fmt.Println("任务执行")
+        return nil
+    }).
     Build()
 
-// 延迟执行任务
-task := tasks.NewTaskBuilder().
-    WithID("task-2").
-    WithType("report").
+// 定时执行任务
+task := NewTaskBuilder().
+    WithType("scheduled-task").
+    ScheduleAt(time.Now().Add(1 * time.Hour)).
     WithHandler(func(ctx context.Context) error {
-        return generateReport()
+        fmt.Println("定时任务执行")
+        return nil
     }).
-    WithDelayedExecution(time.Now().Add(5 * time.Minute)).
     Build()
 
 // 周期性任务
-task := tasks.NewTaskBuilder().
-    WithID("task-3").
-    WithType("cleanup").
+task := NewTaskBuilder().
+    WithType("recurring-task").
+    ScheduleRecurring(30 * time.Minute).
     WithHandler(func(ctx context.Context) error {
-        return cleanup()
+        fmt.Println("周期性任务执行")
+        return nil
     }).
-    WithRecurringExecution(time.Hour).
     Build()
-
-// 提交到调度器
-if err := app.Scheduler.Schedule(task); err != nil {
-    log.Printf("提交任务失败: %v", err)
-}
 ```
 
-**注意**：在大多数情况下，`app.RunTask` 和 `app.RunTypedTask` 已经足够使用，只有在需要延迟执行、周期性执行等特殊需求时才需要使用TaskBuilder。
-
-## 4. 高级功能
-
-### 4.1 任务取消
+### 可重试任务
 
 ```go
-// 提交任务并获取ID
-taskID := app.RunTask(func(ctx context.Context) error {
-    // 长时间运行的任务
-    for i := 0; i < 10; i++ {
-        select {
-        case <-ctx.Done():
-            log.Println("任务被取消")
-            return ctx.Err()
-        default:
-            log.Printf("任务进度: %d/10", i+1)
-            time.Sleep(1 * time.Second)
+retryableTask := NewTaskBuilder().
+    WithType("retryable-task").
+    Immediate().
+    WithHandler(func(ctx context.Context) error {
+        // 可能失败的任务逻辑
+        return doRiskyWork()
+    }).
+    WithRetry(5).                              // 最大重试5次
+    WithLinearBackoff(2 * time.Second).        // 线性退避，每次增加2秒
+    WithMaxDelay(1 * time.Minute).             // 最大延迟1分钟
+    Build()
+```
+
+### 任务回调
+
+```go
+task := NewTaskBuilder().
+    WithType("callback-task").
+    Immediate().
+    WithHandler(func(ctx context.Context) error {
+        return doWork()
+    }).
+    WithOnComplete(func(ctx context.Context, err error) {
+        if err != nil {
+            fmt.Printf("任务失败: %v\n", err)
+        } else {
+            fmt.Println("任务成功完成")
         }
-    }
-    return nil
-})
-
-// 取消任务
-err := app.CancelTask(taskID)
-if err != nil {
-    log.Printf("取消任务失败: %v", err)
-}
+    }).
+    WithOnCancel(func(ctx context.Context) {
+        fmt.Println("任务被取消")
+    }).
+    Build()
 ```
 
-### 4.2 任务状态查询
+## 清理策略
+
+### 清理策略配置
 
 ```go
-// 获取任务状态
-status, err := app.GetTaskStatus(taskID)
-if err != nil {
-    log.Printf("获取任务状态失败: %v", err)
-    return
+// 使用默认清理策略
+scheduler := NewMemoryTaskScheduler(
+    WithCleanupPolicy(DefaultCleanupPolicy()),
+)
+
+// 自定义清理策略
+policy := &CleanupPolicy{
+    CompletedTaskTTL:   1 * time.Hour,     // 已完成任务保留1小时
+    FailedTaskTTL:      2 * time.Hour,     // 失败任务保留2小时
+    CancelledTaskTTL:   30 * time.Minute,  // 已取消任务保留30分钟
+    MaxCompletedTasks:  500,               // 最多保留500个已完成任务
+    MaxFailedTasks:     200,               // 最多保留200个失败任务
+    CleanupInterval:    10 * time.Minute,  // 每10分钟清理一次
+    EnableAutoCleanup:  true,              // 启用自动清理
 }
 
-switch status {
-case tasks.TaskStatusWaiting:
-    log.Println("任务等待中")
-case tasks.TaskStatusRunning:
-    log.Println("任务执行中")
-case tasks.TaskStatusCompleted:
-    log.Println("任务已完成")
-case tasks.TaskStatusFailed:
-    log.Println("任务执行失败")
-case tasks.TaskStatusCancelled:
-    log.Println("任务已取消")
-}
+scheduler := NewMemoryTaskScheduler(
+    WithCleanupPolicy(policy),
+)
 ```
 
-### 4.3 任务列表
+### 清理统计
 
 ```go
-// 列出所有任务
-allTasks := app.ListTasks()
-for _, taskInfo := range allTasks {
-    log.Printf("任务ID: %s, 类型: %s, 状态: %s", 
-        taskInfo.ID, taskInfo.Type, taskInfo.Status)
-}
+// 获取清理统计
+stats := scheduler.GetCleanupStats()
+fmt.Printf("总任务数: %d\n", stats["total_tasks"])
+fmt.Printf("状态分布: %v\n", stats["status_counts"])
+fmt.Printf("清理策略: %v\n", stats["cleanup_policy"])
 ```
 
-### 4.4 动态配置调整
+## 运行策略调节
+
+### 动态配置调整
 
 ```go
 // 调整最大并发任务数
-err := app.SetMaxConcurrentTasks(100)
-if err != nil {
-    log.Printf("调整并发数失败: %v", err)
-}
+scheduler.SetMaxConcurrentTasks(20)
 
-// 对于单一调度器，可以调整执行模式
-err := app.SetExecutionMode(tasks.ExecutionModeSequential)
-if err != nil {
-    log.Printf("设置执行模式失败: %v", err)
+// 切换执行模式
+scheduler.SetExecutionMode(ExecutionModeSequential)
+
+// 获取当前执行模式
+mode := scheduler.GetExecutionMode()
+```
+
+### 混合调度器策略管理
+
+```go
+// 动态注册任务策略
+scheduler.RegisterTaskPolicy("new-task-type", PolicyConcurrent)
+
+// 获取执行统计
+stats := scheduler.GetStats()
+for policy, stat := range stats {
+    fmt.Printf("策略 %s: 总任务=%d, 完成=%d, 失败=%d, 进行中=%d\n",
+        policy, stat.TotalTasks, stat.CompletedTasks,
+        stat.FailedTasks, stat.RunningTasks)
 }
 ```
 
-### 4.5 混合调度器统计信息
+## 高级功能
+
+### 任务取消
 
 ```go
-// 获取混合调度器统计信息
-if stats, ok := app.GetTaskStats(); ok {
+// 调度任务
+err := scheduler.Schedule(task)
+if err != nil {
+    return err
+}
+
+// 取消任务
+err = scheduler.Cancel(task.ID())
+if err != nil {
+    fmt.Printf("取消任务失败: %v\n", err)
+}
+```
+
+### 状态查询
+
+```go
+// 获取任务状态
+status, err := scheduler.GetTaskStatus(task.ID())
+if err != nil {
+    fmt.Printf("获取状态失败: %v\n", err)
+} else {
+    fmt.Printf("任务状态: %s\n", status)
+}
+
+// 列出所有任务
+tasks := scheduler.ListTasks()
+for _, task := range tasks {
+    fmt.Printf("任务 %s: %s (%s)\n", task.ID, task.Type, task.Status)
+}
+```
+
+### 统计信息
+
+```go
+// 单一调度器统计
+retryStats := scheduler.GetRetryStats()
+cleanupStats := scheduler.GetCleanupStats()
+
+// 混合调度器统计
+if hybridScheduler, ok := scheduler.(*HybridTaskScheduler); ok {
+    stats := hybridScheduler.GetStats()
     for policy, stat := range stats {
-        log.Printf("策略 %s: 总任务=%d, 已完成=%d, 失败=%d", 
-            policy, stat.TotalTasks, stat.CompletedTasks, stat.FailedTasks)
+        fmt.Printf("%s策略统计: %+v\n", policy, stat)
     }
 }
 ```
 
-## 5. 最佳实践
+## 最佳实践
 
-### 5.1 优先使用简洁API
+### 1. 选择合适的调度器
+- **单一调度器**：适用于简单的任务调度需求
+- **混合调度器**：适用于需要多种执行策略的复杂场景
 
-**强烈推荐使用 `app.RunTask` 和 `app.RunTypedTask`**，这是最符合Go语言简洁哲学的方式：
+### 2. 合理配置工作协程
+- 并发任务：根据CPU核心数和IO密集度配置
+- 顺序任务：通常设置为1
+- 流水线任务：根据流水线阶段数配置
 
-```go
-// ✅ 推荐 - 简洁明了
-taskID := app.RunTask(func(ctx context.Context) error {
-    return doSomething()
-})
+### 3. 重试策略建议
+- 网络请求：使用指数退避，初始延迟1-2秒
+- 数据库操作：使用线性退避，避免雪崩
+- 外部API调用：设置合理的最大延迟和重试次数
 
-// ✅ 推荐 - 类型化任务
-taskID := app.RunTypedTask("email", func(ctx context.Context) error {
-    return sendEmail()
-})
+### 4. 清理策略配置
+- 高频任务：缩短TTL，减少内存占用
+- 重要任务：延长TTL，便于问题排查
+- 长期运行：定期监控清理效果
 
-// ❌ 避免 - 除非有特殊需求
-task := tasks.NewTaskBuilder().
-    WithID("task-1").
-    WithHandler(func(ctx context.Context) error {
-        return doSomething()
-    }).
-    WithImmediateExecution().
-    Build()
+## 配置选项参考
 
-if err := app.Scheduler.Schedule(task); err != nil {
-    log.Printf("提交任务失败: %v", err)
-}
-```
-
-### 5.2 选择合适的调度器
-
-- **单一调度器**：大多数应用的首选，配置简单
-- **混合调度器**：需要不同执行模式的复杂应用
-
-### 5.3 任务类型设计
-
-- **合理分类**：根据任务特性选择合适的执行策略
-- **命名规范**：使用清晰的任务类型名称
-- **策略一致性**：相同类型的任务应使用相同的执行策略
-
-### 5.4 错误处理
-
-- **任务内部错误处理**：在任务处理函数中处理预期的错误
-- **回调处理**：使用 OnComplete 回调处理任务完成后的逻辑
-- **日志记录**：记录任务执行过程中的关键信息
-
-### 5.5 资源管理
-
-- **优雅关闭**：确保应用在关闭时正确清理资源
-- **并发控制**：合理设置最大并发任务数，避免资源耗尽
-- **内存管理**：及时清理已完成的任务信息
-
-### 5.6 监控和调试
-
-- **统计信息**：定期检查任务执行统计
-- **日志记录**：记录任务调度和执行的关键事件
-- **状态监控**：监控任务状态变化，及时发现问题
-
-## 6. 配置选项参考
-
-### 6.1 单一调度器选项
+### 单一调度器配置
 
 ```go
-type Option func(*Options)
-
-// WithWorkerCount 设置工作协程数量
-func WithWorkerCount(count int) Option
-
-// WithMaxConcurrentTasks 设置最大并发任务数
-func WithMaxConcurrentTasks(max int) Option
-
-// WithLogger 设置日志记录器
-func WithLogger(logger *logger.Logger) Option
+// 配置选项
+WithWorkerCount(int)                    // 工作协程数
+WithMaxConcurrentTasks(int)             // 最大并发任务数
+WithLogger(*logger.Logger)              // 日志记录器
+WithCleanupPolicy(*CleanupPolicy)       // 清理策略
 ```
 
-### 6.2 混合调度器选项
+### 混合调度器配置
 
 ```go
-type AdvancedTaskOption func(*AdvancedTaskConfig)
-
-// 工作协程配置
-func WithConcurrentWorkers(count int) AdvancedTaskOption
-
-// 执行模式启用配置
-func EnableSequentialExecution() AdvancedTaskOption
-func EnablePipelineExecution() AdvancedTaskOption
-
-// 并发控制
-func WithMaxConcurrentTasks(max int) AdvancedTaskOption
-
-// 任务策略配置（推荐方式）
-func WithSequentialType(taskTypes ...string) AdvancedTaskOption
-func WithConcurrentType(taskTypes ...string) AdvancedTaskOption
-func WithPipelineType(taskTypes ...string) AdvancedTaskOption
+// 配置选项
+WithHybridWorkerCount(concurrent, sequential, pipeline int)  // 各策略工作协程数
+WithHybridMaxConcurrentTasks(int)                            // 最大并发任务数
+WithHybridLogger(*logger.Logger)                             // 日志记录器
 ```
 
-#### API 设计说明
+### 清理策略配置
 
-**重要变更**：为了解决语义混淆问题，我们进行了以下改进：
+```go
+// 默认值
+CompletedTaskTTL:   30 * time.Minute
+FailedTaskTTL:      60 * time.Minute
+CancelledTaskTTL:   15 * time.Minute
+MaxCompletedTasks:  1000
+MaxFailedTasks:     500
+CleanupInterval:    5 * time.Minute
+EnableAutoCleanup:  true
+```
 
-1. **移除误导性配置**：
-   - 删除了 `WithSequentialWorkers(count)` 和 `WithPipelineWorkers(count)`
-   - 这些配置暗示可以设置多个工作协程，但顺序/流水线执行逻辑上应该是独占的
+## 故障排除
 
-2. **新增语义清晰的配置**：
-   - `EnableSequentialExecution()` - 启用顺序执行模式
-   - `EnablePipelineExecution()` - 启用流水线执行模式
-   - 这些配置明确表示启用某种执行模式，内部固定使用1个工作协程
+### 常见问题
 
-3. **保持向后兼容性**：
-   - 保留了 `WithConcurrentWorkers(count)` 用于并发调度器
-   - 所有现有的任务策略配置API保持不变
+1. **任务不执行**
+   - 检查调度器是否已启动
+   - 确认工作协程数配置
+   - 验证任务调度时间
 
-**设计原则**：
-- **语义清晰**：配置名称直接反映其功能
-- **逻辑一致**：顺序/流水线执行强制单线程，避免并发冲突
-- **简洁易用**：通过布尔开关控制模式启用，减少配置复杂度
+2. **重试不生效**
+   - 确认任务实现了RetryableTask接口
+   - 检查重试策略配置
+   - 验证错误类型是否可重试
 
-## 7. 故障排除
+3. **内存占用过高**
+   - 调整清理策略TTL
+   - 减少最大任务数量限制
+   - 缩短清理间隔
 
-### 7.1 常见问题
+4. **执行顺序问题**
+   - 顺序执行模式需要设置工作协程数为1
+   - 流水线执行需要任务间依赖协调
+   - 检查执行模式配置
 
-**Q: 任务提交失败**
-A: 检查调度器是否已启动，任务参数是否正确
+### 调试技巧
 
-**Q: 任务不执行**
-A: 检查任务调度时间，工作协程是否正常
+```go
+// 启用详细日志
+logger := logger.New(logger.WithLevel("debug"))
+scheduler := NewMemoryTaskScheduler(WithLogger(logger))
 
-**Q: 并发任务过多**
-A: 调整 MaxConcurrentTasks 参数
+// 监控统计信息
+go func() {
+    ticker := time.NewTicker(30 * time.Second)
+    for range ticker.C {
+        stats := scheduler.GetRetryStats()
+        fmt.Printf("重试统计: %+v\n", stats)
+    }
+}()
+```
 
-**Q: 内存占用过高**
-A: 及时清理已完成任务，调整任务队列大小
+## 示例项目
 
-### 7.2 调试技巧
+完整的使用示例请参考：
+- `examples/basic/` - 基础任务调度示例
+- `examples/hybrid/` - 混合调度器示例
+- `examples/retry/` - 重试机制示例
+- `examples/pipeline/` - 流水线执行示例
 
-- 启用详细日志记录
-- 使用统计信息监控系统状态
-- 检查任务状态和错误信息
-- 验证配置参数的正确性
+## API参考
 
-## 8. 示例项目
-
-完整示例代码位于：
-- `examples/advanced_tasks/` - 高级任务调度示例
-- `examples/simple_api/` - 简洁API使用示例
-- `examples/hybrid_scheduler_demo.go` - 混合调度器演示
-
-这些示例展示了不同场景下的最佳实践和常见用法。
+详细的API文档请参考：
+- [接口定义](core.go)
+- [内存调度器实现](memory.go)
+- [混合调度器实现](hybrid_scheduler.go)
+- [重试机制实现](retry.go)
+- [清理策略实现](cleanup.go)

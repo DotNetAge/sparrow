@@ -14,8 +14,6 @@ type TaskScheduler interface {
 	usecase.Startable
 	// Schedule 调度一个任务
 	Schedule(task Task) error
-	// Start 启动任务调度器
-	// Start() error
 	// Stop 停止任务调度器
 	Stop() error
 	// Cancel 取消指定的任务
@@ -26,10 +24,6 @@ type TaskScheduler interface {
 	ListTasks() []TaskInfo
 	// SetMaxConcurrentTasks 设置最大并发任务数
 	SetMaxConcurrentTasks(max int) error
-	// SetExecutionMode 设置执行模式
-	SetExecutionMode(mode ExecutionMode) error
-	// GetExecutionMode 获取当前执行模式
-	GetExecutionMode() ExecutionMode
 }
 
 // TaskInfo 任务信息
@@ -66,11 +60,16 @@ type Task interface {
 type TaskStatus string
 
 const (
-	TaskStatusWaiting   TaskStatus = "waiting"
-	TaskStatusRunning   TaskStatus = "running"
-	TaskStatusCompleted TaskStatus = "completed"
-	TaskStatusCancelled TaskStatus = "cancelled"
-	TaskStatusFailed    TaskStatus = "failed"
+	TaskStatusUnknown   TaskStatus = "unknown"    // 未知状态
+	TaskStatusWaiting   TaskStatus = "waiting"    // 等待中
+	TaskStatusRunning   TaskStatus = "running"    // 执行中
+	TaskStatusCompleted TaskStatus = "completed"  // 已完成
+	TaskStatusCancelled TaskStatus = "cancelled"  // 已取消
+	TaskStatusFailed    TaskStatus = "failed"     // 执行失败
+	
+	// 新增重试相关状态
+	TaskStatusRetrying   TaskStatus = "retrying"    // 重试中
+	TaskStatusDeadLetter TaskStatus = "dead_letter" // 死信
 )
 
 // TaskScheduleType 任务调度类型
@@ -96,12 +95,9 @@ type TaskSchedule struct {
 type ExecutionMode int
 
 const (
-	// ExecutionModeConcurrent 并发执行模式（默认）
-	ExecutionModeConcurrent ExecutionMode = iota
-	// ExecutionModeSequential 顺序执行模式
-	ExecutionModeSequential
-	// ExecutionModePipeline 流水线执行模式
-	ExecutionModePipeline
+	ExecutionModeConcurrent ExecutionMode = iota  // 并发执行
+	ExecutionModeSequential                       // 顺序执行
+	ExecutionModePipeline                         // 流水线执行
 )
 
 // ImmediateExecution 创建即时执行的调度配置

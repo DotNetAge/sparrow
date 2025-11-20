@@ -105,15 +105,9 @@ func TestGracefulShutdownWithInterrupt(t *testing.T) {
 // TestMultipleTasksInterrupt 测试多个任务执行时的中断处理
 func TestMultipleTasksInterrupt(t *testing.T) {
 	scheduler := NewMemoryTaskScheduler()
-	
-	// 设置为并发模式以测试多个任务同时执行
-	err := scheduler.SetExecutionMode(ExecutionModeConcurrent)
-	if err != nil {
-		t.Fatalf("设置并发执行模式失败: %v", err)
-	}
 
 	ctx := context.Background()
-	err = scheduler.Start(ctx)
+	err := scheduler.Start(ctx)
 	if err != nil {
 		t.Fatalf("启动调度器失败: %v", err)
 	}

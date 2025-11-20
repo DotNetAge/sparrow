@@ -10,15 +10,9 @@ import (
 // TestPipelineStagesExecution 测试流水线阶段执行
 func TestPipelineStagesExecution(t *testing.T) {
 	scheduler := NewMemoryTaskScheduler()
-	
-	// 设置为流水线执行模式
-	err := scheduler.SetExecutionMode(ExecutionModePipeline)
-	if err != nil {
-		t.Fatalf("设置流水线执行模式失败: %v", err)
-	}
 
 	ctx := context.Background()
-	err = scheduler.Start(ctx)
+	err := scheduler.Start(ctx)
 	if err != nil {
 		t.Fatalf("启动调度器失败: %v", err)
 	}
@@ -131,15 +125,9 @@ func TestPipelineStagesExecution(t *testing.T) {
 // TestPipelineWithDependencies 测试带依赖关系的流水线执行
 func TestPipelineWithDependencies(t *testing.T) {
 	scheduler := NewMemoryTaskScheduler()
-	
-	// 设置为流水线执行模式
-	err := scheduler.SetExecutionMode(ExecutionModePipeline)
-	if err != nil {
-		t.Fatalf("设置流水线执行模式失败: %v", err)
-	}
 
 	ctx := context.Background()
-	err = scheduler.Start(ctx)
+	err := scheduler.Start(ctx)
 	if err != nil {
 		t.Fatalf("启动调度器失败: %v", err)
 	}

@@ -252,36 +252,36 @@ func Tasks(opts ...TaskOption) Option {
 			ExecutionMode:      tasks.ExecutionModeConcurrent, // 默认并发模式
 			Logger:             o.Logger,
 		}
-		
+
 		// 应用用户配置
 		for _, opt := range opts {
 			opt(config)
 		}
-		
+
 		// 根据执行模式调整工作协程数
 		// 顺序和流水线模式只需要1个工作协程，避免资源浪费
 		actualWorkerCount := config.WorkerCount
-		if config.ExecutionMode == tasks.ExecutionModeSequential || 
-		   config.ExecutionMode == tasks.ExecutionModePipeline {
+		if config.ExecutionMode == tasks.ExecutionModeSequential ||
+			config.ExecutionMode == tasks.ExecutionModePipeline {
 			actualWorkerCount = 1
 			if config.WorkerCount > 1 && config.Logger != nil {
-				config.Logger.Warn("顺序/流水线模式下只能使用1个工作协程，已自动调整", 
+				config.Logger.Warn("顺序/流水线模式下只能使用1个工作协程，已自动调整",
 					"requested", config.WorkerCount, "actual", actualWorkerCount)
 			}
 		}
-		
+
 		// 创建单一调度器
 		scheduler := tasks.NewMemoryTaskScheduler(
 			tasks.WithLogger(config.Logger),
 			tasks.WithWorkerCount(actualWorkerCount),
 			tasks.WithMaxConcurrentTasks(config.MaxConcurrentTasks),
 		)
-		
+
 		// 设置执行模式
 		if err := scheduler.SetExecutionMode(config.ExecutionMode); err != nil {
 			o.Logger.Error("设置执行模式失败", "mode", config.ExecutionMode, "error", err)
 		}
-		
+
 		o.Scheduler = scheduler
 		o.NeedCleanup(o.Scheduler.(usecase.GracefulClose))
 	}
@@ -340,13 +340,13 @@ func HybridTasks(opts ...tasks.HybridSchedulerOption) Option {
 		// 默认配置
 		defaultOpts := []tasks.HybridSchedulerOption{
 			tasks.WithHybridLogger(o.Logger),
-			tasks.WithHybridWorkerCount(5, 1, 1),  // 并发5个，顺序1个，流水线1个
+			tasks.WithHybridWorkerCount(5, 1, 1), // 并发5个，顺序1个，流水线1个
 			tasks.WithHybridMaxConcurrentTasks(10),
 		}
-		
+
 		// 合并用户配置
 		allOpts := append(defaultOpts, opts...)
-		
+
 		o.Scheduler = tasks.NewHybridTaskScheduler(allOpts...)
 		o.NeedCleanup(o.Scheduler.(usecase.GracefulClose))
 	}
@@ -362,41 +362,41 @@ func AdvancedTasks(opts ...AdvancedTaskOption) Option {
 			MaxConcurrentTasks:        10,
 			TaskPolicies:              make(map[string]tasks.TaskExecutionPolicy),
 			Logger:                    o.Logger,
-			EnableSequentialExecution: false,  // 默认不启用顺序执行
-			EnablePipelineExecution:   false,  // 默认不启用流水线执行
+			EnableSequentialExecution: false, // 默认不启用顺序执行
+			EnablePipelineExecution:   false, // 默认不启用流水线执行
 		}
-		
+
 		// 应用用户配置
 		for _, opt := range opts {
 			opt(config)
 		}
-		
+
 		// 根据配置确定工作协程数
 		sequentialWorkers := 0
 		pipelineWorkers := 0
-		
+
 		if config.EnableSequentialExecution {
-			sequentialWorkers = 1  // 顺序执行只需要1个工作协程
+			sequentialWorkers = 1 // 顺序执行只需要1个工作协程
 		}
-		
+
 		if config.EnablePipelineExecution {
-			pipelineWorkers = 1    // 流水线执行只需要1个工作协程
+			pipelineWorkers = 1 // 流水线执行只需要1个工作协程
 		}
-		
+
 		// 创建混合调度器
 		scheduler := tasks.NewHybridTaskScheduler(
 			tasks.WithHybridLogger(config.Logger),
 			tasks.WithHybridWorkerCount(config.ConcurrentWorkers, sequentialWorkers, pipelineWorkers),
 			tasks.WithHybridMaxConcurrentTasks(config.MaxConcurrentTasks),
 		)
-		
+
 		// 注册任务类型策略
 		for taskType, policy := range config.TaskPolicies {
 			if err := scheduler.RegisterTaskPolicy(taskType, policy); err != nil {
 				o.Logger.Warn("注册任务策略失败", "taskType", taskType, "policy", policy, "error", err)
 			}
 		}
-		
+
 		o.Scheduler = scheduler
 		o.NeedCleanup(o.Scheduler.(usecase.GracefulClose))
 	}
@@ -408,10 +408,10 @@ type AdvancedTaskConfig struct {
 	MaxConcurrentTasks int
 	TaskPolicies       map[string]tasks.TaskExecutionPolicy
 	Logger             *logger.Logger
-	
+
 	// 执行模式配置 - 新增更清晰的配置
-	EnableSequentialExecution bool  // 是否启用顺序执行模式
-	EnablePipelineExecution   bool  // 是否启用流水线执行模式
+	EnableSequentialExecution bool // 是否启用顺序执行模式
+	EnablePipelineExecution   bool // 是否启用流水线执行模式
 }
 
 // AdvancedTaskOption 高级任务配置选项
@@ -447,8 +447,6 @@ func WithAdvancedMaxConcurrentTasks(max int) AdvancedTaskOption {
 	}
 }
 
-
-
 // WithSequentialType 指定任务类型为顺序执行
 func WithSequentialType(taskTypes ...string) AdvancedTaskOption {
 	return func(c *AdvancedTaskConfig) {
@@ -457,18 +455,6 @@ func WithSequentialType(taskTypes ...string) AdvancedTaskOption {
 		}
 		for _, taskType := range taskTypes {
 			c.TaskPolicies[taskType] = tasks.PolicySequential
-		}
-	}
-}
-
-// WithConcurrentType 指定任务类型为并发执行
-func WithConcurrentType(taskTypes ...string) AdvancedTaskOption {
-	return func(c *AdvancedTaskConfig) {
-		if c.TaskPolicies == nil {
-			c.TaskPolicies = make(map[string]tasks.TaskExecutionPolicy)
-		}
-		for _, taskType := range taskTypes {
-			c.TaskPolicies[taskType] = tasks.PolicyConcurrent
 		}
 	}
 }
@@ -482,6 +468,117 @@ func WithPipelineType(taskTypes ...string) AdvancedTaskOption {
 		for _, taskType := range taskTypes {
 			c.TaskPolicies[taskType] = tasks.PolicyPipeline
 		}
+	}
+}
+
+// ===== 重试配置选项 =====
+
+// RetryConfig 重试配置
+type RetryConfig struct {
+	MaxRetries       int           // 最大重试次数，默认3次
+	InitialBackoff   time.Duration // 初始退避时间，默认1秒
+	MaxBackoff       time.Duration // 最大退避时间，默认30秒
+	BackoffMultiplier float64      // 退避倍数，默认2.0（指数退避）
+	Enabled          bool          // 是否启用重试，默认true
+}
+
+// DefaultRetryConfig 默认重试配置
+func DefaultRetryConfig() *RetryConfig {
+	return &RetryConfig{
+		MaxRetries:        3,
+		InitialBackoff:    time.Second,
+		MaxBackoff:        30 * time.Second,
+		BackoffMultiplier: 2.0,
+		Enabled:           true,
+	}
+}
+
+// WithRetry 配置任务重试能力
+// 这是生产系统的核心能力，默认启用
+func WithRetry(opts ...RetryOption) Option {
+	return func(app *App) {
+		config := DefaultRetryConfig()
+		for _, opt := range opts {
+			opt(config)
+		}
+		
+		// 保存重试配置到App结构体
+		app.retryConfig = config
+		
+		// 确保使用支持重试的调度器
+		if app.Scheduler == nil {
+			// 如果没有调度器，创建支持重试的混合调度器
+			app.Scheduler = tasks.NewHybridTaskScheduler(
+				tasks.WithHybridLogger(app.Logger),
+				tasks.WithHybridWorkerCount(5, 1, 1),
+				tasks.WithHybridMaxConcurrentTasks(10),
+			)
+			app.NeedCleanup(app.Scheduler.(usecase.GracefulClose))
+		}
+		
+		// 检查当前调度器是否支持重试
+		if _, ok := app.Scheduler.(*tasks.MemoryTaskScheduler); ok {
+			app.Logger.Warn("当前调度器不支持重试，已自动切换到混合调度器")
+			app.Scheduler = tasks.NewHybridTaskScheduler(
+				tasks.WithHybridLogger(app.Logger),
+				tasks.WithHybridWorkerCount(5, 1, 1),
+				tasks.WithHybridMaxConcurrentTasks(10),
+			)
+			app.NeedCleanup(app.Scheduler.(usecase.GracefulClose))
+		}
+	}
+}
+
+// RetryOption 重试配置选项
+type RetryOption func(*RetryConfig)
+
+// WithMaxRetries 设置最大重试次数
+func WithMaxRetries(count int) RetryOption {
+	return func(c *RetryConfig) {
+		c.MaxRetries = count
+	}
+}
+
+// WithInitialBackoff 设置初始退避时间
+func WithInitialBackoff(duration time.Duration) RetryOption {
+	return func(c *RetryConfig) {
+		c.InitialBackoff = duration
+	}
+}
+
+// WithMaxBackoff 设置最大退避时间
+func WithMaxBackoff(duration time.Duration) RetryOption {
+	return func(c *RetryConfig) {
+		c.MaxBackoff = duration
+	}
+}
+
+// WithExponentialBackoff 设置指数退避策略
+func WithExponentialBackoff(multiplier float64) RetryOption {
+	return func(c *RetryConfig) {
+		c.BackoffMultiplier = multiplier
+	}
+}
+
+// WithLinearBackoff 设置线性退避策略
+func WithLinearBackoff() RetryOption {
+	return func(c *RetryConfig) {
+		c.BackoffMultiplier = 1.0
+	}
+}
+
+// WithFixedBackoff 设置固定退避策略
+func WithFixedBackoff() RetryOption {
+	return func(c *RetryConfig) {
+		c.BackoffMultiplier = 1.0
+		c.MaxBackoff = c.InitialBackoff
+	}
+}
+
+// DisableRetry 禁用重试（不推荐用于生产环境）
+func DisableRetry() RetryOption {
+	return func(c *RetryConfig) {
+		c.Enabled = false
 	}
 }
 
@@ -546,15 +643,7 @@ func Middlewares(middleware ...gin.HandlerFunc) Option {
 }
 
 func WithJWT(expire time.Duration, refreshExp time.Duration) Option {
-	// return func(o *App) {
-	// 	o.Container.Register(func() auth.TokenGenerator {
-	// 		return auth.NewTokenGenerator([]byte(o.Config.App.Secret), expire, refreshExp)
-	// 	})
 
-	// 	o.Container.RegisterNamed("authMiddleware", func() gin.HandlerFunc {
-	// 		return middlewares.JWTAuthMiddleware([]byte(o.Config.App.Secret))
-	// 	})
-	// }
 	return func(app *App) {
 		app.Auth = Authorization{
 			Tokens: auth.NewTokenGenerator([]byte(app.Config.App.Secret), expire, refreshExp),

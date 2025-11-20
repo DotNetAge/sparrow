@@ -41,6 +41,7 @@ type App struct {
 	Auth         Authorization
 	Scheduler    tasks.TaskScheduler
 	retryCancel  context.CancelFunc // 用于取消重试goroutine的函数
+	retryConfig  *RetryConfig       // 重试配置
 }
 
 var (
@@ -338,35 +339,71 @@ func (app *App) NewHub(serviceName string) *messaging.StreamHub {
 	return hub
 }
 
+// buildTaskWithRetry 根据重试配置构建任务
+func (app *App) buildTaskWithRetry(builder *tasks.TaskBuilder) tasks.Task {
+	// 如果配置了重试，添加重试能力
+	if app.retryConfig != nil && app.retryConfig.Enabled {
+		retryBuilder := builder.WithRetry(app.retryConfig.MaxRetries)
+		
+		// 根据退避策略配置
+		if app.retryConfig.BackoffMultiplier == 1.0 {
+			if app.retryConfig.MaxBackoff == app.retryConfig.InitialBackoff {
+				retryBuilder.WithFixedBackoff(app.retryConfig.InitialBackoff)
+			} else {
+				retryBuilder.WithLinearBackoff(app.retryConfig.InitialBackoff)
+			}
+		} else {
+			retryBuilder.WithExponentialBackoff(app.retryConfig.InitialBackoff).
+				WithMaxDelay(app.retryConfig.MaxBackoff)
+		}
+		
+		return retryBuilder.Build()
+	} else {
+		return builder.Build()
+	}
+}
+
 func (app *App) RunTaskAt(at time.Time, handler func(ctx context.Context) error) string {
 	taskId := uuid.New().String()
-	task := tasks.NewTaskBuilder().
+	
+	// 构建任务，默认支持重试
+	builder := tasks.NewTaskBuilder().
 		WithID(taskId).
 		ScheduleAt(at).
-		WithHandler(handler).
-		Build()
+		WithHandler(handler)
+	
+	task := app.buildTaskWithRetry(builder)
 	app.Scheduler.Schedule(task)
+	
 	return taskId
 }
 func (app *App) RunTaskRecurring(interval time.Duration, handler func(ctx context.Context) error) string {
 	taskId := uuid.New().String()
-	task := tasks.NewTaskBuilder().
+	
+	// 构建任务，默认支持重试
+	builder := tasks.NewTaskBuilder().
 		WithID(taskId).
 		ScheduleRecurring(interval).
-		WithHandler(handler).
-		Build()
+		WithHandler(handler)
+	
+	task := app.buildTaskWithRetry(builder)
 	app.Scheduler.Schedule(task)
+	
 	return taskId
 }
 
 func (app *App) RunTask(handler func(ctx context.Context) error) string {
 	taskId := uuid.New().String()
-	task := tasks.NewTaskBuilder().
+	
+	// 构建任务，默认支持重试
+	builder := tasks.NewTaskBuilder().
 		WithID(taskId).
 		Immediate().
-		WithHandler(handler).
-		Build()
+		WithHandler(handler)
+	
+	task := app.buildTaskWithRetry(builder)
 	app.Scheduler.Schedule(task)
+	
 	return taskId
 }
 
@@ -376,13 +413,17 @@ func (app *App) RunTask(handler func(ctx context.Context) error) string {
 // 返回: 任务ID
 func (app *App) RunTypedTask(taskType string, handler func(ctx context.Context) error) string {
 	taskId := uuid.New().String()
-	task := tasks.NewTaskBuilder().
+	
+	// 构建任务，默认支持重试
+	builder := tasks.NewTaskBuilder().
 		WithID(taskId).
 		WithType(taskType).
 		Immediate().
-		WithHandler(handler).
-		Build()
+		WithHandler(handler)
+	
+	task := app.buildTaskWithRetry(builder)
 	app.Scheduler.Schedule(task)
+	
 	return taskId
 }
 
@@ -393,13 +434,17 @@ func (app *App) RunTypedTask(taskType string, handler func(ctx context.Context) 
 // 返回: 任务ID
 func (app *App) RunTypedTaskAt(taskType string, at time.Time, handler func(ctx context.Context) error) string {
 	taskId := uuid.New().String()
-	task := tasks.NewTaskBuilder().
+	
+	// 构建任务，默认支持重试
+	builder := tasks.NewTaskBuilder().
 		WithID(taskId).
 		WithType(taskType).
 		ScheduleAt(at).
-		WithHandler(handler).
-		Build()
+		WithHandler(handler)
+	
+	task := app.buildTaskWithRetry(builder)
 	app.Scheduler.Schedule(task)
+	
 	return taskId
 }
 
@@ -410,12 +455,16 @@ func (app *App) RunTypedTaskAt(taskType string, at time.Time, handler func(ctx c
 // 返回: 任务ID
 func (app *App) RunTypedTaskRecurring(taskType string, interval time.Duration, handler func(ctx context.Context) error) string {
 	taskId := uuid.New().String()
-	task := tasks.NewTaskBuilder().
+	
+	// 构建任务，默认支持重试
+	builder := tasks.NewTaskBuilder().
 		WithID(taskId).
 		WithType(taskType).
 		ScheduleRecurring(interval).
-		WithHandler(handler).
-		Build()
+		WithHandler(handler)
+	
+	task := app.buildTaskWithRetry(builder)
 	app.Scheduler.Schedule(task)
+	
 	return taskId
 }

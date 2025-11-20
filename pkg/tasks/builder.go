@@ -73,6 +73,17 @@ func (b *TaskBuilder) WithOnCancel(callback func(ctx context.Context)) *TaskBuil
 	return b
 }
 
+// WithRetry 设置重试策略，提供简化的配置方式
+func (b *TaskBuilder) WithRetry(maxRetries int) *RetryableTaskBuilder {
+	policy := &RetryPolicy{
+		MaxRetries: maxRetries,
+	}
+	return &RetryableTaskBuilder{
+		TaskBuilder: *b,
+		retryPolicy: policy,
+	}
+}
+
 // Build 构建任务
 func (b *TaskBuilder) Build() Task {
 	if b.handler == nil {
@@ -143,4 +154,114 @@ func (t *builtTask) IsRecurring() bool {
 
 func (t *builtTask) GetInterval() time.Duration {
 	return t.schedule.Interval
+}
+
+func (t *builtTask) SetSchedule(nextTime time.Time) {
+	t.execTime = nextTime
+}
+
+// RetryableTaskBuilder 可重试任务构建器
+type RetryableTaskBuilder struct {
+	TaskBuilder
+	retryPolicy *RetryPolicy
+}
+
+// WithExponentialBackoff 设置指数退避策略
+func (b *RetryableTaskBuilder) WithExponentialBackoff(initialDelay time.Duration) *RetryableTaskBuilder {
+	b.retryPolicy.InitialBackoff = initialDelay
+	b.retryPolicy.BackoffMultiplier = 2.0
+	b.retryPolicy.MaxBackoff = initialDelay * 60 // 最大60倍初始延迟
+	return b
+}
+
+// WithLinearBackoff 设置线性退避策略
+func (b *RetryableTaskBuilder) WithLinearBackoff(initialDelay time.Duration) *RetryableTaskBuilder {
+	b.retryPolicy.InitialBackoff = initialDelay
+	b.retryPolicy.BackoffMultiplier = 1.0
+	b.retryPolicy.MaxBackoff = initialDelay * 30 // 最大30倍初始延迟
+	return b
+}
+
+// WithFixedBackoff 设置固定退避策略
+func (b *RetryableTaskBuilder) WithFixedBackoff(delay time.Duration) *RetryableTaskBuilder {
+	b.retryPolicy.InitialBackoff = delay
+	b.retryPolicy.BackoffMultiplier = 1.0
+	b.retryPolicy.MaxBackoff = delay
+	return b
+}
+
+// WithMaxDelay 设置最大退避时间
+func (b *RetryableTaskBuilder) WithMaxDelay(maxDelay time.Duration) *RetryableTaskBuilder {
+	b.retryPolicy.MaxBackoff = maxDelay
+	return b
+}
+
+// Build 构建可重试任务
+func (b *RetryableTaskBuilder) Build() RetryableTask {
+	if b.handler == nil {
+		panic("任务处理函数不能为空")
+	}
+
+	// 设置默认值
+	if b.retryPolicy.InitialBackoff == 0 {
+		b.retryPolicy.InitialBackoff = 1 * time.Second
+	}
+	if b.retryPolicy.MaxBackoff == 0 {
+		b.retryPolicy.MaxBackoff = 1 * time.Minute
+	}
+
+	// 验证重试策略
+	if err := b.retryPolicy.Validate(); err != nil {
+		panic("重试策略配置无效: " + err.Error())
+	}
+
+	// 计算执行时间
+	execTime := time.Time{}
+	switch b.schedule.Type {
+	case ScheduleTypeImmediate:
+		execTime = time.Now()
+	case ScheduleTypeOnce:
+		execTime = b.schedule.At
+	case ScheduleTypeRecurring:
+		execTime = time.Now().Add(b.schedule.Interval)
+	}
+
+	return &retryableTask{
+		builtTask: &builtTask{
+			id:         b.id,
+			typeName:   b.typeName,
+			execTime:   execTime,
+			handler:    b.handler,
+			onComplete: b.onComplete,
+			onCancel:   b.onCancel,
+			schedule:   b.schedule,
+		},
+		retryPolicy: b.retryPolicy,
+		retryInfo:   NewRetryInfo(),
+	}
+}
+
+// retryableTask 可重试任务实现
+type retryableTask struct {
+	*builtTask
+	retryPolicy *RetryPolicy
+	retryInfo   *TaskRetryInfo
+}
+
+// 实现RetryableTask接口的方法
+func (t *retryableTask) GetRetryPolicy() *RetryPolicy {
+	return t.retryPolicy
+}
+
+func (t *retryableTask) SetRetryInfo(info *TaskRetryInfo) {
+	t.retryInfo = info
+}
+
+func (t *retryableTask) GetRetryInfo() *TaskRetryInfo {
+	return t.retryInfo
+}
+
+// NewTask 创建新的任务构建器（保持向后兼容）
+func NewTask() *TaskBuilder {
+	return NewTaskBuilder()
 }

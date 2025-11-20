@@ -122,7 +122,6 @@ func NewHybridTaskScheduler(opts ...HybridSchedulerOption) *HybridTaskScheduler 
 			WithWorkerCount(1),  // 顺序执行只需要1个工作协程
 			WithMaxConcurrentTasks(1), // 顺序执行只能有一个并发
 		)
-		scheduler.sequentialScheduler.SetExecutionMode(ExecutionModeSequential)
 	}
 	
 	if config.PipelineWorkers > 0 {
@@ -131,7 +130,6 @@ func NewHybridTaskScheduler(opts ...HybridSchedulerOption) *HybridTaskScheduler 
 			WithWorkerCount(1),  // 流水线执行只需要1个工作协程
 			WithMaxConcurrentTasks(1), // 流水线执行只能有一个并发
 		)
-		scheduler.pipelineScheduler.SetExecutionMode(ExecutionModePipeline)
 	}
 	
 	return scheduler
@@ -356,16 +354,6 @@ func (h *HybridTaskScheduler) SetMaxConcurrentTasks(max int) error {
 	
 	// 顺序和流水线调度器保持单线程，不需要设置
 	return nil
-}
-
-// SetExecutionMode 设置执行模式（混合调度器不支持此方法）
-func (h *HybridTaskScheduler) SetExecutionMode(mode ExecutionMode) error {
-	return fmt.Errorf("混合调度器不支持设置单一执行模式，请使用RegisterTaskPolicy方法注册任务类型策略")
-}
-
-// GetExecutionMode 获取当前执行模式（混合调度器返回混合模式）
-func (h *HybridTaskScheduler) GetExecutionMode() ExecutionMode {
-	return ExecutionModeConcurrent // 混合调度器默认返回并发模式
 }
 
 // GetStats 获取执行统计信息
