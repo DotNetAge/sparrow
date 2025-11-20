@@ -26,6 +26,10 @@ type TaskScheduler interface {
 	ListTasks() []TaskInfo
 	// SetMaxConcurrentTasks 设置最大并发任务数
 	SetMaxConcurrentTasks(max int) error
+	// SetExecutionMode 设置执行模式
+	SetExecutionMode(mode ExecutionMode) error
+	// GetExecutionMode 获取当前执行模式
+	GetExecutionMode() ExecutionMode
 }
 
 // TaskInfo 任务信息
@@ -87,6 +91,18 @@ type TaskSchedule struct {
 	At       time.Time     // 一次性执行的时间点
 	Interval time.Duration // 周期性执行的间隔
 }
+
+// ExecutionMode 任务执行模式
+type ExecutionMode int
+
+const (
+	// ExecutionModeConcurrent 并发执行模式（默认）
+	ExecutionModeConcurrent ExecutionMode = iota
+	// ExecutionModeSequential 顺序执行模式
+	ExecutionModeSequential
+	// ExecutionModePipeline 流水线执行模式
+	ExecutionModePipeline
+)
 
 // ImmediateExecution 创建即时执行的调度配置
 func ImmediateExecution() TaskSchedule {

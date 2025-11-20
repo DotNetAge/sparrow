@@ -249,6 +249,47 @@ func Tasks() Option {
 	}
 }
 
+// HybridTasks 使用混合任务系统
+// 支持并发、顺序、流水线三种执行策略，根据任务类型自动选择
+func HybridTasks(opts ...tasks.HybridSchedulerOption) Option {
+	return func(o *App) {
+		// 默认配置
+		defaultOpts := []tasks.HybridSchedulerOption{
+			tasks.WithHybridLogger(o.Logger),
+			tasks.WithHybridWorkerCount(5, 1, 1),  // 并发5个，顺序1个，流水线1个
+			tasks.WithHybridMaxConcurrentTasks(10),
+		}
+		
+		// 合并用户配置
+		allOpts := append(defaultOpts, opts...)
+		
+		o.Scheduler = tasks.NewHybridTaskScheduler(allOpts...)
+		o.NeedCleanup(o.Scheduler.(usecase.GracefulClose))
+	}
+}
+
+// AdvancedTasks 高级任务系统配置
+// 提供更灵活的任务系统配置选项
+func AdvancedTasks(concurrentWorkers, sequentialWorkers, pipelineWorkers, maxConcurrentTasks int, taskPolicies map[string]tasks.TaskExecutionPolicy) Option {
+	return func(o *App) {
+		scheduler := tasks.NewHybridTaskScheduler(
+			tasks.WithHybridLogger(o.Logger),
+			tasks.WithHybridWorkerCount(concurrentWorkers, sequentialWorkers, pipelineWorkers),
+			tasks.WithHybridMaxConcurrentTasks(maxConcurrentTasks),
+		)
+		
+		// 注册任务类型策略
+		for taskType, policy := range taskPolicies {
+			if err := scheduler.RegisterTaskPolicy(taskType, policy); err != nil {
+				o.Logger.Warn("注册任务策略失败", "taskType", taskType, "policy", policy, "error", err)
+			}
+		}
+		
+		o.Scheduler = scheduler
+		o.NeedCleanup(o.Scheduler.(usecase.GracefulClose))
+	}
+}
+
 // UseSession 使用会话系统
 // 会话系统使用内存作为存储
 func Sessions(expire time.Duration) Option {

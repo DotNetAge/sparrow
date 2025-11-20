@@ -59,6 +59,10 @@ type MemoryTaskScheduler struct {
 	workerPool         chan struct{}                 // 工作池，控制并发执行
 	maxConcurrentTasks int                           // 最大并发任务数
 	cancels            map[string]context.CancelFunc // 存储执行中任务的取消函数
+	executionMode      ExecutionMode                 // 执行模式
+	sequentialQueue    []string                      // 顺序执行队列
+	pipelineQueue      []string                      // 流水线执行队列
+	isExecuting        bool                          // 是否正在执行任务（用于顺序模式）
 }
 
 // taskWrapper 任务包装器
@@ -95,6 +99,10 @@ func NewMemoryTaskScheduler(opts ...Option) *MemoryTaskScheduler {
 		Logger:             options.Logger,
 		workerPool:         make(chan struct{}, options.MaxConcurrentTasks),
 		cancels:            make(map[string]context.CancelFunc),
+		executionMode:      ExecutionModeConcurrent, // 默认为并发模式
+		sequentialQueue:    make([]string, 0),
+		pipelineQueue:      make([]string, 0),
+		isExecuting:        false,
 	}
 }
 
@@ -184,9 +192,25 @@ func (s *MemoryTaskScheduler) Close(ctx context.Context) error {
 		return err
 	}
 
-	// 等待所有工作协程退出，但已取消的任务不会等待它们完成
-	s.wg.Wait()
-	return nil
+	// 创建一个带超时的等待机制
+	done := make(chan struct{})
+	go func() {
+		s.wg.Wait()
+		close(done)
+	}()
+
+	// 等待所有工作协程退出，但支持上下文取消
+	select {
+	case <-done:
+		// 所有工作协程正常退出
+		return nil
+	case <-ctx.Done():
+		// 超时或上下文被取消
+		if s.Logger != nil {
+			s.Logger.Warn("任务调度器关闭超时，强制退出")
+		}
+		return fmt.Errorf("任务调度器关闭超时: %w", ctx.Err())
+	}
 }
 
 // Schedule 调度一个任务
@@ -323,6 +347,34 @@ func (s *MemoryTaskScheduler) SetMaxConcurrentTasks(max int) error {
 	return nil
 }
 
+// SetExecutionMode 设置执行模式
+func (s *MemoryTaskScheduler) SetExecutionMode(mode ExecutionMode) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	
+	s.executionMode = mode
+	
+	if s.Logger != nil {
+		modeStr := "并发"
+		switch mode {
+		case ExecutionModeSequential:
+			modeStr = "顺序"
+		case ExecutionModePipeline:
+			modeStr = "流水线"
+		}
+		s.Logger.Infof("执行模式已设置为: %s", modeStr)
+	}
+	
+	return nil
+}
+
+// GetExecutionMode 获取当前执行模式
+func (s *MemoryTaskScheduler) GetExecutionMode() ExecutionMode {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.executionMode
+}
+
 // run 任务调度核心逻辑
 func (s *MemoryTaskScheduler) run() {
 	for {
@@ -339,6 +391,22 @@ func (s *MemoryTaskScheduler) run() {
 		if !s.started {
 			s.mu.Unlock()
 			return
+		}
+
+		// 根据执行模式处理任务
+		switch s.executionMode {
+		case ExecutionModeSequential:
+			if !s.canExecuteSequential() {
+				s.mu.Unlock()
+				time.Sleep(10 * time.Millisecond)
+				continue
+			}
+		case ExecutionModePipeline:
+			if !s.canExecutePipeline() {
+				s.mu.Unlock()
+				time.Sleep(10 * time.Millisecond)
+				continue
+			}
 		}
 
 		// 检查任务队列是否为空
@@ -358,6 +426,17 @@ func (s *MemoryTaskScheduler) run() {
 			task := s.taskQueue.Pop()
 			task.status = TaskStatusRunning
 			task.updatedAt = time.Now()
+			
+			// 根据执行模式处理
+			switch s.executionMode {
+			case ExecutionModeSequential:
+				s.sequentialQueue = append(s.sequentialQueue, task.task.ID())
+				s.isExecuting = true
+			case ExecutionModePipeline:
+				s.pipelineQueue = append(s.pipelineQueue, task.task.ID())
+				s.isExecuting = true
+			}
+			
 			s.mu.Unlock()
 			// 执行任务
 			s.executeTask(task)
@@ -376,23 +455,64 @@ func (s *MemoryTaskScheduler) run() {
 	}
 }
 
+// canExecuteSequential 检查是否可以执行顺序任务
+func (s *MemoryTaskScheduler) canExecuteSequential() bool {
+	return !s.isExecuting
+}
+
+// canExecutePipeline 检查是否可以执行流水线任务
+func (s *MemoryTaskScheduler) canExecutePipeline() bool {
+	// 流水线模式下，串行执行任务阶段，同时只能执行一个任务
+	return !s.isExecuting
+}
+
 // executeTask 任务执行函数
 func (s *MemoryTaskScheduler) executeTask(t *taskWrapper) {
-	// 获取工作池中的令牌，限制并发数
-	s.workerPool <- struct{}{}
-	s.wg.Add(1)
-
 	taskID := t.task.ID()
+
+	// 在并发模式下使用工作池，在其他模式下直接执行
+	if s.executionMode == ExecutionModeConcurrent {
+		s.workerPool <- struct{}{}
+		s.wg.Add(1)
+	} else {
+		s.wg.Add(1)
+	}
 
 	go func(task *taskWrapper, taskID string) {
 		defer func() {
-			<-s.workerPool
-			s.wg.Done()
-
-			// 任务完成后，从cancels映射中移除
+			// 处理不同执行模式的清理逻辑
 			s.mu.Lock()
+			switch s.executionMode {
+			case ExecutionModeSequential:
+				// 顺序模式：标记为未执行中，并从队列中移除
+				s.isExecuting = false
+				for i, id := range s.sequentialQueue {
+					if id == taskID {
+						s.sequentialQueue = append(s.sequentialQueue[:i], s.sequentialQueue[i+1:]...)
+						break
+					}
+				}
+			case ExecutionModePipeline:
+				// 流水线模式：标记为未执行中，并从队列中移除
+				s.isExecuting = false
+				for i, id := range s.pipelineQueue {
+					if id == taskID {
+						s.pipelineQueue = append(s.pipelineQueue[:i], s.pipelineQueue[i+1:]...)
+						break
+					}
+				}
+			}
+			
+			// 从cancels映射中移除
 			delete(s.cancels, taskID)
 			s.mu.Unlock()
+
+			// 并发模式下释放工作池令牌
+			if s.executionMode == ExecutionModeConcurrent {
+				<-s.workerPool
+			}
+			
+			s.wg.Done()
 
 			if r := recover(); r != nil {
 				// 检查任务是否已经被取消
