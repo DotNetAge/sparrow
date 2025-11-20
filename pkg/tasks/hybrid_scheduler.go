@@ -89,8 +89,8 @@ func WithHybridMaxConcurrentTasks(max int) HybridSchedulerOption {
 func NewHybridTaskScheduler(opts ...HybridSchedulerOption) *HybridTaskScheduler {
 	config := &HybridTaskSchedulerConfig{
 		ConcurrentWorkers:  5,
-		SequentialWorkers:  1,
-		PipelineWorkers:    1,
+		SequentialWorkers:  0,  // 默认不启用顺序执行
+		PipelineWorkers:    0,  // 默认不启用流水线执行
 		MaxConcurrentTasks: 10,
 	}
 	
@@ -108,28 +108,31 @@ func NewHybridTaskScheduler(opts ...HybridSchedulerOption) *HybridTaskScheduler 
 		},
 	}
 	
-	// 创建不同策略的调度器
+	// 创建并发调度器
 	scheduler.concurrentScheduler = NewMemoryTaskScheduler(
 		WithLogger(config.Logger),
 		WithWorkerCount(config.ConcurrentWorkers),
 		WithMaxConcurrentTasks(config.MaxConcurrentTasks),
 	)
 	
-	scheduler.sequentialScheduler = NewMemoryTaskScheduler(
-		WithLogger(config.Logger),
-		WithWorkerCount(config.SequentialWorkers),
-		WithMaxConcurrentTasks(1), // 顺序执行只能有一个并发
-	)
+	// 只有在配置了工作协程数时才创建顺序和流水线调度器
+	if config.SequentialWorkers > 0 {
+		scheduler.sequentialScheduler = NewMemoryTaskScheduler(
+			WithLogger(config.Logger),
+			WithWorkerCount(1),  // 顺序执行只需要1个工作协程
+			WithMaxConcurrentTasks(1), // 顺序执行只能有一个并发
+		)
+		scheduler.sequentialScheduler.SetExecutionMode(ExecutionModeSequential)
+	}
 	
-	scheduler.pipelineScheduler = NewMemoryTaskScheduler(
-		WithLogger(config.Logger),
-		WithWorkerCount(config.SequentialWorkers),
-		WithMaxConcurrentTasks(1), // 流水线执行只能有一个并发
-	)
-	
-	// 设置执行模式
-	scheduler.sequentialScheduler.SetExecutionMode(ExecutionModeSequential)
-	scheduler.pipelineScheduler.SetExecutionMode(ExecutionModePipeline)
+	if config.PipelineWorkers > 0 {
+		scheduler.pipelineScheduler = NewMemoryTaskScheduler(
+			WithLogger(config.Logger),
+			WithWorkerCount(1),  // 流水线执行只需要1个工作协程
+			WithMaxConcurrentTasks(1), // 流水线执行只能有一个并发
+		)
+		scheduler.pipelineScheduler.SetExecutionMode(ExecutionModePipeline)
+	}
 	
 	return scheduler
 }
@@ -175,16 +178,23 @@ func (h *HybridTaskScheduler) Start(ctx context.Context) error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	
+	// 启动并发调度器（总是存在）
 	if err := h.concurrentScheduler.Start(ctx); err != nil {
 		return fmt.Errorf("启动并发调度器失败: %w", err)
 	}
 	
-	if err := h.sequentialScheduler.Start(ctx); err != nil {
-		return fmt.Errorf("启动顺序调度器失败: %w", err)
+	// 启动顺序调度器（如果存在）
+	if h.sequentialScheduler != nil {
+		if err := h.sequentialScheduler.Start(ctx); err != nil {
+			return fmt.Errorf("启动顺序调度器失败: %w", err)
+		}
 	}
 	
-	if err := h.pipelineScheduler.Start(ctx); err != nil {
-		return fmt.Errorf("启动流水线调度器失败: %w", err)
+	// 启动流水线调度器（如果存在）
+	if h.pipelineScheduler != nil {
+		if err := h.pipelineScheduler.Start(ctx); err != nil {
+			return fmt.Errorf("启动流水线调度器失败: %w", err)
+		}
 	}
 	
 	if h.logger != nil {
@@ -201,16 +211,23 @@ func (h *HybridTaskScheduler) Stop() error {
 	
 	var errors []error
 	
+	// 停止并发调度器（总是存在）
 	if err := h.concurrentScheduler.Stop(); err != nil {
 		errors = append(errors, fmt.Errorf("停止并发调度器失败: %w", err))
 	}
 	
-	if err := h.sequentialScheduler.Stop(); err != nil {
-		errors = append(errors, fmt.Errorf("停止顺序调度器失败: %w", err))
+	// 停止顺序调度器（如果存在）
+	if h.sequentialScheduler != nil {
+		if err := h.sequentialScheduler.Stop(); err != nil {
+			errors = append(errors, fmt.Errorf("停止顺序调度器失败: %w", err))
+		}
 	}
 	
-	if err := h.pipelineScheduler.Stop(); err != nil {
-		errors = append(errors, fmt.Errorf("停止流水线调度器失败: %w", err))
+	// 停止流水线调度器（如果存在）
+	if h.pipelineScheduler != nil {
+		if err := h.pipelineScheduler.Stop(); err != nil {
+			errors = append(errors, fmt.Errorf("停止流水线调度器失败: %w", err))
+		}
 	}
 	
 	if len(errors) > 0 {
@@ -231,16 +248,23 @@ func (h *HybridTaskScheduler) Close(ctx context.Context) error {
 	
 	var errors []error
 	
+	// 关闭并发调度器（总是存在）
 	if err := h.concurrentScheduler.Close(ctx); err != nil {
 		errors = append(errors, fmt.Errorf("关闭并发调度器失败: %w", err))
 	}
 	
-	if err := h.sequentialScheduler.Close(ctx); err != nil {
-		errors = append(errors, fmt.Errorf("关闭顺序调度器失败: %w", err))
+	// 关闭顺序调度器（如果存在）
+	if h.sequentialScheduler != nil {
+		if err := h.sequentialScheduler.Close(ctx); err != nil {
+			errors = append(errors, fmt.Errorf("关闭顺序调度器失败: %w", err))
+		}
 	}
 	
-	if err := h.pipelineScheduler.Close(ctx); err != nil {
-		errors = append(errors, fmt.Errorf("关闭流水线调度器失败: %w", err))
+	// 关闭流水线调度器（如果存在）
+	if h.pipelineScheduler != nil {
+		if err := h.pipelineScheduler.Close(ctx); err != nil {
+			errors = append(errors, fmt.Errorf("关闭流水线调度器失败: %w", err))
+		}
 	}
 	
 	if len(errors) > 0 {
@@ -265,16 +289,20 @@ func (h *HybridTaskScheduler) Cancel(taskID string) error {
 		errors = append(errors, err)
 	}
 	
-	if err := h.sequentialScheduler.Cancel(taskID); err == nil {
-		return nil
-	} else {
-		errors = append(errors, err)
+	if h.sequentialScheduler != nil {
+		if err := h.sequentialScheduler.Cancel(taskID); err == nil {
+			return nil
+		} else {
+			errors = append(errors, err)
+		}
 	}
 	
-	if err := h.pipelineScheduler.Cancel(taskID); err == nil {
-		return nil
-	} else {
-		errors = append(errors, err)
+	if h.pipelineScheduler != nil {
+		if err := h.pipelineScheduler.Cancel(taskID); err == nil {
+			return nil
+		} else {
+			errors = append(errors, err)
+		}
 	}
 	
 	return fmt.Errorf("任务未找到或取消失败: %v", errors)
@@ -287,12 +315,16 @@ func (h *HybridTaskScheduler) GetTaskStatus(taskID string) (TaskStatus, error) {
 		return status, nil
 	}
 	
-	if status, err := h.sequentialScheduler.GetTaskStatus(taskID); err == nil {
-		return status, nil
+	if h.sequentialScheduler != nil {
+		if status, err := h.sequentialScheduler.GetTaskStatus(taskID); err == nil {
+			return status, nil
+		}
 	}
 	
-	if status, err := h.pipelineScheduler.GetTaskStatus(taskID); err == nil {
-		return status, nil
+	if h.pipelineScheduler != nil {
+		if status, err := h.pipelineScheduler.GetTaskStatus(taskID); err == nil {
+			return status, nil
+		}
 	}
 	
 	return "", fmt.Errorf("任务未找到: %s", taskID)
@@ -303,8 +335,14 @@ func (h *HybridTaskScheduler) ListTasks() []TaskInfo {
 	var allTasks []TaskInfo
 	
 	allTasks = append(allTasks, h.concurrentScheduler.ListTasks()...)
-	allTasks = append(allTasks, h.sequentialScheduler.ListTasks()...)
-	allTasks = append(allTasks, h.pipelineScheduler.ListTasks()...)
+	
+	if h.sequentialScheduler != nil {
+		allTasks = append(allTasks, h.sequentialScheduler.ListTasks()...)
+	}
+	
+	if h.pipelineScheduler != nil {
+		allTasks = append(allTasks, h.pipelineScheduler.ListTasks()...)
+	}
 	
 	return allTasks
 }
@@ -369,8 +407,14 @@ func (h *HybridTaskScheduler) getSchedulerByPolicy(policy TaskExecutionPolicy) (
 	case PolicyConcurrent:
 		return h.concurrentScheduler, nil
 	case PolicySequential:
+		if h.sequentialScheduler == nil {
+			return nil, fmt.Errorf("顺序调度器未启用")
+		}
 		return h.sequentialScheduler, nil
 	case PolicyPipeline:
+		if h.pipelineScheduler == nil {
+			return nil, fmt.Errorf("流水线调度器未启用")
+		}
 		return h.pipelineScheduler, nil
 	default:
 		return nil, fmt.Errorf("不支持的执行策略: %s", policy)

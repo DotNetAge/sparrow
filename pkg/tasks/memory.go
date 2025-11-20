@@ -169,8 +169,13 @@ func (s *MemoryTaskScheduler) Stop() error {
 		}
 	}
 
-	// 关闭停止信号通道
-	close(s.stopChan)
+	// 关闭停止信号通道（防止重复关闭）
+	select {
+	case <-s.stopChan:
+		// 已经关闭，无需重复关闭
+	default:
+		close(s.stopChan)
+	}
 
 	// 释放锁，让工作协程能够退出
 	s.mu.Unlock()
@@ -188,6 +193,11 @@ func (s *MemoryTaskScheduler) drainWorkerPool() {
 
 // Close 优雅关闭任务调度器
 func (s *MemoryTaskScheduler) Close(ctx context.Context) error {
+	// 如果 context 为 nil，使用默认的 background context
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	
 	if err := s.Stop(); err != nil {
 		return err
 	}

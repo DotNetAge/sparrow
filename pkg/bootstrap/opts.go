@@ -10,6 +10,7 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/config"
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/eventbus"
+	"github.com/DotNetAge/sparrow/pkg/logger"
 
 	// "github.com/DotNetAge/sparrow/pkg/eventbus"
 	"github.com/DotNetAge/sparrow/pkg/messaging"
@@ -240,12 +241,95 @@ func MemBus() Option {
 
 // Tasks 使用任务系统
 // 任务系统使用内存作为存储
-func Tasks() Option {
+// 向后兼容：无参数时使用默认配置（并发模式）
+// 新功能：支持配置执行模式、工作协程数等
+func Tasks(opts ...TaskOption) Option {
 	return func(o *App) {
-		o.Scheduler = tasks.NewMemoryTaskScheduler(
-			tasks.WithLogger(o.Logger),
+		// 默认配置，保持向后兼容
+		config := &TaskConfig{
+			WorkerCount:        5,
+			MaxConcurrentTasks: 10,
+			ExecutionMode:      tasks.ExecutionModeConcurrent, // 默认并发模式
+			Logger:             o.Logger,
+		}
+		
+		// 应用用户配置
+		for _, opt := range opts {
+			opt(config)
+		}
+		
+		// 根据执行模式调整工作协程数
+		// 顺序和流水线模式只需要1个工作协程，避免资源浪费
+		actualWorkerCount := config.WorkerCount
+		if config.ExecutionMode == tasks.ExecutionModeSequential || 
+		   config.ExecutionMode == tasks.ExecutionModePipeline {
+			actualWorkerCount = 1
+			if config.WorkerCount > 1 && config.Logger != nil {
+				config.Logger.Warn("顺序/流水线模式下只能使用1个工作协程，已自动调整", 
+					"requested", config.WorkerCount, "actual", actualWorkerCount)
+			}
+		}
+		
+		// 创建单一调度器
+		scheduler := tasks.NewMemoryTaskScheduler(
+			tasks.WithLogger(config.Logger),
+			tasks.WithWorkerCount(actualWorkerCount),
+			tasks.WithMaxConcurrentTasks(config.MaxConcurrentTasks),
 		)
+		
+		// 设置执行模式
+		if err := scheduler.SetExecutionMode(config.ExecutionMode); err != nil {
+			o.Logger.Error("设置执行模式失败", "mode", config.ExecutionMode, "error", err)
+		}
+		
+		o.Scheduler = scheduler
 		o.NeedCleanup(o.Scheduler.(usecase.GracefulClose))
+	}
+}
+
+// TaskConfig 任务调度器配置
+type TaskConfig struct {
+	WorkerCount        int
+	MaxConcurrentTasks int
+	ExecutionMode      tasks.ExecutionMode
+	Logger             *logger.Logger
+}
+
+// TaskOption 任务配置选项
+type TaskOption func(*TaskConfig)
+
+// WithWorkerCount 设置工作协程数
+func WithWorkerCount(count int) TaskOption {
+	return func(c *TaskConfig) {
+		c.WorkerCount = count
+	}
+}
+
+// WithMaxConcurrentTasks 设置最大并发任务数
+func WithMaxConcurrentTasks(max int) TaskOption {
+	return func(c *TaskConfig) {
+		c.MaxConcurrentTasks = max
+	}
+}
+
+// WithSequentialMode 设置为顺序执行模式
+func WithSequentialMode() TaskOption {
+	return func(c *TaskConfig) {
+		c.ExecutionMode = tasks.ExecutionModeSequential
+	}
+}
+
+// WithConcurrentMode 设置为并发执行模式
+func WithConcurrentMode() TaskOption {
+	return func(c *TaskConfig) {
+		c.ExecutionMode = tasks.ExecutionModeConcurrent
+	}
+}
+
+// WithPipelineMode 设置为流水线执行模式
+func WithPipelineMode() TaskOption {
+	return func(c *TaskConfig) {
+		c.ExecutionMode = tasks.ExecutionModePipeline
 	}
 }
 
@@ -269,17 +353,45 @@ func HybridTasks(opts ...tasks.HybridSchedulerOption) Option {
 }
 
 // AdvancedTasks 高级任务系统配置
-// 提供更灵活的任务系统配置选项
-func AdvancedTasks(concurrentWorkers, sequentialWorkers, pipelineWorkers, maxConcurrentTasks int, taskPolicies map[string]tasks.TaskExecutionPolicy) Option {
+// 提供更灵活的任务系统配置选项，使用Option模式
+func AdvancedTasks(opts ...AdvancedTaskOption) Option {
 	return func(o *App) {
+		// 默认配置
+		config := &AdvancedTaskConfig{
+			ConcurrentWorkers:         5,
+			MaxConcurrentTasks:        10,
+			TaskPolicies:              make(map[string]tasks.TaskExecutionPolicy),
+			Logger:                    o.Logger,
+			EnableSequentialExecution: false,  // 默认不启用顺序执行
+			EnablePipelineExecution:   false,  // 默认不启用流水线执行
+		}
+		
+		// 应用用户配置
+		for _, opt := range opts {
+			opt(config)
+		}
+		
+		// 根据配置确定工作协程数
+		sequentialWorkers := 0
+		pipelineWorkers := 0
+		
+		if config.EnableSequentialExecution {
+			sequentialWorkers = 1  // 顺序执行只需要1个工作协程
+		}
+		
+		if config.EnablePipelineExecution {
+			pipelineWorkers = 1    // 流水线执行只需要1个工作协程
+		}
+		
+		// 创建混合调度器
 		scheduler := tasks.NewHybridTaskScheduler(
-			tasks.WithHybridLogger(o.Logger),
-			tasks.WithHybridWorkerCount(concurrentWorkers, sequentialWorkers, pipelineWorkers),
-			tasks.WithHybridMaxConcurrentTasks(maxConcurrentTasks),
+			tasks.WithHybridLogger(config.Logger),
+			tasks.WithHybridWorkerCount(config.ConcurrentWorkers, sequentialWorkers, pipelineWorkers),
+			tasks.WithHybridMaxConcurrentTasks(config.MaxConcurrentTasks),
 		)
 		
 		// 注册任务类型策略
-		for taskType, policy := range taskPolicies {
+		for taskType, policy := range config.TaskPolicies {
 			if err := scheduler.RegisterTaskPolicy(taskType, policy); err != nil {
 				o.Logger.Warn("注册任务策略失败", "taskType", taskType, "policy", policy, "error", err)
 			}
@@ -287,6 +399,89 @@ func AdvancedTasks(concurrentWorkers, sequentialWorkers, pipelineWorkers, maxCon
 		
 		o.Scheduler = scheduler
 		o.NeedCleanup(o.Scheduler.(usecase.GracefulClose))
+	}
+}
+
+// AdvancedTaskConfig 高级任务配置
+type AdvancedTaskConfig struct {
+	ConcurrentWorkers  int
+	MaxConcurrentTasks int
+	TaskPolicies       map[string]tasks.TaskExecutionPolicy
+	Logger             *logger.Logger
+	
+	// 执行模式配置 - 新增更清晰的配置
+	EnableSequentialExecution bool  // 是否启用顺序执行模式
+	EnablePipelineExecution   bool  // 是否启用流水线执行模式
+}
+
+// AdvancedTaskOption 高级任务配置选项
+type AdvancedTaskOption func(*AdvancedTaskConfig)
+
+// WithConcurrentWorkers 设置并发工作协程数
+func WithConcurrentWorkers(count int) AdvancedTaskOption {
+	return func(c *AdvancedTaskConfig) {
+		c.ConcurrentWorkers = count
+	}
+}
+
+// EnableSequentialExecution 启用顺序执行模式
+// 顺序执行模式下，任务将严格按照提交顺序串行执行，同时只会有一个任务在运行
+func EnableSequentialExecution() AdvancedTaskOption {
+	return func(c *AdvancedTaskConfig) {
+		c.EnableSequentialExecution = true
+	}
+}
+
+// EnablePipelineExecution 启用流水线执行模式
+// 流水线执行模式下，任务将按阶段串行执行，适用于需要分阶段处理的任务
+func EnablePipelineExecution() AdvancedTaskOption {
+	return func(c *AdvancedTaskConfig) {
+		c.EnablePipelineExecution = true
+	}
+}
+
+// WithAdvancedMaxConcurrentTasks 设置最大并发任务数（高级任务系统）
+func WithAdvancedMaxConcurrentTasks(max int) AdvancedTaskOption {
+	return func(c *AdvancedTaskConfig) {
+		c.MaxConcurrentTasks = max
+	}
+}
+
+
+
+// WithSequentialType 指定任务类型为顺序执行
+func WithSequentialType(taskTypes ...string) AdvancedTaskOption {
+	return func(c *AdvancedTaskConfig) {
+		if c.TaskPolicies == nil {
+			c.TaskPolicies = make(map[string]tasks.TaskExecutionPolicy)
+		}
+		for _, taskType := range taskTypes {
+			c.TaskPolicies[taskType] = tasks.PolicySequential
+		}
+	}
+}
+
+// WithConcurrentType 指定任务类型为并发执行
+func WithConcurrentType(taskTypes ...string) AdvancedTaskOption {
+	return func(c *AdvancedTaskConfig) {
+		if c.TaskPolicies == nil {
+			c.TaskPolicies = make(map[string]tasks.TaskExecutionPolicy)
+		}
+		for _, taskType := range taskTypes {
+			c.TaskPolicies[taskType] = tasks.PolicyConcurrent
+		}
+	}
+}
+
+// WithPipelineType 指定任务类型为流水线执行
+func WithPipelineType(taskTypes ...string) AdvancedTaskOption {
+	return func(c *AdvancedTaskConfig) {
+		if c.TaskPolicies == nil {
+			c.TaskPolicies = make(map[string]tasks.TaskExecutionPolicy)
+		}
+		for _, taskType := range taskTypes {
+			c.TaskPolicies[taskType] = tasks.PolicyPipeline
+		}
 	}
 }
 

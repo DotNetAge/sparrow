@@ -369,3 +369,53 @@ func (app *App) RunTask(handler func(ctx context.Context) error) string {
 	app.Scheduler.Schedule(task)
 	return taskId
 }
+
+// RunTypedTask 提交一个指定类型的任务（主要用于混合调度器）
+// taskType: 任务类型，混合调度器会根据类型选择执行策略
+// handler: 任务处理函数
+// 返回: 任务ID
+func (app *App) RunTypedTask(taskType string, handler func(ctx context.Context) error) string {
+	taskId := uuid.New().String()
+	task := tasks.NewTaskBuilder().
+		WithID(taskId).
+		WithType(taskType).
+		Immediate().
+		WithHandler(handler).
+		Build()
+	app.Scheduler.Schedule(task)
+	return taskId
+}
+
+// RunTypedTaskAt 提交一个指定类型的定时任务（主要用于混合调度器）
+// taskType: 任务类型，混合调度器会根据类型选择执行策略
+// at: 定时执行时间
+// handler: 任务处理函数
+// 返回: 任务ID
+func (app *App) RunTypedTaskAt(taskType string, at time.Time, handler func(ctx context.Context) error) string {
+	taskId := uuid.New().String()
+	task := tasks.NewTaskBuilder().
+		WithID(taskId).
+		WithType(taskType).
+		ScheduleAt(at).
+		WithHandler(handler).
+		Build()
+	app.Scheduler.Schedule(task)
+	return taskId
+}
+
+// RunTypedTaskRecurring 提交一个指定类型的周期性任务（主要用于混合调度器）
+// taskType: 任务类型，混合调度器会根据类型选择执行策略
+// interval: 执行间隔
+// handler: 任务处理函数
+// 返回: 任务ID
+func (app *App) RunTypedTaskRecurring(taskType string, interval time.Duration, handler func(ctx context.Context) error) string {
+	taskId := uuid.New().String()
+	task := tasks.NewTaskBuilder().
+		WithID(taskId).
+		WithType(taskType).
+		ScheduleRecurring(interval).
+		WithHandler(handler).
+		Build()
+	app.Scheduler.Schedule(task)
+	return taskId
+}
