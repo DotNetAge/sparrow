@@ -346,7 +346,15 @@ func (s *MemoryTaskScheduler) processNextTask() {
 		return
 	}
 
+	// 从队列中获取任务
 	wrapper := s.taskQueue.Pop()
+	
+	// 立即更新任务状态为运行中，防止其他协程重复处理
+	if wrapper.status != TaskStatusWaiting {
+		s.mu.Unlock()
+		return // 任务状态已变更，跳过
+	}
+	
 	s.runningTasks++ // 增加运行任务计数
 	s.mu.Unlock()
 
@@ -369,7 +377,15 @@ func (s *MemoryTaskScheduler) executeTask(wrapper *taskWrapper) {
 	// 创建任务上下文
 	taskCtx, cancel := context.WithCancel(context.Background())
 	
+	// 立即锁定任务状态为运行中，确保其他协程不会重复执行
 	s.mu.Lock()
+	// 再次检查任务状态，确保没有被其他协程修改
+	if wrapper.status != TaskStatusWaiting {
+		s.mu.Unlock()
+		cancel()
+		return // 任务状态已变更，跳过执行
+	}
+	
 	s.cancels[wrapper.task.ID()] = cancel
 	wrapper.status = TaskStatusRunning
 	wrapper.updatedAt = time.Now()
