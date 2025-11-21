@@ -107,10 +107,14 @@ func TestScheduledTask(t *testing.T) {
 }
 
 func TestRecurringTask(t *testing.T) {
-	scheduler := NewMemoryTaskScheduler()
-	defer scheduler.Close(nil)
+	// 创建底层调度器
+	baseScheduler := NewMemoryTaskScheduler()
+	defer baseScheduler.Close(nil)
 
-	err := scheduler.Start(context.Background())
+	// 创建包装器
+	wrapper := NewSchedulerWrapper(baseScheduler, nil)
+
+	err := baseScheduler.Start(context.Background())
 	if err != nil {
 		t.Fatalf("expected no error, got: %v", err)
 	}
@@ -118,20 +122,20 @@ func TestRecurringTask(t *testing.T) {
 	var executionCount int
 	var mu sync.Mutex
 
-	task := NewTaskBuilder().
-		WithType("recurring").
-		ScheduleRecurring(200 * time.Millisecond).
-		WithHandler(func(ctx context.Context) error {
-			mu.Lock()
-			executionCount++
-			mu.Unlock()
-			return nil
-		}).
-		Build()
+	// 使用RunTaskRecurring方法创建循环任务
+	taskID, err := wrapper.RunTaskRecurring(200 * time.Millisecond, func(ctx context.Context) error {
+		mu.Lock()
+		defer mu.Unlock()
+		executionCount++
+		return nil
+	})
 
-	err = scheduler.Schedule(task)
 	if err != nil {
 		t.Fatalf("expected no error, got: %v", err)
+	}
+
+	if taskID == "" {
+		t.Fatal("expected non-empty task ID")
 	}
 
 	// 等待执行多次
@@ -146,10 +150,15 @@ func TestRecurringTask(t *testing.T) {
 		t.Errorf("expected at least 3 executions, got: %d", count)
 	}
 
-	// 列出所有任务，应该有多个实例
-	tasks := scheduler.ListTasks()
-	if len(tasks) < 1 {
-		t.Errorf("expected at least 1 task, got: %d", len(tasks))
+	// 列出所有任务，应该有1个循环任务
+	tasks := baseScheduler.ListTasks()
+	if len(tasks) != 1 {
+		t.Errorf("expected 1 task, got: %d", len(tasks))
+	}
+
+	// 验证任务ID匹配
+	if len(tasks) > 0 && tasks[0].ID != taskID {
+		t.Errorf("task ID mismatch, expected: %s, got: %s", taskID, tasks[0].ID)
 	}
 }
 

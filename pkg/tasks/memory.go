@@ -69,20 +69,20 @@ type MemoryTaskScheduler struct {
 	cancels            map[string]context.CancelFunc // 存储执行中任务的取消函数
 	retryMonitor       *RetryMonitor                 // 重试监控器
 	executionMode      ExecutionMode                 // 执行模式
-	
+
 	// 清理机制相关字段
-	cleanupPolicy      *CleanupPolicy
-	cleanupStopChan    chan struct{}
-	cleanupStarted     bool
+	cleanupPolicy   *CleanupPolicy
+	cleanupStopChan chan struct{}
+	cleanupStarted  bool
 }
 
 // taskWrapper 任务包装器
 type taskWrapper struct {
-	task       Task               // 原始任务
-	status     TaskStatus         // 任务状态
-	cancelFunc context.CancelFunc // 取消函数
-	createdAt  time.Time          // 创建时间
-	updatedAt  time.Time          // 更新时间
+	task   Task       // 原始任务
+	status TaskStatus // 任务状态
+	// cancelFunc context.CancelFunc // 取消函数
+	createdAt time.Time // 创建时间
+	updatedAt time.Time // 更新时间
 }
 
 // priorityQueue 优先队列
@@ -210,7 +210,7 @@ func (s *MemoryTaskScheduler) Close(ctx context.Context) error {
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	
+
 	if err := s.Stop(); err != nil {
 		return err
 	}
@@ -329,8 +329,10 @@ func (s *MemoryTaskScheduler) run() {
 
 // processNextTask 处理下一个任务
 func (s *MemoryTaskScheduler) processNextTask() {
+	// 首先获取任务并更新状态
+	var wrapper *taskWrapper
+	
 	s.mu.Lock()
-
 	// 检查当前运行的任务数是否达到最大并发限制
 	if s.runningTasks >= s.maxConcurrentTasks {
 		s.mu.Unlock()
@@ -347,58 +349,66 @@ func (s *MemoryTaskScheduler) processNextTask() {
 	}
 
 	// 从队列中获取任务
-	wrapper := s.taskQueue.Pop()
-	
+	wrapper = s.taskQueue.Pop()
+
 	// 立即更新任务状态为运行中，防止其他协程重复处理
 	if wrapper.status != TaskStatusWaiting {
 		s.mu.Unlock()
 		return // 任务状态已变更，跳过
 	}
+
+	// 标记任务为运行中
+	wrapper.status = TaskStatusRunning
+	wrapper.updatedAt = time.Now()
+
+	// 增加运行任务计数
+	s.runningTasks++
 	
-	s.runningTasks++ // 增加运行任务计数
+	// 释放锁，避免在执行任务时长时间持有锁
 	s.mu.Unlock()
 
-	// 执行任务
+	// 执行任务 - 在锁外执行，避免死锁
 	s.executeTask(wrapper)
 }
 
 // executeTask 执行任务
 func (s *MemoryTaskScheduler) executeTask(wrapper *taskWrapper) {
-	// 获取工作池令牌
-	s.workerPool <- struct{}{}
-	defer func() { 
-		<-s.workerPool
-		// 减少运行任务计数
-		s.mu.Lock()
-		s.runningTasks--
-		s.mu.Unlock()
-	}()
-
 	// 创建任务上下文
 	taskCtx, cancel := context.WithCancel(context.Background())
-	
-	// 立即锁定任务状态为运行中，确保其他协程不会重复执行
-	s.mu.Lock()
-	// 再次检查任务状态，确保没有被其他协程修改
-	if wrapper.status != TaskStatusWaiting {
-		s.mu.Unlock()
-		cancel()
-		return // 任务状态已变更，跳过执行
-	}
-	
-	s.cancels[wrapper.task.ID()] = cancel
-	wrapper.status = TaskStatusRunning
-	wrapper.updatedAt = time.Now()
-	s.mu.Unlock()
 
-	startTime := time.Now()
+	// 记录取消函数
+	s.mu.Lock()
+	s.cancels[wrapper.task.ID()] = cancel
+	// 确保任务状态仍然是running（可能在记录取消函数前被取消）
+	originalStatus := wrapper.status
+	s.mu.Unlock()
 	
-	// 添加panic恢复机制
-	var err error
-	func() {
+	// 如果任务状态已经不是running，直接返回
+	if originalStatus != TaskStatusRunning {
+		cancel()
+		return
+	}
+
+	// 获取完成回调
+	onComplete := wrapper.task.OnComplete()
+
+	// 在goroutine中执行任务，避免阻塞
+	go func() {
+		// 捕获panic，防止任务崩溃影响调度器
+		startTime := time.Now()
+		var err error
+
+		// 确保在函数退出时调用取消函数和清理资源
 		defer func() {
+			// 无论如何都调用取消函数
+			cancel()
+			
+			// 捕获panic
 			if r := recover(); r != nil {
-				// 将panic转换为error
+				if s.Logger != nil {
+					s.Logger.Error(fmt.Sprintf("任务 %s 发生panic: %v", wrapper.task.ID(), r))
+				}
+				// 转换panic为error
 				switch v := r.(type) {
 				case error:
 					err = v
@@ -407,78 +417,101 @@ func (s *MemoryTaskScheduler) executeTask(wrapper *taskWrapper) {
 				default:
 					err = fmt.Errorf("panic: %v", v)
 				}
-				if s.Logger != nil {
-					s.Logger.Error(fmt.Sprintf("任务 %s 发生panic: %v", wrapper.task.ID(), r))
+				
+				// 立即在锁内更新任务状态为failed，确保panic后的状态正确
+				s.mu.Lock()
+				// 确保任务没有被取消
+				if wrapper.status != TaskStatusCancelled {
+					wrapper.status = TaskStatusFailed
+					wrapper.updatedAt = time.Now()
 				}
+				// 清理运行计数
+				s.runningTasks--
+				delete(s.cancels, wrapper.task.ID())
+				s.mu.Unlock()
+			}
+
+			// 任务完成后在锁外执行回调
+			if onComplete != nil {
+				go onComplete(context.Background(), err)
 			}
 		}()
-		
+
+		// 执行任务处理器
 		err = wrapper.task.Handler()(taskCtx)
-	}()
-	
-	duration := time.Since(startTime)
+		duration := time.Since(startTime)
 
-	s.mu.Lock()
-	delete(s.cancels, wrapper.task.ID())
-	
-	// 检查任务是否已被取消
-	if wrapper.status == TaskStatusCancelled {
-		// 任务已被取消，不需要进一步处理
-		s.mu.Unlock()
-	} else if err != nil {
-		if retryableTask, ok := wrapper.task.(RetryableTask); ok {
-			// 处理可重试任务
-			s.handleRetryableTask(retryableTask, wrapper, err, duration)
+		// 更新任务状态和清理资源，确保在锁内执行
+		s.mu.Lock()
+		defer s.mu.Unlock()
+
+		// 确保无论如何都清理资源并减少运行计数
+		s.runningTasks--
+		delete(s.cancels, wrapper.task.ID())
+
+		// 检查任务是否已被取消
+		if wrapper.status == TaskStatusCancelled {
+			return
+		}
+
+		// 处理执行结果
+		if err != nil {
+			// 任务失败
+			if retryableTask, ok := wrapper.task.(RetryableTask); ok {
+				// 处理可重试任务
+				s.handleRetryableTask(retryableTask, wrapper, err, duration)
+			} else {
+				// 普通任务失败
+				wrapper.status = TaskStatusFailed
+				wrapper.updatedAt = time.Now()
+				if s.retryMonitor != nil {
+					s.retryMonitor.RecordRetry(false, duration)
+				}
+			}
 		} else {
-			// 普通任务失败
-			wrapper.status = TaskStatusFailed
-			wrapper.updatedAt = time.Now()
+			// 任务成功
+			if wrapper.task.IsRecurring() {
+				// 循环任务，重新调度
+				interval := wrapper.task.GetInterval()
+
+				// 简化：直接使用当前时间计算下次执行时间
+				nextRunTime := time.Now().Add(interval)
+
+				// 确保SetSchedule被调用
+				if taskWithSchedule, ok := wrapper.task.(interface {
+					SetSchedule(time.Time)
+				}); ok {
+					taskWithSchedule.SetSchedule(nextRunTime)
+				}
+
+				// 重置任务状态为等待，然后重新入队
+				wrapper.status = TaskStatusWaiting
+				wrapper.updatedAt = time.Now()
+
+				// 重新放入队列
+				s.taskQueue.Push(wrapper)
+
+				if s.Logger != nil {
+					s.Logger.Info(fmt.Sprintf("循环任务 %s 已重新调度，下次执行时间: %v", wrapper.task.ID(), nextRunTime))
+				}
+			} else {
+				// 普通任务完成
+				wrapper.status = TaskStatusCompleted
+				wrapper.updatedAt = time.Now()
+			}
+
 			if s.retryMonitor != nil {
-				s.retryMonitor.RecordRetry(false, duration)
+				s.retryMonitor.RecordRetry(true, duration)
 			}
 		}
-		s.mu.Unlock()
-	} else {
-		// 任务成功
-		if wrapper.task.IsRecurring() {
-			// 循环任务，重新调度下一次执行
-			nextExecTime := time.Now().Add(wrapper.task.GetInterval())
-			
-			// 更新任务的执行时间
-			if schedulableTask, ok := wrapper.task.(interface{ SetSchedule(time.Time) }); ok {
-				schedulableTask.SetSchedule(nextExecTime)
-			}
-			
-			wrapper.status = TaskStatusWaiting
-			wrapper.updatedAt = time.Now()
-			s.taskQueue.Push(wrapper)
-			
-			if s.Logger != nil {
-				s.Logger.Info(fmt.Sprintf("循环任务 %s 已调度下次执行，时间: %v", wrapper.task.ID(), nextExecTime))
-			}
-		} else {
-			// 普通任务成功
-			wrapper.status = TaskStatusCompleted
-			wrapper.updatedAt = time.Now()
-		}
-		
-		if s.retryMonitor != nil {
-			s.retryMonitor.RecordRetry(true, duration)
-		}
-		s.mu.Unlock()
-	}
-
-	// 执行完成回调
-	if onComplete := wrapper.task.OnComplete(); onComplete != nil {
-		go onComplete(context.Background(), err)
-	}
+	}()
 }
 
 // handleRetryableTask 处理可重试任务
 func (s *MemoryTaskScheduler) handleRetryableTask(task RetryableTask, wrapper *taskWrapper, err error, duration time.Duration) {
 	retryInfo := task.GetRetryInfo()
 	policy := task.GetRetryPolicy()
-	
+
 	if retryInfo == nil {
 		retryInfo = NewRetryInfo()
 		task.SetRetryInfo(retryInfo)
@@ -493,33 +526,33 @@ func (s *MemoryTaskScheduler) handleRetryableTask(task RetryableTask, wrapper *t
 		// 计算下次重试时间
 		backoffTime := policy.CalculateBackoff(retryInfo.CurrentRetry, BackoffStrategyExponential)
 		nextRetryAt := time.Now().Add(backoffTime)
-		
+
 		retryInfo.NextRetryAt = nextRetryAt
-		
+
 		// 重新调度任务
 		wrapper.status = TaskStatusRetrying
 		wrapper.updatedAt = time.Now()
-		
+
 		// 更新任务的调度时间
 		if schedulableTask, ok := wrapper.task.(interface{ SetSchedule(time.Time) }); ok {
 			schedulableTask.SetSchedule(nextRetryAt)
 		}
-		
+
 		s.taskQueue.Push(wrapper)
-		
+
 		if s.Logger != nil {
-			s.Logger.Info(fmt.Sprintf("任务 %s 将在 %v 后重试 (第%d次)", 
+			s.Logger.Info(fmt.Sprintf("任务 %s 将在 %v 后重试 (第%d次)",
 				task.ID(), backoffTime, retryInfo.CurrentRetry))
 		}
 	} else {
 		// 不再重试，标记为死信
 		wrapper.status = TaskStatusDeadLetter
 		wrapper.updatedAt = time.Now()
-		
+
 		if s.retryMonitor != nil {
 			s.retryMonitor.RecordDeadLetter()
 		}
-		
+
 		if s.Logger != nil {
 			s.Logger.Error(fmt.Sprintf("任务 %s 重试失败，达到最大重试次数", task.ID()))
 		}
@@ -559,11 +592,11 @@ func (s *MemoryTaskScheduler) SetMaxConcurrentTasks(max int) error {
 	if max <= 0 {
 		return fmt.Errorf("最大并发任务数必须大于0")
 	}
-	
+
 	s.mu.Lock()
 	s.maxConcurrentTasks = max
 	s.mu.Unlock()
-	
+
 	// 如果当前运行的任务数超过新的限制，不会立即停止现有任务
 	// 但新任务会被限制
 	return nil
@@ -573,9 +606,9 @@ func (s *MemoryTaskScheduler) SetMaxConcurrentTasks(max int) error {
 func (s *MemoryTaskScheduler) SetExecutionMode(mode ExecutionMode) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	s.executionMode = mode
-	
+
 	// 根据执行模式调整工作协程数
 	switch mode {
 	case ExecutionModeSequential, ExecutionModePipeline:
@@ -586,21 +619,21 @@ func (s *MemoryTaskScheduler) SetExecutionMode(mode ExecutionMode) error {
 		s.workerPool = make(chan struct{}, 1)
 	case ExecutionModeConcurrent:
 		// 并发模式恢复原始设置
-		s.workerCount = 10 // 默认值
+		s.workerCount = 10         // 默认值
 		s.maxConcurrentTasks = 100 // 默认值
 		// 重新创建工作池
 		s.workerPool = make(chan struct{}, s.workerCount)
 	}
-	
+
 	if s.Logger != nil {
 		modeStr := map[ExecutionMode]string{
 			ExecutionModeConcurrent: "并发",
 			ExecutionModeSequential: "顺序",
-			ExecutionModePipeline:  "流水线",
+			ExecutionModePipeline:   "流水线",
 		}[mode]
 		s.Logger.Info(fmt.Sprintf("执行模式已设置为: %s", modeStr))
 	}
-	
+
 	return nil
 }
 
@@ -623,7 +656,7 @@ func (pq *priorityQueue) Pop() *taskWrapper {
 	if len(pq.items) == 0 {
 		return nil
 	}
-	
+
 	item := pq.items[0]
 	pq.items = pq.items[1:]
 	return item
@@ -674,9 +707,9 @@ func (s *MemoryTaskScheduler) cleanupExpiredTasks() {
 		if wrapper, exists := s.tasks[taskID]; exists {
 			delete(s.tasks, taskID)
 			deletedCount++
-			
+
 			if s.Logger != nil {
-				s.Logger.Debug(fmt.Sprintf("清理过期任务: %s (状态: %s, 创建时间: %v)", 
+				s.Logger.Debug(fmt.Sprintf("清理过期任务: %s (状态: %s, 创建时间: %v)",
 					taskID, wrapper.status, wrapper.createdAt))
 			}
 		}
@@ -690,7 +723,7 @@ func (s *MemoryTaskScheduler) cleanupExpiredTasks() {
 // CleanupTasks 手动清理任务
 func (s *MemoryTaskScheduler) CleanupTasks() int {
 	s.cleanupExpiredTasks()
-	
+
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return len(s.tasks)
@@ -739,29 +772,29 @@ func (s *MemoryTaskScheduler) GetCleanupStats() map[string]interface{} {
 
 	for _, wrapper := range s.tasks {
 		statusCounts[wrapper.status]++
-		
+
 		if oldest, exists := oldestTask[wrapper.status]; !exists || wrapper.createdAt.Before(oldest) {
 			oldestTask[wrapper.status] = wrapper.createdAt
 		}
-		
+
 		if newest, exists := newestTask[wrapper.status]; !exists || wrapper.updatedAt.After(newest) {
 			newestTask[wrapper.status] = wrapper.updatedAt
 		}
 	}
 
 	return map[string]interface{}{
-		"total_tasks":     len(s.tasks),
-		"status_counts":   statusCounts,
-		"oldest_tasks":    oldestTask,
-		"newest_tasks":    newestTask,
+		"total_tasks":   len(s.tasks),
+		"status_counts": statusCounts,
+		"oldest_tasks":  oldestTask,
+		"newest_tasks":  newestTask,
 		"cleanup_policy": map[string]interface{}{
-			"enable_auto_cleanup":  s.cleanupPolicy.EnableAutoCleanup,
-			"completed_task_ttl":   s.cleanupPolicy.CompletedTaskTTL.String(),
-			"failed_task_ttl":      s.cleanupPolicy.FailedTaskTTL.String(),
-			"cancelled_task_ttl":   s.cleanupPolicy.CancelledTaskTTL.String(),
-			"max_completed_tasks":  s.cleanupPolicy.MaxCompletedTasks,
-			"max_failed_tasks":     s.cleanupPolicy.MaxFailedTasks,
-			"cleanup_interval":     s.cleanupPolicy.CleanupInterval.String(),
+			"enable_auto_cleanup": s.cleanupPolicy.EnableAutoCleanup,
+			"completed_task_ttl":  s.cleanupPolicy.CompletedTaskTTL.String(),
+			"failed_task_ttl":     s.cleanupPolicy.FailedTaskTTL.String(),
+			"cancelled_task_ttl":  s.cleanupPolicy.CancelledTaskTTL.String(),
+			"max_completed_tasks": s.cleanupPolicy.MaxCompletedTasks,
+			"max_failed_tasks":    s.cleanupPolicy.MaxFailedTasks,
+			"cleanup_interval":    s.cleanupPolicy.CleanupInterval.String(),
 		},
 	}
 }
