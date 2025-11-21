@@ -175,63 +175,6 @@ func SQLStore() Option {
 	}
 }
 
-// Messaging 使用事件总线作为消息发布
-// func Messaging() Option {
-// 	return func(a *App) {
-// 		a.Container.Register(func() *messaging.EventPublisher {
-// 			bus := a.GetEventBus()
-// 			store := a.GetEventStore()
-// 			if bus == nil || store == nil {
-// 				a.Logger.Error("事件总线或事件存储未配置，无法创建事件发布者")
-// 				panic("事件总线或事件存储未配置，无法创建事件发布者")
-// 			}
-
-// 			// appName := strings.ReplaceAll(a.Config.App.Name, "-", "_")
-// 			return messaging.NewEventPublisher(store, bus, a.Name)
-// 		})
-// 	}
-// }
-
-// // NatsBus 使用NATS作为事件总线
-// func NatsBus() Option {
-// 	return func(o *App) {
-// 		o.Container.Register(func() eventbus.EventBus {
-// 			eventBus, err := sb.NewNatsEventBus(&o.Config.NATS)
-// 			if err != nil {
-// 				o.Logger.Error("创建NATS事件总线失败", "error", err)
-// 				panic(err)
-// 			}
-// 			return eventBus
-// 		})
-// 	}
-// }
-
-// func RedisBus() Option {
-// 	return func(o *App) {
-// 		o.Container.Register(func() eventbus.EventBus {
-// 			eventBus, err := redis_bus.NewRedisEventBus(&o.Config.Redis)
-// 			if err != nil {
-// 				o.Logger.Error("创建Redis事件总线失败", "error", err)
-// 				panic(err)
-// 			}
-// 			return eventBus
-// 		})
-// 	}
-// }
-
-// func RabbitMQBus() Option {
-// 	return func(o *App) {
-// 		o.Container.Register(func() eventbus.EventBus {
-// 			eventBus, err := rabbitmq.NewRabbitMQEventBus(&o.Config.RabbitMQ)
-// 			if err != nil {
-// 				o.Logger.Error("创建RabbitMQ事件总线失败", "error", err)
-// 				panic(err)
-// 			}
-// 			return eventBus
-// 		})
-// 	}
-// }
-
 // MemBus 使用内存作为事件总线
 func MemBus() Option {
 	return func(o *App) {
@@ -282,8 +225,8 @@ func Tasks(opts ...TaskOption) Option {
 			o.Logger.Error("设置执行模式失败", "mode", config.ExecutionMode, "error", err)
 		}
 
-		o.Scheduler = scheduler
-		o.NeedCleanup(o.Scheduler.(usecase.GracefulClose))
+		o.Scheduler = tasks.NewSchedulerWrapper(scheduler, DefaultRetryConfig())
+		o.NeedCleanup(o.Scheduler.Instance.(usecase.GracefulClose))
 	}
 }
 
@@ -347,8 +290,8 @@ func HybridTasks(opts ...tasks.HybridSchedulerOption) Option {
 		// 合并用户配置
 		allOpts := append(defaultOpts, opts...)
 
-		o.Scheduler = tasks.NewHybridTaskScheduler(allOpts...)
-		o.NeedCleanup(o.Scheduler.(usecase.GracefulClose))
+		o.Scheduler = tasks.NewSchedulerWrapper(tasks.NewHybridTaskScheduler(allOpts...), DefaultRetryConfig())
+		o.NeedCleanup(o.Scheduler.Instance.(usecase.GracefulClose))
 	}
 }
 
@@ -397,8 +340,8 @@ func AdvancedTasks(opts ...AdvancedTaskOption) Option {
 			}
 		}
 
-		o.Scheduler = scheduler
-		o.NeedCleanup(o.Scheduler.(usecase.GracefulClose))
+		o.Scheduler = tasks.NewSchedulerWrapper(scheduler, DefaultRetryConfig())
+		o.NeedCleanup(o.Scheduler.Instance.(usecase.GracefulClose))
 	}
 }
 
@@ -473,18 +416,9 @@ func WithPipelineType(taskTypes ...string) AdvancedTaskOption {
 
 // ===== 重试配置选项 =====
 
-// RetryConfig 重试配置
-type RetryConfig struct {
-	MaxRetries        int           // 最大重试次数，默认3次
-	InitialBackoff    time.Duration // 初始退避时间，默认1秒
-	MaxBackoff        time.Duration // 最大退避时间，默认30秒
-	BackoffMultiplier float64       // 退避倍数，默认2.0（指数退避）
-	Enabled           bool          // 是否启用重试，默认true
-}
-
 // DefaultRetryConfig 默认重试配置
-func DefaultRetryConfig() *RetryConfig {
-	return &RetryConfig{
+func DefaultRetryConfig() *config.RetryConfig {
+	return &config.RetryConfig{
 		MaxRetries:        3,
 		InitialBackoff:    time.Second,
 		MaxBackoff:        30 * time.Second,
@@ -501,64 +435,68 @@ func WithRetry(opts ...RetryOption) Option {
 		for _, opt := range opts {
 			opt(config)
 		}
-
 		// 保存重试配置到App结构体
-		app.retryConfig = config
+		// app.retryConfig = config
 
 		// 确保使用支持重试的调度器
 		if app.Scheduler == nil {
 			// 如果没有调度器，创建支持重试的混合调度器
-			app.Scheduler = tasks.NewHybridTaskScheduler(
-				tasks.WithHybridLogger(app.Logger),
-				tasks.WithHybridWorkerCount(5, 1, 1),
-				tasks.WithHybridMaxConcurrentTasks(10),
-			)
-			app.NeedCleanup(app.Scheduler.(usecase.GracefulClose))
+			app.Scheduler = &tasks.SchedulerWrapper{
+				Instance: tasks.NewHybridTaskScheduler(
+					tasks.WithHybridLogger(app.Logger),
+					tasks.WithHybridWorkerCount(5, 1, 1),
+					tasks.WithHybridMaxConcurrentTasks(10),
+				),
+				RetryConfig: config,
+			}
+			app.NeedCleanup(app.Scheduler.Instance.(usecase.GracefulClose))
+		} else {
+			app.Scheduler.RetryConfig = config
 		}
 	}
 }
 
 // RetryOption 重试配置选项
-type RetryOption func(*RetryConfig)
+type RetryOption func(*config.RetryConfig)
 
 // WithMaxRetries 设置最大重试次数
 func WithMaxRetries(count int) RetryOption {
-	return func(c *RetryConfig) {
+	return func(c *config.RetryConfig) {
 		c.MaxRetries = count
 	}
 }
 
 // WithInitialBackoff 设置初始退避时间
 func WithInitialBackoff(duration time.Duration) RetryOption {
-	return func(c *RetryConfig) {
+	return func(c *config.RetryConfig) {
 		c.InitialBackoff = duration
 	}
 }
 
 // WithMaxBackoff 设置最大退避时间
 func WithMaxBackoff(duration time.Duration) RetryOption {
-	return func(c *RetryConfig) {
+	return func(c *config.RetryConfig) {
 		c.MaxBackoff = duration
 	}
 }
 
 // WithExponentialBackoff 设置指数退避策略
 func WithExponentialBackoff(multiplier float64) RetryOption {
-	return func(c *RetryConfig) {
+	return func(c *config.RetryConfig) {
 		c.BackoffMultiplier = multiplier
 	}
 }
 
 // WithLinearBackoff 设置线性退避策略
 func WithLinearBackoff() RetryOption {
-	return func(c *RetryConfig) {
+	return func(c *config.RetryConfig) {
 		c.BackoffMultiplier = 1.0
 	}
 }
 
 // WithFixedBackoff 设置固定退避策略
 func WithFixedBackoff() RetryOption {
-	return func(c *RetryConfig) {
+	return func(c *config.RetryConfig) {
 		c.BackoffMultiplier = 1.0
 		c.MaxBackoff = c.InitialBackoff
 	}
@@ -566,7 +504,7 @@ func WithFixedBackoff() RetryOption {
 
 // DisableRetry 禁用重试（不推荐用于生产环境）
 func DisableRetry() RetryOption {
-	return func(c *RetryConfig) {
+	return func(c *config.RetryConfig) {
 		c.Enabled = false
 	}
 }

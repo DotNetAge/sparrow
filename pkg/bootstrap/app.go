@@ -19,7 +19,6 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/usecase"
 	"github.com/DotNetAge/sparrow/pkg/utils"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"
 )
@@ -39,9 +38,9 @@ type App struct {
 	SubProcesses []usecase.GracefulClose
 	Subscribers  messaging.Subscribers
 	Auth         Authorization
-	Scheduler    tasks.TaskScheduler
+	Scheduler    *tasks.SchedulerWrapper
 	retryCancel  context.CancelFunc // 用于取消重试goroutine的函数
-	retryConfig  *RetryConfig       // 重试配置
+
 }
 
 var (
@@ -337,134 +336,4 @@ func (app *App) NewHub(serviceName string) *messaging.StreamHub {
 	hub := messaging.NewStreamBus(app.NatsConn(), app.Name, serviceName, app.Logger)
 	app.NeedCleanup(hub)
 	return hub
-}
-
-// buildTaskWithRetry 根据重试配置构建任务
-func (app *App) buildTaskWithRetry(builder *tasks.TaskBuilder) tasks.Task {
-	// 如果配置了重试，添加重试能力
-	if app.retryConfig != nil && app.retryConfig.Enabled {
-		retryBuilder := builder.WithRetry(app.retryConfig.MaxRetries)
-		
-		// 根据退避策略配置
-		if app.retryConfig.BackoffMultiplier == 1.0 {
-			if app.retryConfig.MaxBackoff == app.retryConfig.InitialBackoff {
-				retryBuilder.WithFixedBackoff(app.retryConfig.InitialBackoff)
-			} else {
-				retryBuilder.WithLinearBackoff(app.retryConfig.InitialBackoff)
-			}
-		} else {
-			retryBuilder.WithExponentialBackoff(app.retryConfig.InitialBackoff).
-				WithMaxDelay(app.retryConfig.MaxBackoff)
-		}
-		
-		return retryBuilder.Build()
-	} else {
-		return builder.Build()
-	}
-}
-
-func (app *App) RunTaskAt(at time.Time, handler func(ctx context.Context) error) string {
-	taskId := uuid.New().String()
-	
-	// 构建任务，默认支持重试
-	builder := tasks.NewTaskBuilder().
-		WithID(taskId).
-		ScheduleAt(at).
-		WithHandler(handler)
-	
-	task := app.buildTaskWithRetry(builder)
-	app.Scheduler.Schedule(task)
-	
-	return taskId
-}
-func (app *App) RunTaskRecurring(interval time.Duration, handler func(ctx context.Context) error) string {
-	taskId := uuid.New().String()
-	
-	// 构建任务，默认支持重试
-	builder := tasks.NewTaskBuilder().
-		WithID(taskId).
-		ScheduleRecurring(interval).
-		WithHandler(handler)
-	
-	task := app.buildTaskWithRetry(builder)
-	app.Scheduler.Schedule(task)
-	
-	return taskId
-}
-
-func (app *App) RunTask(handler func(ctx context.Context) error) string {
-	taskId := uuid.New().String()
-	
-	// 构建任务，默认支持重试
-	builder := tasks.NewTaskBuilder().
-		WithID(taskId).
-		Immediate().
-		WithHandler(handler)
-	
-	task := app.buildTaskWithRetry(builder)
-	app.Scheduler.Schedule(task)
-	
-	return taskId
-}
-
-// RunTypedTask 提交一个指定类型的任务（主要用于混合调度器）
-// taskType: 任务类型，混合调度器会根据类型选择执行策略
-// handler: 任务处理函数
-// 返回: 任务ID
-func (app *App) RunTypedTask(taskType string, handler func(ctx context.Context) error) string {
-	taskId := uuid.New().String()
-	
-	// 构建任务，默认支持重试
-	builder := tasks.NewTaskBuilder().
-		WithID(taskId).
-		WithType(taskType).
-		Immediate().
-		WithHandler(handler)
-	
-	task := app.buildTaskWithRetry(builder)
-	app.Scheduler.Schedule(task)
-	
-	return taskId
-}
-
-// RunTypedTaskAt 提交一个指定类型的定时任务（主要用于混合调度器）
-// taskType: 任务类型，混合调度器会根据类型选择执行策略
-// at: 定时执行时间
-// handler: 任务处理函数
-// 返回: 任务ID
-func (app *App) RunTypedTaskAt(taskType string, at time.Time, handler func(ctx context.Context) error) string {
-	taskId := uuid.New().String()
-	
-	// 构建任务，默认支持重试
-	builder := tasks.NewTaskBuilder().
-		WithID(taskId).
-		WithType(taskType).
-		ScheduleAt(at).
-		WithHandler(handler)
-	
-	task := app.buildTaskWithRetry(builder)
-	app.Scheduler.Schedule(task)
-	
-	return taskId
-}
-
-// RunTypedTaskRecurring 提交一个指定类型的周期性任务（主要用于混合调度器）
-// taskType: 任务类型，混合调度器会根据类型选择执行策略
-// interval: 执行间隔
-// handler: 任务处理函数
-// 返回: 任务ID
-func (app *App) RunTypedTaskRecurring(taskType string, interval time.Duration, handler func(ctx context.Context) error) string {
-	taskId := uuid.New().String()
-	
-	// 构建任务，默认支持重试
-	builder := tasks.NewTaskBuilder().
-		WithID(taskId).
-		WithType(taskType).
-		ScheduleRecurring(interval).
-		WithHandler(handler)
-	
-	task := app.buildTaskWithRetry(builder)
-	app.Scheduler.Schedule(task)
-	
-	return taskId
 }
