@@ -67,7 +67,6 @@ type MemoryTaskScheduler struct {
 	maxConcurrentTasks int                           // 最大并发任务数
 	runningTasks       int                           // 当前运行的任务数
 	cancels            map[string]context.CancelFunc // 存储执行中任务的取消函数
-	retryMonitor       *RetryMonitor                 // 重试监控器
 	executionMode      ExecutionMode                 // 执行模式
 
 	// 清理机制相关字段
@@ -78,11 +77,22 @@ type MemoryTaskScheduler struct {
 
 // taskWrapper 任务包装器
 type taskWrapper struct {
-	task   Task       // 原始任务
-	status TaskStatus // 任务状态
-	// cancelFunc context.CancelFunc // 取消函数
-	createdAt time.Time // 创建时间
-	updatedAt time.Time // 更新时间
+	task       Task       // 原始任务
+	status     TaskStatus // 任务状态
+	createdAt  time.Time  // 创建时间
+	updatedAt  time.Time  // 更新时间
+}
+
+// 实现TaskInfoProvider接口
+func (t *taskWrapper) TaskInfo() *TaskInfo {
+	return &TaskInfo{
+		ID:        t.task.ID(),
+		Type:      t.task.Type(),
+		Status:    t.status,
+		Schedule:  t.task.Schedule(),
+		CreatedAt: t.createdAt,
+		UpdatedAt: t.updatedAt,
+	}
 }
 
 // priorityQueue 优先队列
@@ -111,7 +121,6 @@ func NewMemoryTaskScheduler(opts ...Option) *MemoryTaskScheduler {
 		Logger:             options.Logger,
 		workerPool:         make(chan struct{}, options.WorkerCount),
 		cancels:            make(map[string]context.CancelFunc),
-		retryMonitor:       NewRetryMonitor(),
 		cleanupPolicy:      options.CleanupPolicy,
 		cleanupStopChan:    make(chan struct{}),
 		executionMode:      ExecutionModeConcurrent, // 默认并发模式
@@ -264,17 +273,18 @@ func (s *MemoryTaskScheduler) Schedule(task Task) error {
 // Cancel 取消指定的任务
 func (s *MemoryTaskScheduler) Cancel(taskID string) error {
 	s.mu.Lock()
-	defer s.mu.Unlock()
-
 	wrapper, exists := s.tasks[taskID]
 	if !exists {
+		s.mu.Unlock()
 		return fmt.Errorf("任务不存在: %s", taskID)
 	}
 
 	if wrapper.status == TaskStatusCompleted || wrapper.status == TaskStatusFailed {
+		s.mu.Unlock()
 		return fmt.Errorf("任务已完成或失败，无法取消")
 	}
 
+	// 取消任务执行
 	if cancel, exists := s.cancels[taskID]; exists {
 		cancel()
 		delete(s.cancels, taskID)
@@ -284,6 +294,7 @@ func (s *MemoryTaskScheduler) Cancel(taskID string) error {
 	wrapper.status = TaskStatusCancelled
 	wrapper.updatedAt = time.Now()
 
+	// 如果任务在等待队列中，从队列移除
 	if oldStatus == TaskStatusWaiting {
 		newItems := make([]*taskWrapper, 0, len(s.taskQueue.items))
 		for _, item := range s.taskQueue.items {
@@ -294,7 +305,14 @@ func (s *MemoryTaskScheduler) Cancel(taskID string) error {
 		s.taskQueue.items = newItems
 	}
 
-	if onCancel := wrapper.task.OnCancel(); onCancel != nil {
+	// 立即清理资源
+		onCancel := wrapper.task.OnCancel()
+		// 保留任务对象以便测试验证状态
+		// 任务将在定期清理时被移除
+		s.mu.Unlock()
+
+	// 在锁外执行取消回调
+	if onCancel != nil {
 		ctx := context.Background()
 		onCancel(ctx)
 	}
@@ -352,7 +370,7 @@ func (s *MemoryTaskScheduler) processNextTask() {
 	wrapper = s.taskQueue.Pop()
 
 	// 立即更新任务状态为运行中，防止其他协程重复处理
-	if wrapper.status != TaskStatusWaiting {
+	if wrapper.status != TaskStatusWaiting && wrapper.status != TaskStatusRetrying {
 		s.mu.Unlock()
 		return // 任务状态已变更，跳过
 	}
@@ -373,8 +391,21 @@ func (s *MemoryTaskScheduler) processNextTask() {
 
 // executeTask 执行任务
 func (s *MemoryTaskScheduler) executeTask(wrapper *taskWrapper) {
-	// 创建任务上下文
-	taskCtx, cancel := context.WithCancel(context.Background())
+	// 创建任务上下文，支持超时控制
+	var taskCtx context.Context
+	var cancel context.CancelFunc
+	
+	// 检查任务是否支持超时设置
+	if timeoutTask, ok := wrapper.task.(interface{ GetTimeout() time.Duration }); ok {
+		timeout := timeoutTask.GetTimeout()
+		if timeout > 0 {
+			taskCtx, cancel = context.WithTimeout(context.Background(), timeout)
+		} else {
+			taskCtx, cancel = context.WithCancel(context.Background())
+		}
+	} else {
+		taskCtx, cancel = context.WithCancel(context.Background())
+	}
 
 	// 记录取消函数
 	s.mu.Lock()
@@ -435,6 +466,12 @@ func (s *MemoryTaskScheduler) executeTask(wrapper *taskWrapper) {
 			if onComplete != nil {
 				go onComplete(context.Background(), err)
 			}
+			
+			// 保留已完成任务，便于测试验证状态
+		// 任务将在定期清理时被移除
+		if originalStatus == TaskStatusRunning && wrapper.status == TaskStatusCompleted {
+			// 不再立即清理任务，仅更新状态
+		}
 		}()
 
 		// 执行任务处理器
@@ -457,16 +494,13 @@ func (s *MemoryTaskScheduler) executeTask(wrapper *taskWrapper) {
 		// 处理执行结果
 		if err != nil {
 			// 任务失败
-			if retryableTask, ok := wrapper.task.(RetryableTask); ok {
-				// 处理可重试任务
-				s.handleRetryableTask(retryableTask, wrapper, err, duration)
+			if taskInfo, ok := wrapper.task.(TaskInfoProvider); ok {
+				s.handleTaskRetry(taskInfo, wrapper, err, duration)
 			} else {
 				// 普通任务失败
 				wrapper.status = TaskStatusFailed
 				wrapper.updatedAt = time.Now()
-				if s.retryMonitor != nil {
-					s.retryMonitor.RecordRetry(false, duration)
-				}
+				// 保留失败任务，便于测试验证状态
 			}
 		} else {
 			// 任务成功
@@ -500,70 +534,47 @@ func (s *MemoryTaskScheduler) executeTask(wrapper *taskWrapper) {
 				wrapper.updatedAt = time.Now()
 			}
 
-			if s.retryMonitor != nil {
-				s.retryMonitor.RecordRetry(true, duration)
+			// 任务将在定期清理时被移除
+			if originalStatus == TaskStatusRunning && wrapper.status == TaskStatusCompleted {
+				// 不再立即清理任务，仅更新状态
 			}
 		}
 	}()
 }
 
-// handleRetryableTask 处理可重试任务
-func (s *MemoryTaskScheduler) handleRetryableTask(task RetryableTask, wrapper *taskWrapper, err error, duration time.Duration) {
-	retryInfo := task.GetRetryInfo()
-	policy := task.GetRetryPolicy()
+// 处理任务重试
+func (s *MemoryTaskScheduler) handleTaskRetry(taskInfo TaskInfoProvider, wrapper *taskWrapper, err error, duration time.Duration) {
+	info := taskInfo.TaskInfo()
 
-	if retryInfo == nil {
-		retryInfo = NewRetryInfo()
-		task.SetRetryInfo(retryInfo)
-	}
-
-	// 增加重试计数
-	nextAttempt := retryInfo.CurrentRetry + 1
-	retryInfo.AddRetryAttempt(nextAttempt, err, duration)
-
-	// 判断是否应该重试
-	if policy.ShouldRetry(retryInfo.CurrentRetry, err) {
-		// 计算下次重试时间
-		backoffTime := policy.CalculateBackoff(retryInfo.CurrentRetry, BackoffStrategyExponential)
-		nextRetryAt := time.Now().Add(backoffTime)
-
-		retryInfo.NextRetryAt = nextRetryAt
-
-		// 重新调度任务
+	// 准备重试，直接使用PrepareRetry的结果判断
+	nextRetryAt, retryErr := PrepareRetry(info, err)
+	if retryErr == nil {
+		// 更新任务状态为retrying
 		wrapper.status = TaskStatusRetrying
 		wrapper.updatedAt = time.Now()
 
-		// 更新任务的调度时间
-		if schedulableTask, ok := wrapper.task.(interface{ SetSchedule(time.Time) }); ok {
-			schedulableTask.SetSchedule(nextRetryAt)
-		}
-
+		// 将任务重新放入队列
 		s.taskQueue.Push(wrapper)
 
 		if s.Logger != nil {
-			s.Logger.Info(fmt.Sprintf("任务 %s 将在 %v 后重试 (第%d次)",
-				task.ID(), backoffTime, retryInfo.CurrentRetry))
+			s.Logger.Info(fmt.Sprintf("任务 %s 将在 %v 后重试，当前重试次数: %d/%d", 
+				wrapper.task.ID(), nextRetryAt, info.RetryCount, info.MaxRetries))
 		}
 	} else {
-		// 不再重试，标记为死信
-		wrapper.status = TaskStatusDeadLetter
+		// 达到最大重试次数或不应该重试，标记为失败
+		wrapper.status = TaskStatusFailed
 		wrapper.updatedAt = time.Now()
 
-		if s.retryMonitor != nil {
-			s.retryMonitor.RecordDeadLetter()
-		}
-
 		if s.Logger != nil {
-			s.Logger.Error(fmt.Sprintf("任务 %s 重试失败，达到最大重试次数", task.ID()))
+			s.Logger.Info(fmt.Sprintf("任务 %s 达到最大重试次数 %d，标记为失败", 
+				wrapper.task.ID(), info.MaxRetries))
 		}
 	}
 }
 
 // GetRetryStats 获取重试统计
+// 简化版本：返回空统计信息
 func (s *MemoryTaskScheduler) GetRetryStats() map[string]interface{} {
-	if s.retryMonitor != nil {
-		return s.retryMonitor.GetStats()
-	}
 	return nil
 }
 

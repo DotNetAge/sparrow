@@ -38,7 +38,7 @@ func (w *SchedulerWrapper) RunTaskAt(at time.Time, handler func(ctx context.Cont
 func (w *SchedulerWrapper) RunTaskWithIDAt(taskId string, at time.Time, handler func(ctx context.Context) error) error {
 	return w.Instance.Schedule(w.buildTaskWithRetry(NewTaskBuilder().
 		WithID(taskId).
-		ScheduleAt(at).
+		WithSchedule(at).
 		WithHandler(handler)))
 }
 
@@ -60,7 +60,7 @@ func (w *SchedulerWrapper) RunTaskRecurring(interval time.Duration, handler func
 func (w *SchedulerWrapper) RunTaskWithIDRecurring(taskId string, interval time.Duration, handler func(ctx context.Context) error) error {
 	return w.Instance.Schedule(w.buildTaskWithRetry(NewTaskBuilder().
 		WithID(taskId).
-		ScheduleRecurring(interval).
+		WithRecurring(interval).
 		WithHandler(handler)))
 }
 
@@ -80,7 +80,6 @@ func (w *SchedulerWrapper) RunTask(handler func(ctx context.Context) error) (str
 func (w *SchedulerWrapper) RunTaskWithID(taskId string, handler func(ctx context.Context) error) error {
 	return w.Instance.Schedule(w.buildTaskWithRetry(NewTaskBuilder().
 		WithID(taskId).
-		Immediate().
 		WithHandler(handler)))
 }
 
@@ -93,7 +92,6 @@ func (w *SchedulerWrapper) RunTypedTaskWithID(taskId, taskType string, handler f
 	return w.Instance.Schedule(w.buildTaskWithRetry(NewTaskBuilder().
 		WithID(taskId).
 		WithType(taskType).
-		Immediate().
 		WithHandler(handler)))
 }
 
@@ -123,7 +121,7 @@ func (w *SchedulerWrapper) RunTypedTaskWithIDAt(taskId, taskType string, at time
 	return w.Instance.Schedule(w.buildTaskWithRetry(NewTaskBuilder().
 		WithID(taskId).
 		WithType(taskType).
-		ScheduleAt(at).
+		WithSchedule(at).
 		WithHandler(handler)))
 }
 
@@ -137,7 +135,7 @@ func (w *SchedulerWrapper) RunTypedTaskRecurring(taskType string, interval time.
 	err := w.Instance.Schedule(w.buildTaskWithRetry(NewTaskBuilder().
 		WithID(taskId).
 		WithType(taskType).
-		ScheduleRecurring(interval).
+		WithRecurring(interval).
 		WithHandler(handler)))
 	return taskId, err
 }
@@ -147,30 +145,20 @@ func (w *SchedulerWrapper) RunTypedTaskWithIDRecurring(taskId, taskType string, 
 	return w.Instance.Schedule(w.buildTaskWithRetry(NewTaskBuilder().
 		WithID(taskId).
 		WithType(taskType).
-		ScheduleRecurring(interval).
+		WithRecurring(interval).
 		WithHandler(handler)))
 }
 
 // buildTaskWithRetry 根据重试配置构建任务
 func (w *SchedulerWrapper) buildTaskWithRetry(builder *TaskBuilder) Task {
-	// 如果配置了重试，添加重试能力
-	if w.RetryConfig != nil && w.RetryConfig.Enabled {
-		retryBuilder := builder.WithRetry(w.RetryConfig.MaxRetries)
-
-		// 根据退避策略配置
-		if w.RetryConfig.BackoffMultiplier == 1.0 {
-			if w.RetryConfig.MaxBackoff == w.RetryConfig.InitialBackoff {
-				retryBuilder.WithFixedBackoff(w.RetryConfig.InitialBackoff)
-			} else {
-				retryBuilder.WithLinearBackoff(w.RetryConfig.InitialBackoff)
-			}
-		} else {
-			retryBuilder.WithExponentialBackoff(w.RetryConfig.InitialBackoff).
-				WithMaxDelay(w.RetryConfig.MaxBackoff)
-		}
-
-		return retryBuilder.Build()
-	} else {
-		return builder.Build()
+	// 默认启用重试，设置最大重试次数为3次
+	maxRetries := 3
+	
+	// 如果有配置，使用配置中的重试次数
+	if w.RetryConfig != nil && w.RetryConfig.Enabled && w.RetryConfig.MaxRetries > 0 {
+		maxRetries = w.RetryConfig.MaxRetries
 	}
+	
+	// 设置最大重试次数，重试逻辑移至任务执行器内部处理
+	return builder.WithRetry(maxRetries).Build()
 }

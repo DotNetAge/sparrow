@@ -8,21 +8,30 @@ import (
 )
 
 // TaskBuilder 任务构建器
+// 简化版：直接在Task中集成重试功能
+
 type TaskBuilder struct {
 	id         string
 	typeName   string
-	schedule   TaskSchedule
 	handler    func(ctx context.Context) error
 	onComplete func(ctx context.Context, err error)
 	onCancel   func(ctx context.Context)
+	schedule   TaskSchedule
+	timeout    time.Duration
+	maxRetries int
 }
 
-// NewTaskBuilder 创建新的任务构建器
-func NewTaskBuilder() *TaskBuilder {
+// NewTask 创建新的任务构建器
+func NewTask() *TaskBuilder {
 	return &TaskBuilder{
 		id:       uuid.New().String(),
-		typeName: "default",
+		schedule: TaskSchedule{Type: ScheduleTypeImmediate},
 	}
+}
+
+// NewTaskBuilder 创建新的任务构建器（保持向后兼容）
+func NewTaskBuilder() *TaskBuilder {
+	return NewTask()
 }
 
 // WithID 设置任务ID
@@ -32,26 +41,8 @@ func (b *TaskBuilder) WithID(id string) *TaskBuilder {
 }
 
 // WithType 设置任务类型
-func (b *TaskBuilder) WithType(taskType string) *TaskBuilder {
-	b.typeName = taskType
-	return b
-}
-
-// Immediate 设置为即时执行
-func (b *TaskBuilder) Immediate() *TaskBuilder {
-	b.schedule = ImmediateExecution()
-	return b
-}
-
-// ScheduleAt 设置为在指定时间执行
-func (b *TaskBuilder) ScheduleAt(at time.Time) *TaskBuilder {
-	b.schedule = ScheduleAt(at)
-	return b
-}
-
-// ScheduleRecurring 设置为周期性执行
-func (b *TaskBuilder) ScheduleRecurring(interval time.Duration) *TaskBuilder {
-	b.schedule = ScheduleRecurring(interval)
+func (b *TaskBuilder) WithType(typeName string) *TaskBuilder {
+	b.typeName = typeName
 	return b
 }
 
@@ -62,26 +53,41 @@ func (b *TaskBuilder) WithHandler(handler func(ctx context.Context) error) *Task
 }
 
 // WithOnComplete 设置任务完成回调
-func (b *TaskBuilder) WithOnComplete(callback func(ctx context.Context, err error)) *TaskBuilder {
-	b.onComplete = callback
+func (b *TaskBuilder) WithOnComplete(onComplete func(ctx context.Context, err error)) *TaskBuilder {
+	b.onComplete = onComplete
 	return b
 }
 
 // WithOnCancel 设置任务取消回调
-func (b *TaskBuilder) WithOnCancel(callback func(ctx context.Context)) *TaskBuilder {
-	b.onCancel = callback
+func (b *TaskBuilder) WithOnCancel(onCancel func(ctx context.Context)) *TaskBuilder {
+	b.onCancel = onCancel
 	return b
 }
 
-// WithRetry 设置重试策略，提供简化的配置方式
-func (b *TaskBuilder) WithRetry(maxRetries int) *RetryableTaskBuilder {
-	policy := &RetryPolicy{
-		MaxRetries: maxRetries,
-	}
-	return &RetryableTaskBuilder{
-		TaskBuilder: *b,
-		retryPolicy: policy,
-	}
+// WithSchedule 设置任务调度时间
+func (b *TaskBuilder) WithSchedule(at time.Time) *TaskBuilder {
+	b.schedule.Type = ScheduleTypeOnce
+	b.schedule.At = at
+	return b
+}
+
+// WithRecurring 设置定期任务
+func (b *TaskBuilder) WithRecurring(interval time.Duration) *TaskBuilder {
+	b.schedule.Type = ScheduleTypeRecurring
+	b.schedule.Interval = interval
+	return b
+}
+
+// WithTimeout 设置任务超时时间
+func (b *TaskBuilder) WithTimeout(timeout time.Duration) *TaskBuilder {
+	b.timeout = timeout
+	return b
+}
+
+// WithRetry 设置重试次数
+func (b *TaskBuilder) WithRetry(maxRetries int) *TaskBuilder {
+	b.maxRetries = maxRetries
+	return b
 }
 
 // Build 构建任务
@@ -102,38 +108,50 @@ func (b *TaskBuilder) Build() Task {
 	}
 
 	return &builtTask{
-		id:         b.id,
-		typeName:   b.typeName,
-		execTime:   execTime,
+		taskInfo: &TaskInfo{
+			ID:         b.id,
+			Type:       b.typeName,
+			Status:     TaskStatusWaiting,
+			Schedule:   execTime,
+			MaxRetries: b.maxRetries,
+			CreatedAt:  time.Now(),
+			UpdatedAt:  time.Now(),
+		},
 		handler:    b.handler,
 		onComplete: b.onComplete,
 		onCancel:   b.onCancel,
 		schedule:   b.schedule,
+		timeout:    b.timeout,
 	}
 }
 
 // builtTask 内部任务实现
+// 同时实现Task和TaskInfoProvider接口
 type builtTask struct {
-	id         string
-	typeName   string
-	execTime   time.Time
+	taskInfo   *TaskInfo
 	handler    func(ctx context.Context) error
 	onComplete func(ctx context.Context, err error)
 	onCancel   func(ctx context.Context)
 	schedule   TaskSchedule
+	timeout    time.Duration
 }
 
 // 实现Task接口的方法
 func (t *builtTask) ID() string {
-	return t.id
+	return t.taskInfo.ID
 }
 
 func (t *builtTask) Type() string {
-	return t.typeName
+	return t.taskInfo.Type
+}
+
+// GetTimeout 返回任务超时时间
+func (t *builtTask) GetTimeout() time.Duration {
+	return t.timeout
 }
 
 func (t *builtTask) Schedule() time.Time {
-	return t.execTime
+	return t.taskInfo.Schedule
 }
 
 func (t *builtTask) Handler() func(ctx context.Context) error {
@@ -157,111 +175,10 @@ func (t *builtTask) GetInterval() time.Duration {
 }
 
 func (t *builtTask) SetSchedule(nextTime time.Time) {
-	t.execTime = nextTime
+	t.taskInfo.Schedule = nextTime
 }
 
-// RetryableTaskBuilder 可重试任务构建器
-type RetryableTaskBuilder struct {
-	TaskBuilder
-	retryPolicy *RetryPolicy
-}
-
-// WithExponentialBackoff 设置指数退避策略
-func (b *RetryableTaskBuilder) WithExponentialBackoff(initialDelay time.Duration) *RetryableTaskBuilder {
-	b.retryPolicy.InitialBackoff = initialDelay
-	b.retryPolicy.BackoffMultiplier = 2.0
-	b.retryPolicy.MaxBackoff = initialDelay * 60 // 最大60倍初始延迟
-	return b
-}
-
-// WithLinearBackoff 设置线性退避策略
-func (b *RetryableTaskBuilder) WithLinearBackoff(initialDelay time.Duration) *RetryableTaskBuilder {
-	b.retryPolicy.InitialBackoff = initialDelay
-	b.retryPolicy.BackoffMultiplier = 1.0
-	b.retryPolicy.MaxBackoff = initialDelay * 30 // 最大30倍初始延迟
-	return b
-}
-
-// WithFixedBackoff 设置固定退避策略
-func (b *RetryableTaskBuilder) WithFixedBackoff(delay time.Duration) *RetryableTaskBuilder {
-	b.retryPolicy.InitialBackoff = delay
-	b.retryPolicy.BackoffMultiplier = 1.0
-	b.retryPolicy.MaxBackoff = delay
-	return b
-}
-
-// WithMaxDelay 设置最大退避时间
-func (b *RetryableTaskBuilder) WithMaxDelay(maxDelay time.Duration) *RetryableTaskBuilder {
-	b.retryPolicy.MaxBackoff = maxDelay
-	return b
-}
-
-// Build 构建可重试任务
-func (b *RetryableTaskBuilder) Build() RetryableTask {
-	if b.handler == nil {
-		panic("任务处理函数不能为空")
-	}
-
-	// 设置默认值
-	if b.retryPolicy.InitialBackoff == 0 {
-		b.retryPolicy.InitialBackoff = 1 * time.Second
-	}
-	if b.retryPolicy.MaxBackoff == 0 {
-		b.retryPolicy.MaxBackoff = 1 * time.Minute
-	}
-
-	// 验证重试策略
-	if err := b.retryPolicy.Validate(); err != nil {
-		panic("重试策略配置无效: " + err.Error())
-	}
-
-	// 计算执行时间
-	execTime := time.Time{}
-	switch b.schedule.Type {
-	case ScheduleTypeImmediate:
-		execTime = time.Now()
-	case ScheduleTypeOnce:
-		execTime = b.schedule.At
-	case ScheduleTypeRecurring:
-		execTime = time.Now().Add(b.schedule.Interval)
-	}
-
-	return &retryableTask{
-		builtTask: &builtTask{
-			id:         b.id,
-			typeName:   b.typeName,
-			execTime:   execTime,
-			handler:    b.handler,
-			onComplete: b.onComplete,
-			onCancel:   b.onCancel,
-			schedule:   b.schedule,
-		},
-		retryPolicy: b.retryPolicy,
-		retryInfo:   NewRetryInfo(),
-	}
-}
-
-// retryableTask 可重试任务实现
-type retryableTask struct {
-	*builtTask
-	retryPolicy *RetryPolicy
-	retryInfo   *TaskRetryInfo
-}
-
-// 实现RetryableTask接口的方法
-func (t *retryableTask) GetRetryPolicy() *RetryPolicy {
-	return t.retryPolicy
-}
-
-func (t *retryableTask) SetRetryInfo(info *TaskRetryInfo) {
-	t.retryInfo = info
-}
-
-func (t *retryableTask) GetRetryInfo() *TaskRetryInfo {
-	return t.retryInfo
-}
-
-// NewTask 创建新的任务构建器（保持向后兼容）
-func NewTask() *TaskBuilder {
-	return NewTaskBuilder()
+// 实现TaskInfoProvider接口
+func (t *builtTask) TaskInfo() *TaskInfo {
+	return t.taskInfo
 }

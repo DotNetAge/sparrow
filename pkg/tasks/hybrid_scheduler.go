@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/DotNetAge/sparrow/pkg/logger"
+	"github.com/DotNetAge/sparrow/pkg/usecase"
 )
 
 // TaskExecutionPolicy 任务执行策略
@@ -17,8 +18,6 @@ const (
 	PolicyConcurrent TaskExecutionPolicy = "concurrent"
 	// PolicySequential 顺序执行策略  
 	PolicySequential TaskExecutionPolicy = "sequential"
-	// PolicyPipeline 流水线执行策略
-	PolicyPipeline TaskExecutionPolicy = "pipeline"
 )
 
 // HybridTaskScheduler 混合任务调度器
@@ -29,7 +28,6 @@ type HybridTaskScheduler struct {
 	// 不同策略的调度器
 	concurrentScheduler TaskScheduler
 	sequentialScheduler TaskScheduler  
-	pipelineScheduler   TaskScheduler
 	
 	// 任务类型到策略的映射
 	policyMap map[string]TaskExecutionPolicy
@@ -39,6 +37,10 @@ type HybridTaskScheduler struct {
 	
 	// 统计信息
 	stats map[TaskExecutionPolicy]*ExecutionStats
+	
+	// 明确嵌入接口，确保实现了GracefulClose和Startable
+	usecase.GracefulClose
+	usecase.Startable
 }
 
 // ExecutionStats 执行统计信息
@@ -55,11 +57,11 @@ type HybridSchedulerOption func(*HybridTaskSchedulerConfig)
 
 // HybridTaskSchedulerConfig 混合调度器配置
 type HybridTaskSchedulerConfig struct {
-	ConcurrentWorkers int
-	SequentialWorkers int
-	PipelineWorkers   int
+	ConcurrentWorkers  int
+	SequentialWorkers  int
 	MaxConcurrentTasks int
-	Logger           *logger.Logger
+	Logger            *logger.Logger
+	TaskPolicies      map[string]TaskExecutionPolicy
 }
 
 // WithHybridLogger 设置日志记录器
@@ -70,11 +72,10 @@ func WithHybridLogger(logger *logger.Logger) HybridSchedulerOption {
 }
 
 // WithHybridWorkerCount 设置各策略的工作协程数
-func WithHybridWorkerCount(concurrent, sequential, pipeline int) HybridSchedulerOption {
+func WithHybridWorkerCount(concurrent, sequential int) HybridSchedulerOption {
 	return func(c *HybridTaskSchedulerConfig) {
 		c.ConcurrentWorkers = concurrent
 		c.SequentialWorkers = sequential
-		c.PipelineWorkers = pipeline
 	}
 }
 
@@ -85,26 +86,63 @@ func WithHybridMaxConcurrentTasks(max int) HybridSchedulerOption {
 	}
 }
 
+// WithTaskPolicy 注册任务类型的执行策略
+// 此选项允许在初始化时明确指定任务类型的执行策略
+func WithTaskPolicy(taskType string, policy TaskExecutionPolicy) HybridSchedulerOption {
+	return func(c *HybridTaskSchedulerConfig) {
+		if c.TaskPolicies == nil {
+			c.TaskPolicies = make(map[string]TaskExecutionPolicy)
+		}
+		c.TaskPolicies[taskType] = policy
+	}
+}
+
+// WithTaskPolicies 批量注册任务类型的执行策略
+// 此选项允许在初始化时批量指定多个任务类型的执行策略
+func WithTaskPolicies(policies map[string]TaskExecutionPolicy) HybridSchedulerOption {
+	return func(c *HybridTaskSchedulerConfig) {
+		if c.TaskPolicies == nil {
+			c.TaskPolicies = make(map[string]TaskExecutionPolicy)
+		}
+		for taskType, policy := range policies {
+			c.TaskPolicies[taskType] = policy
+		}
+	}
+}
+
 // NewHybridTaskScheduler 创建混合任务调度器
 func NewHybridTaskScheduler(opts ...HybridSchedulerOption) *HybridTaskScheduler {
 	config := &HybridTaskSchedulerConfig{
 		ConcurrentWorkers:  5,
 		SequentialWorkers:  0,  // 默认不启用顺序执行
-		PipelineWorkers:    0,  // 默认不启用流水线执行
 		MaxConcurrentTasks: 10,
+		TaskPolicies:       make(map[string]TaskExecutionPolicy),
 	}
 	
 	for _, opt := range opts {
 		opt(config)
 	}
 	
+	// 如果有任务类型被注册为顺序执行，确保启用顺序调度器
+	hasSequentialTasks := false
+	for _, policy := range config.TaskPolicies {
+		if policy == PolicySequential {
+			hasSequentialTasks = true
+			break
+		}
+	}
+	
+	// 如果有顺序任务但未配置顺序工作协程，自动启用
+	if hasSequentialTasks && config.SequentialWorkers == 0 {
+		config.SequentialWorkers = 1
+	}
+	
 	scheduler := &HybridTaskScheduler{
-		logger: config.Logger,
+		logger:    config.Logger,
 		policyMap: make(map[string]TaskExecutionPolicy),
 		stats: map[TaskExecutionPolicy]*ExecutionStats{
 			PolicyConcurrent: {LastExecution: time.Now()},
 			PolicySequential: {LastExecution: time.Now()},
-			PolicyPipeline:   {LastExecution: time.Now()},
 		},
 	}
 	
@@ -124,12 +162,14 @@ func NewHybridTaskScheduler(opts ...HybridSchedulerOption) *HybridTaskScheduler 
 		)
 	}
 	
-	if config.PipelineWorkers > 0 {
-		scheduler.pipelineScheduler = NewMemoryTaskScheduler(
-			WithLogger(config.Logger),
-			WithWorkerCount(1),  // 流水线执行只需要1个工作协程
-			WithMaxConcurrentTasks(1), // 流水线执行只能有一个并发
-		)
+
+	
+	// 注册初始化时指定的任务类型策略
+	for taskType, policy := range config.TaskPolicies {
+		scheduler.policyMap[taskType] = policy
+		if scheduler.logger != nil {
+			scheduler.logger.Infof("任务类型 %s 初始化注册执行策略: %s", taskType, policy)
+		}
 	}
 	
 	return scheduler
@@ -140,7 +180,7 @@ func (h *HybridTaskScheduler) RegisterTaskPolicy(taskType string, policy TaskExe
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	
-	if policy != PolicyConcurrent && policy != PolicySequential && policy != PolicyPipeline {
+	if policy != PolicyConcurrent && policy != PolicySequential {
 		return fmt.Errorf("无效的执行策略: %s", policy)
 	}
 	
@@ -188,12 +228,7 @@ func (h *HybridTaskScheduler) Start(ctx context.Context) error {
 		}
 	}
 	
-	// 启动流水线调度器（如果存在）
-	if h.pipelineScheduler != nil {
-		if err := h.pipelineScheduler.Start(ctx); err != nil {
-			return fmt.Errorf("启动流水线调度器失败: %w", err)
-		}
-	}
+
 	
 	if h.logger != nil {
 		h.logger.Info("混合任务调度器已启动")
@@ -221,12 +256,7 @@ func (h *HybridTaskScheduler) Stop() error {
 		}
 	}
 	
-	// 停止流水线调度器（如果存在）
-	if h.pipelineScheduler != nil {
-		if err := h.pipelineScheduler.Stop(); err != nil {
-			errors = append(errors, fmt.Errorf("停止流水线调度器失败: %w", err))
-		}
-	}
+
 	
 	if len(errors) > 0 {
 		return fmt.Errorf("停止调度器时发生错误: %v", errors)
@@ -258,12 +288,7 @@ func (h *HybridTaskScheduler) Close(ctx context.Context) error {
 		}
 	}
 	
-	// 关闭流水线调度器（如果存在）
-	if h.pipelineScheduler != nil {
-		if err := h.pipelineScheduler.Close(ctx); err != nil {
-			errors = append(errors, fmt.Errorf("关闭流水线调度器失败: %w", err))
-		}
-	}
+
 	
 	if len(errors) > 0 {
 		return fmt.Errorf("关闭调度器时发生错误: %v", errors)
@@ -295,13 +320,7 @@ func (h *HybridTaskScheduler) Cancel(taskID string) error {
 		}
 	}
 	
-	if h.pipelineScheduler != nil {
-		if err := h.pipelineScheduler.Cancel(taskID); err == nil {
-			return nil
-		} else {
-			errors = append(errors, err)
-		}
-	}
+
 	
 	return fmt.Errorf("任务未找到或取消失败: %v", errors)
 }
@@ -319,11 +338,7 @@ func (h *HybridTaskScheduler) GetTaskStatus(taskID string) (TaskStatus, error) {
 		}
 	}
 	
-	if h.pipelineScheduler != nil {
-		if status, err := h.pipelineScheduler.GetTaskStatus(taskID); err == nil {
-			return status, nil
-		}
-	}
+
 	
 	return "", fmt.Errorf("任务未找到: %s", taskID)
 }
@@ -338,9 +353,7 @@ func (h *HybridTaskScheduler) ListTasks() []TaskInfo {
 		allTasks = append(allTasks, h.sequentialScheduler.ListTasks()...)
 	}
 	
-	if h.pipelineScheduler != nil {
-		allTasks = append(allTasks, h.pipelineScheduler.ListTasks()...)
-	}
+
 	
 	return allTasks
 }
@@ -399,11 +412,7 @@ func (h *HybridTaskScheduler) getSchedulerByPolicy(policy TaskExecutionPolicy) (
 			return nil, fmt.Errorf("顺序调度器未启用")
 		}
 		return h.sequentialScheduler, nil
-	case PolicyPipeline:
-		if h.pipelineScheduler == nil {
-			return nil, fmt.Errorf("流水线调度器未启用")
-		}
-		return h.pipelineScheduler, nil
+
 	default:
 		return nil, fmt.Errorf("不支持的执行策略: %s", policy)
 	}
@@ -447,6 +456,10 @@ type statsTaskWrapper struct {
 	onComplete func(ctx context.Context, err error)
 }
 
+func (t *statsTaskWrapper) GetTimeout() time.Duration {
+	return t.task.GetTimeout()
+}
+
 func (t *statsTaskWrapper) ID() string {
 	return t.task.ID()
 }
@@ -477,6 +490,14 @@ func (t *statsTaskWrapper) IsRecurring() bool {
 
 func (t *statsTaskWrapper) GetInterval() time.Duration {
 	return t.task.GetInterval()
+}
+
+// TaskInfo 实现TaskInfoProvider接口，委托给原始任务
+func (t *statsTaskWrapper) TaskInfo() *TaskInfo {
+	if infoProvider, ok := t.task.(TaskInfoProvider); ok {
+		return infoProvider.TaskInfo()
+	}
+	return nil
 }
 
 // updateStats 更新统计信息

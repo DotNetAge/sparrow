@@ -28,12 +28,17 @@ type TaskScheduler interface {
 
 // TaskInfo 任务信息
 type TaskInfo struct {
-	ID        string     `json:"id"`
-	Type      string     `json:"type"`
-	Status    TaskStatus `json:"status"`
-	Schedule  time.Time  `json:"schedule"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
+	ID             string     `json:"id"`
+	Type           string     `json:"type"`
+	Status         TaskStatus `json:"status"`
+	Schedule       time.Time  `json:"schedule"`
+	CreatedAt      time.Time  `json:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at"`
+	// 重试相关字段
+	RetryCount     int        `json:"retry_count"`     // 当前重试次数
+	MaxRetries     int        `json:"max_retries"`     // 最大重试次数
+	LastError      string     `json:"last_error"`      // 最后一次错误信息
+	NextRetryAt    time.Time  `json:"next_retry_at"`   // 下次重试时间
 }
 
 // Task 任务接口
@@ -54,6 +59,14 @@ type Task interface {
 	IsRecurring() bool
 	// GetInterval 获取任务的执行间隔
 	GetInterval() time.Duration
+	// GetTimeout 获取任务的超时时间
+	GetTimeout() time.Duration
+}
+
+// TaskInfoProvider 任务信息提供接口
+type TaskInfoProvider interface {
+	// TaskInfo 返回任务信息
+	TaskInfo() *TaskInfo
 }
 
 // TaskStatus 任务状态
