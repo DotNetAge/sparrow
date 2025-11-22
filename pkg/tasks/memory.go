@@ -664,14 +664,27 @@ func (pq *priorityQueue) Pop() *taskWrapper {
 
 // runCleanup 运行清理协程
 func (s *MemoryTaskScheduler) runCleanup() {
-	ticker := time.NewTicker(s.cleanupPolicy.CleanupInterval)
+	// 确保使用正确的清理间隔
+	interval := s.cleanupPolicy.CleanupInterval
+	if interval <= 0 {
+		interval = 5 * time.Minute // 默认5分钟
+	}
+	
+	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
+
+	if s.Logger != nil {
+		s.Logger.Info(fmt.Sprintf("清理协程已启动，清理间隔: %v", interval))
+	}
 
 	for {
 		select {
 		case <-s.cleanupStopChan:
 			return
 		case <-ticker.C:
+			if s.Logger != nil {
+				s.Logger.Info("开始定期清理任务")
+			}
 			s.cleanupExpiredTasks()
 		}
 	}
