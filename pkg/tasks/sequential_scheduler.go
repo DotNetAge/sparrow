@@ -13,31 +13,31 @@ import (
 
 type sequentialScheduler struct {
 	TaskScheduler
-	tasks         map[string]Task // 存储所有任务
-	taskMutex     sync.RWMutex    // 保护任务映射的互斥锁
-	wg            sync.WaitGroup  // 等待所有任务完成的等待组
-	isRunning     bool            // 是否有任务正在运行
-	stopChan      chan struct{}   // 停止信号通道
-	startOnce     sync.Once       // 确保调度器只启动一次
-	taskTTL       time.Duration   // 任务完成后的保存时间（默认5分钟）
-	maxTaskCount  int             // 最大保存的任务数量（默认500个）
-	pendingTasks  []string        // 待执行的任务ID队列
-	pendingMutex  sync.Mutex      // 保护待执行任务队列的互斥锁
-	taskDoneChan  chan struct{}   // 任务完成通知通道
-	taskQueue     chan Task       // 任务队列
-	taskQueueClosed bool          // 任务队列是否已关闭
+	tasks           map[string]Task // 存储所有任务
+	taskMutex       sync.RWMutex    // 保护任务映射的互斥锁
+	wg              sync.WaitGroup  // 等待所有任务完成的等待组
+	isRunning       bool            // 是否有任务正在运行
+	stopChan        chan struct{}   // 停止信号通道
+	startOnce       sync.Once       // 确保调度器只启动一次
+	taskTTL         time.Duration   // 任务完成后的保存时间（默认5分钟）
+	maxTaskCount    int             // 最大保存的任务数量（默认500个）
+	pendingTasks    []string        // 待执行的任务ID队列
+	pendingMutex    sync.Mutex      // 保护待执行任务队列的互斥锁
+	taskDoneChan    chan struct{}   // 任务完成通知通道
+	taskQueue       chan Task       // 任务队列
+	taskQueueClosed bool            // 任务队列是否已关闭
 }
 
 // NewSequentialScheduler 创建一个新的顺序执行模式任务调度器
 func NewSequentialScheduler() TaskScheduler {
 	ss := &sequentialScheduler{
-		tasks:         make(map[string]Task),
-		stopChan:      make(chan struct{}),
-		taskTTL:       5 * time.Minute, // 任务完成后保存5分钟
-		maxTaskCount:  500,             // 最大保存500个任务
-		pendingTasks:  make([]string, 0),
-		taskDoneChan:  make(chan struct{}, 1),
-		taskQueue:     make(chan Task, 100), // 带缓冲的任务队列
+		tasks:           make(map[string]Task),
+		stopChan:        make(chan struct{}),
+		taskTTL:         5 * time.Minute, // 任务完成后保存5分钟
+		maxTaskCount:    500,             // 最大保存500个任务
+		pendingTasks:    make([]string, 0),
+		taskDoneChan:    make(chan struct{}, 1),
+		taskQueue:       make(chan Task, 100), // 带缓冲的任务队列
 		taskQueueClosed: false,
 	}
 	return ss
@@ -104,12 +104,6 @@ func (s *sequentialScheduler) Close(ctx context.Context) error {
 	}
 	close(s.taskDoneChan)
 
-	return nil
-}
-
-// GracefulClose 优雅关闭任务调度器
-func (s *sequentialScheduler) GracefulClose(ctx context.Context) error {
-	s.Stop()
 	return nil
 }
 

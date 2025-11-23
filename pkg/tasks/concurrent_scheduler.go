@@ -14,16 +14,16 @@ import (
 
 type concurrentScheduler struct {
 	TaskScheduler
-	tasks           map[string]Task // 存储所有任务
-	taskMutex       sync.RWMutex    // 保护任务映射的互斥锁
-	wg              sync.WaitGroup  // 等待所有任务完成的等待组
-	maxConcurrent   int             // 最大并发任务数
-	activeTasks     int             // 当前活跃任务数
-	activeTasksCond *sync.Cond      // 控制并发任务数的条件变量
-	stopChan        chan struct{}   // 停止信号通道
-	startOnce       sync.Once       // 确保调度器只启动一次
-	taskTTL         time.Duration   // 任务完成后的保存时间（默认5分钟）
-	maxTaskCount    int             // 最大保存的任务数量（默认500个）
+	tasks     map[string]Task // 存储所有任务
+	taskMutex sync.RWMutex    // 保护任务映射的互斥锁
+	// wg              sync.WaitGroup  // 等待所有任务完成的等待组
+	maxConcurrent   int           // 最大并发任务数
+	activeTasks     int           // 当前活跃任务数
+	activeTasksCond *sync.Cond    // 控制并发任务数的条件变量
+	stopChan        chan struct{} // 停止信号通道
+	startOnce       sync.Once     // 确保调度器只启动一次
+	taskTTL         time.Duration // 任务完成后的保存时间（默认5分钟）
+	maxTaskCount    int           // 最大保存的任务数量（默认500个）
 }
 
 // NewConcurrentScheduler 创建一个新的并发执行模式任务调度器
@@ -193,8 +193,10 @@ func (s *concurrentScheduler) SetMaxConcurrentTasks(max int) error {
 	return nil
 }
 
-// GracefulClose 优雅关闭
-func (s *concurrentScheduler) GracefulClose() error {
+// Close 优雅关闭调度器并清理资源（实现GracefulClose接口）
+func (s *concurrentScheduler) Close(ctx context.Context) error {
+	// 使用现有的Stop方法实现关闭逻辑
+	// 如果需要，可以根据ctx实现超时控制
 	return s.Stop()
 }
 
@@ -272,7 +274,7 @@ func (s *concurrentScheduler) executeTask(task Task) {
 	// 简化的并发控制实现，使用轮询代替条件变量复杂的等待
 	waitCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	
+
 	// 检查并等待可用的并发槽位
 	for {
 		s.taskMutex.Lock()
@@ -283,13 +285,13 @@ func (s *concurrentScheduler) executeTask(task Task) {
 			break
 		}
 		s.taskMutex.Unlock()
-		
+
 		// 短暂睡眠后重试，避免CPU过度占用
 		select {
-			case <-time.After(100 * time.Millisecond):
-			case <-waitCtx.Done():
-				return
-			}
+		case <-time.After(100 * time.Millisecond):
+		case <-waitCtx.Done():
+			return
+		}
 	}
 
 	// 任务完成后减少活跃任务数

@@ -260,7 +260,6 @@ func TestAppScheduler_TaskTypePolicy(t *testing.T) {
 	// 创建应用实例，配置混合调度器并注册任务类型策略
 	app := NewApp(
 		Tasks(
-			tasks.WithConcurrent("email", "notification"),
 			tasks.WithSequential("payment", "order"),
 		),
 		ServerPort(8083),
@@ -277,28 +276,45 @@ func TestAppScheduler_TaskTypePolicy(t *testing.T) {
 	// 等待调度器初始化
 	time.Sleep(500 * time.Millisecond)
 
-	// 验证并发任务类型的执行
-	concurrentExecuted := false
-	_, err := app.Scheduler.RunTypedTask("email", func(ctx context.Context) error {
-		concurrentExecuted = true
+	// 使用通道来确保任务按顺序执行并获取准确的执行时间
+	paymentDone := make(chan struct{})
+	orderDone := make(chan struct{})
+	
+	paymentAt := time.Time{}
+	orderAt := time.Time{}
+
+	// 提交payment任务
+	_, err := app.Scheduler.RunTypedTask("payment", func(ctx context.Context) error {
+		paymentAt = time.Now()
+		fmt.Printf("payment task executed at %v\n", paymentAt)
+		// 添加更明显的延迟，确保与order任务有明显的时间差
+		time.Sleep(300 * time.Millisecond)
+		paymentDone <- struct{}{}
 		return nil
 	})
+
 	assert.NoError(t, err)
 
-	// 验证顺序任务类型的执行
-	sequentialExecuted := false
-	_, err = app.Scheduler.RunTypedTask("payment", func(ctx context.Context) error {
-		sequentialExecuted = true
+	// 提交order任务
+	_, err = app.Scheduler.RunTypedTask("order", func(ctx context.Context) error {
+		orderAt = time.Now()
+		fmt.Printf("order task executed at %v\n", orderAt)
+		time.Sleep(100 * time.Millisecond)
+		orderDone <- struct{}{}
 		return nil
 	})
+
 	assert.NoError(t, err)
 
-	// 等待任务执行完成
-	time.Sleep(300 * time.Millisecond)
+	// 等待两个任务都执行完成
+	<-paymentDone
+	<-orderDone
 
-	// 验证所有任务都已执行
-	assert.True(t, concurrentExecuted)
-	assert.True(t, sequentialExecuted)
+	// 打印时间差以便调试
+	fmt.Printf("Time difference: %v\n", orderAt.Sub(paymentAt))
+	
+	// 验证payment任务确实在order任务之前执行
+	assert.True(t, paymentAt.Before(orderAt))
 }
 
 // TestAppScheduler_ConcurrentVsSequentialExecution 测试并发和顺序任务的执行模式差异

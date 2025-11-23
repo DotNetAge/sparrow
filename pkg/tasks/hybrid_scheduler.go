@@ -91,18 +91,16 @@ func (s *HybridScheduler) Schedule(task Task) error {
 	// 确定使用哪个调度器
 	var scheduler TaskScheduler
 
-	// 定时任务和周期任务默认使用顺序模式
-	if task.Schedule().After(time.Now()) || task.IsRecurring() {
+	// 首先检查任务类型的执行模式，如果指定了顺序模式，直接使用顺序调度器
+	mode := s.getExecutionMode(task.Type())
+	if mode == Sequential {
+		scheduler = s.sequentialScheduler
+	} else if task.Schedule().After(time.Now()) || task.IsRecurring() {
+		// 定时任务和周期任务默认使用顺序模式
 		scheduler = s.sequentialScheduler
 	} else {
-		// 根据任务类型选择执行模式
-		mode := s.getExecutionMode(task.Type())
-		if mode == Sequential {
-			scheduler = s.sequentialScheduler
-		} else {
-			// 默认使用并发模式
-			scheduler = s.concurrentScheduler
-		}
+		// 默认使用并发模式
+		scheduler = s.concurrentScheduler
 	}
 
 	// 调度任务并返回错误
