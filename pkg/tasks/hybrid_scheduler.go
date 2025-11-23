@@ -2,511 +2,159 @@ package tasks
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"time"
-
-	"github.com/DotNetAge/sparrow/pkg/logger"
-	"github.com/DotNetAge/sparrow/pkg/usecase"
 )
 
-// TaskExecutionPolicy 任务执行策略
-type TaskExecutionPolicy string
+// HybridScheduler 混合调度器实现
+// 根据任务类型选择不同的执行模式（并发或顺序）
+// 定时任务和周期任务默认使用顺序模式执行
+// 可以通过配置指定任务类型与执行模式的映射关系
 
-const (
-	// PolicyConcurrent 并发执行策略
-	PolicyConcurrent TaskExecutionPolicy = "concurrent"
-	// PolicySequential 顺序执行策略  
-	PolicySequential TaskExecutionPolicy = "sequential"
-)
-
-// HybridTaskScheduler 混合任务调度器
-// 根据任务类型自动选择合适的执行策略
-type HybridTaskScheduler struct {
-	logger *logger.Logger
-	
-	// 不同策略的调度器
-	concurrentScheduler TaskScheduler
-	sequentialScheduler TaskScheduler  
-	
-	// 任务类型到策略的映射
-	policyMap map[string]TaskExecutionPolicy
-	
-	// 同步控制
-	mu sync.RWMutex
-	
-	// 统计信息
-	stats map[TaskExecutionPolicy]*ExecutionStats
-	
-	// 明确嵌入接口，确保实现了GracefulClose和Startable
-	usecase.GracefulClose
-	usecase.Startable
+type HybridScheduler struct {
+	TaskScheduler
+	concurrentScheduler TaskScheduler            // 并发执行模式的调度器
+	sequentialScheduler TaskScheduler            // 顺序执行模式的调度器
+	executionModes      map[string]ExecutionMode // 任务类型到执行模式的映射
+	modesMutex          sync.RWMutex             // 保护执行模式映射的互斥锁
 }
 
-// ExecutionStats 执行统计信息
-type ExecutionStats struct {
-	TotalTasks     int64     `json:"total_tasks"`
-	CompletedTasks int64     `json:"completed_tasks"`
-	FailedTasks    int64     `json:"failed_tasks"`
-	RunningTasks   int64     `json:"running_tasks"`
-	LastExecution  time.Time `json:"last_execution"`
+// NewHybridScheduler 创建一个新的混合调度器
+func NewHybridScheduler() *HybridScheduler {
+	hs := &HybridScheduler{
+		concurrentScheduler: NewConcurrentScheduler(),
+		sequentialScheduler: NewSequentialScheduler(),
+		executionModes:      make(map[string]ExecutionMode),
+	}
+	return hs
 }
 
-// HybridSchedulerOption 混合调度器配置选项
-type HybridSchedulerOption func(*HybridTaskSchedulerConfig)
-
-// HybridTaskSchedulerConfig 混合调度器配置
-type HybridTaskSchedulerConfig struct {
-	ConcurrentWorkers  int
-	SequentialWorkers  int
-	MaxConcurrentTasks int
-	Logger            *logger.Logger
-	TaskPolicies      map[string]TaskExecutionPolicy
+// WithConcurrent 设置指定任务类型使用并发执行模式
+func (s *HybridScheduler) WithConcurrent(taskTypes ...string) *HybridScheduler {
+	s.modesMutex.Lock()
+	defer s.modesMutex.Unlock()
+	for _, taskType := range taskTypes {
+		s.executionModes[taskType] = ConcurrentMode
+	}
+	return s
 }
 
-// WithHybridLogger 设置日志记录器
-func WithHybridLogger(logger *logger.Logger) HybridSchedulerOption {
-	return func(c *HybridTaskSchedulerConfig) {
-		c.Logger = logger
+// WithSequential 设置指定任务类型使用顺序执行模式
+func (s *HybridScheduler) WithSequential(taskTypes ...string) *HybridScheduler {
+	s.modesMutex.Lock()
+	defer s.modesMutex.Unlock()
+	for _, taskType := range taskTypes {
+		s.executionModes[taskType] = Sequential
 	}
+	return s
 }
 
-// WithHybridWorkerCount 设置各策略的工作协程数
-func WithHybridWorkerCount(concurrent, sequential int) HybridSchedulerOption {
-	return func(c *HybridTaskSchedulerConfig) {
-		c.ConcurrentWorkers = concurrent
-		c.SequentialWorkers = sequential
-	}
-}
-
-// WithHybridMaxConcurrentTasks 设置最大并发任务数
-func WithHybridMaxConcurrentTasks(max int) HybridSchedulerOption {
-	return func(c *HybridTaskSchedulerConfig) {
-		c.MaxConcurrentTasks = max
-	}
-}
-
-// WithTaskPolicy 注册任务类型的执行策略
-// 此选项允许在初始化时明确指定任务类型的执行策略
-func WithTaskPolicy(taskType string, policy TaskExecutionPolicy) HybridSchedulerOption {
-	return func(c *HybridTaskSchedulerConfig) {
-		if c.TaskPolicies == nil {
-			c.TaskPolicies = make(map[string]TaskExecutionPolicy)
-		}
-		c.TaskPolicies[taskType] = policy
-	}
-}
-
-// WithTaskPolicies 批量注册任务类型的执行策略
-// 此选项允许在初始化时批量指定多个任务类型的执行策略
-func WithTaskPolicies(policies map[string]TaskExecutionPolicy) HybridSchedulerOption {
-	return func(c *HybridTaskSchedulerConfig) {
-		if c.TaskPolicies == nil {
-			c.TaskPolicies = make(map[string]TaskExecutionPolicy)
-		}
-		for taskType, policy := range policies {
-			c.TaskPolicies[taskType] = policy
-		}
-	}
-}
-
-// NewHybridTaskScheduler 创建混合任务调度器
-func NewHybridTaskScheduler(opts ...HybridSchedulerOption) *HybridTaskScheduler {
-	config := &HybridTaskSchedulerConfig{
-		ConcurrentWorkers:  5,
-		SequentialWorkers:  0,  // 默认不启用顺序执行
-		MaxConcurrentTasks: 10,
-		TaskPolicies:       make(map[string]TaskExecutionPolicy),
-	}
-	
-	for _, opt := range opts {
-		opt(config)
-	}
-	
-	// 如果有任务类型被注册为顺序执行，确保启用顺序调度器
-	hasSequentialTasks := false
-	for _, policy := range config.TaskPolicies {
-		if policy == PolicySequential {
-			hasSequentialTasks = true
-			break
-		}
-	}
-	
-	// 如果有顺序任务但未配置顺序工作协程，自动启用
-	if hasSequentialTasks && config.SequentialWorkers == 0 {
-		config.SequentialWorkers = 1
-	}
-	
-	scheduler := &HybridTaskScheduler{
-		logger:    config.Logger,
-		policyMap: make(map[string]TaskExecutionPolicy),
-		stats: map[TaskExecutionPolicy]*ExecutionStats{
-			PolicyConcurrent: {LastExecution: time.Now()},
-			PolicySequential: {LastExecution: time.Now()},
-		},
-	}
-	
-	// 创建并发调度器
-	scheduler.concurrentScheduler = NewMemoryTaskScheduler(
-		WithLogger(config.Logger),
-		WithWorkerCount(config.ConcurrentWorkers),
-		WithMaxConcurrentTasks(config.MaxConcurrentTasks),
-	)
-	
-	// 只有在配置了工作协程数时才创建顺序和流水线调度器
-	if config.SequentialWorkers > 0 {
-		scheduler.sequentialScheduler = NewMemoryTaskScheduler(
-			WithLogger(config.Logger),
-			WithWorkerCount(1),  // 顺序执行只需要1个工作协程
-			WithMaxConcurrentTasks(1), // 顺序执行只能有一个并发
-		)
-	}
-	
-
-	
-	// 注册初始化时指定的任务类型策略
-	for taskType, policy := range config.TaskPolicies {
-		scheduler.policyMap[taskType] = policy
-		if scheduler.logger != nil {
-			scheduler.logger.Infof("任务类型 %s 初始化注册执行策略: %s", taskType, policy)
-		}
-	}
-	
-	return scheduler
-}
-
-// RegisterTaskPolicy 注册任务类型的执行策略
-func (h *HybridTaskScheduler) RegisterTaskPolicy(taskType string, policy TaskExecutionPolicy) error {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-	
-	if policy != PolicyConcurrent && policy != PolicySequential {
-		return fmt.Errorf("无效的执行策略: %s", policy)
-	}
-	
-	h.policyMap[taskType] = policy
-	
-	if h.logger != nil {
-		h.logger.Infof("任务类型 %s 注册执行策略: %s", taskType, policy)
-	}
-	
-	return nil
-}
-
-// Schedule 调度任务
-func (h *HybridTaskScheduler) Schedule(task Task) error {
-	policy := h.getTaskPolicy(task.Type())
-	
-	scheduler, err := h.getSchedulerByPolicy(policy)
-	if err != nil {
+// Start 启动混合调度器
+func (s *HybridScheduler) Start(ctx context.Context) error {
+	if err := s.concurrentScheduler.Start(ctx); err != nil {
 		return err
 	}
-	
-	// 更新统计信息
-	h.updateStats(policy, true)
-	
-	// 包装任务以完成统计
-	wrappedTask := h.wrapTaskWithStats(task, policy)
-	
-	return scheduler.Schedule(wrappedTask)
+	return s.sequentialScheduler.Start(ctx)
 }
 
-// Start 启动所有调度器
-func (h *HybridTaskScheduler) Start(ctx context.Context) error {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-	
-	// 启动并发调度器（总是存在）
-	if err := h.concurrentScheduler.Start(ctx); err != nil {
-		return fmt.Errorf("启动并发调度器失败: %w", err)
+// Stop 停止混合调度器
+func (s *HybridScheduler) Stop() error {
+	if err := s.concurrentScheduler.Stop(); err != nil {
+		return err
 	}
-	
-	// 启动顺序调度器（如果存在）
-	if h.sequentialScheduler != nil {
-		if err := h.sequentialScheduler.Start(ctx); err != nil {
-			return fmt.Errorf("启动顺序调度器失败: %w", err)
-		}
-	}
-	
+	return s.sequentialScheduler.Stop()
+}
 
-	
-	if h.logger != nil {
-		h.logger.Info("混合任务调度器已启动")
+// Close 优雅关闭混合调度器并清理资源
+func (s *HybridScheduler) Close(ctx context.Context) error {
+	// 关闭并发调度器
+	if err := s.concurrentScheduler.Close(ctx); err != nil {
+		return err
 	}
-	
+
+	// 关闭顺序调度器
+	if err := s.sequentialScheduler.Close(ctx); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-// Stop 停止所有调度器
-func (h *HybridTaskScheduler) Stop() error {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-	
-	var errors []error
-	
-	// 停止并发调度器（总是存在）
-	if err := h.concurrentScheduler.Stop(); err != nil {
-		errors = append(errors, fmt.Errorf("停止并发调度器失败: %w", err))
-	}
-	
-	// 停止顺序调度器（如果存在）
-	if h.sequentialScheduler != nil {
-		if err := h.sequentialScheduler.Stop(); err != nil {
-			errors = append(errors, fmt.Errorf("停止顺序调度器失败: %w", err))
-		}
-	}
-	
+// Schedule 调度一个任务
+// 根据任务类型选择合适的调度器
+func (s *HybridScheduler) Schedule(task Task) error {
+	// 确定使用哪个调度器
+	var scheduler TaskScheduler
 
-	
-	if len(errors) > 0 {
-		return fmt.Errorf("停止调度器时发生错误: %v", errors)
-	}
-	
-	if h.logger != nil {
-		h.logger.Info("混合任务调度器已停止")
-	}
-	
-	return nil
-}
-
-// Close 优雅关闭所有调度器
-func (h *HybridTaskScheduler) Close(ctx context.Context) error {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-	
-	var errors []error
-	
-	// 关闭并发调度器（总是存在）
-	if err := h.concurrentScheduler.Close(ctx); err != nil {
-		errors = append(errors, fmt.Errorf("关闭并发调度器失败: %w", err))
-	}
-	
-	// 关闭顺序调度器（如果存在）
-	if h.sequentialScheduler != nil {
-		if err := h.sequentialScheduler.Close(ctx); err != nil {
-			errors = append(errors, fmt.Errorf("关闭顺序调度器失败: %w", err))
-		}
-	}
-	
-
-	
-	if len(errors) > 0 {
-		return fmt.Errorf("关闭调度器时发生错误: %v", errors)
-	}
-	
-	if h.logger != nil {
-		h.logger.Info("混合任务调度器已优雅关闭")
-	}
-	
-	return nil
-}
-
-// Cancel 取消任务
-func (h *HybridTaskScheduler) Cancel(taskID string) error {
-	// 尝试从所有调度器中取消任务
-	var errors []error
-	
-	if err := h.concurrentScheduler.Cancel(taskID); err == nil {
-		return nil
+	// 定时任务和周期任务默认使用顺序模式
+	if task.Schedule().After(time.Now()) || task.IsRecurring() {
+		scheduler = s.sequentialScheduler
 	} else {
-		errors = append(errors, err)
-	}
-	
-	if h.sequentialScheduler != nil {
-		if err := h.sequentialScheduler.Cancel(taskID); err == nil {
-			return nil
+		// 根据任务类型选择执行模式
+		mode := s.getExecutionMode(task.Type())
+		if mode == Sequential {
+			scheduler = s.sequentialScheduler
 		} else {
-			errors = append(errors, err)
+			// 默认使用并发模式
+			scheduler = s.concurrentScheduler
 		}
 	}
-	
 
-	
-	return fmt.Errorf("任务未找到或取消失败: %v", errors)
+	// 调度任务
+	return scheduler.Schedule(task)
+}
+
+// Cancel 取消指定的任务
+// 需要在两个调度器中都尝试取消
+func (s *HybridScheduler) Cancel(taskID string) error {
+	// 先尝试在并发调度器中取消
+	err1 := s.concurrentScheduler.Cancel(taskID)
+	if err1 == nil {
+		return nil
+	}
+
+	// 如果并发调度器中没有找到任务，尝试在顺序调度器中取消
+	return s.sequentialScheduler.Cancel(taskID)
 }
 
 // GetTaskStatus 获取任务状态
-func (h *HybridTaskScheduler) GetTaskStatus(taskID string) (TaskStatus, error) {
-	// 尝试从所有调度器中获取任务状态
-	if status, err := h.concurrentScheduler.GetTaskStatus(taskID); err == nil {
+// 需要在两个调度器中都尝试获取
+func (s *HybridScheduler) GetTaskStatus(taskID string) (TaskStatus, error) {
+	// 先尝试在并发调度器中获取
+	status, err := s.concurrentScheduler.GetTaskStatus(taskID)
+	if err == nil {
 		return status, nil
 	}
-	
-	if h.sequentialScheduler != nil {
-		if status, err := h.sequentialScheduler.GetTaskStatus(taskID); err == nil {
-			return status, nil
-		}
-	}
-	
 
-	
-	return "", fmt.Errorf("任务未找到: %s", taskID)
+	// 如果并发调度器中没有找到任务，尝试在顺序调度器中获取
+	return s.sequentialScheduler.GetTaskStatus(taskID)
 }
 
 // ListTasks 列出所有任务
-func (h *HybridTaskScheduler) ListTasks() []TaskInfo {
-	var allTasks []TaskInfo
-	
-	allTasks = append(allTasks, h.concurrentScheduler.ListTasks()...)
-	
-	if h.sequentialScheduler != nil {
-		allTasks = append(allTasks, h.sequentialScheduler.ListTasks()...)
-	}
-	
+// 合并两个调度器的任务列表
+func (s *HybridScheduler) ListTasks() []TaskInfo {
+	concurrentTasks := s.concurrentScheduler.ListTasks()
+	sequentialTasks := s.sequentialScheduler.ListTasks()
 
-	
-	return allTasks
+	// 合并任务列表
+	return append(concurrentTasks, sequentialTasks...)
 }
 
 // SetMaxConcurrentTasks 设置最大并发任务数
-func (h *HybridTaskScheduler) SetMaxConcurrentTasks(max int) error {
-	// 设置并发调度器的最大并发数
-	if err := h.concurrentScheduler.SetMaxConcurrentTasks(max); err != nil {
-		return fmt.Errorf("设置并发调度器最大并发数失败: %w", err)
+// 只对并发调度器有效
+func (s *HybridScheduler) SetMaxConcurrentTasks(max int) error {
+	return s.concurrentScheduler.SetMaxConcurrentTasks(max)
+}
+
+// getExecutionMode 获取指定任务类型的执行模式
+func (s *HybridScheduler) getExecutionMode(taskType string) ExecutionMode {
+	s.modesMutex.RLock()
+	defer s.modesMutex.RUnlock()
+
+	if mode, exists := s.executionModes[taskType]; exists {
+		return mode
 	}
-	
-	// 顺序和流水线调度器保持单线程，不需要设置
-	return nil
-}
 
-// GetStats 获取执行统计信息
-func (h *HybridTaskScheduler) GetStats() map[TaskExecutionPolicy]*ExecutionStats {
-	h.mu.RLock()
-	defer h.mu.RUnlock()
-	
-	// 返回统计信息的副本
-	stats := make(map[TaskExecutionPolicy]*ExecutionStats)
-	for policy, stat := range h.stats {
-		stats[policy] = &ExecutionStats{
-			TotalTasks:     stat.TotalTasks,
-			CompletedTasks: stat.CompletedTasks,
-			FailedTasks:    stat.FailedTasks,
-			RunningTasks:   stat.RunningTasks,
-			LastExecution:  stat.LastExecution,
-		}
-	}
-	
-	return stats
-}
-
-// getTaskPolicy 获取任务类型的执行策略
-func (h *HybridTaskScheduler) getTaskPolicy(taskType string) TaskExecutionPolicy {
-	h.mu.RLock()
-	defer h.mu.RUnlock()
-	
-	if policy, exists := h.policyMap[taskType]; exists {
-		return policy
-	}
-	
-	// 默认使用并发策略
-	return PolicyConcurrent
-}
-
-// getSchedulerByPolicy 根据策略获取对应的调度器
-func (h *HybridTaskScheduler) getSchedulerByPolicy(policy TaskExecutionPolicy) (TaskScheduler, error) {
-	switch policy {
-	case PolicyConcurrent:
-		return h.concurrentScheduler, nil
-	case PolicySequential:
-		if h.sequentialScheduler == nil {
-			return nil, fmt.Errorf("顺序调度器未启用")
-		}
-		return h.sequentialScheduler, nil
-
-	default:
-		return nil, fmt.Errorf("不支持的执行策略: %s", policy)
-	}
-}
-
-// wrapTaskWithStats 包装任务以收集统计信息
-func (h *HybridTaskScheduler) wrapTaskWithStats(task Task, policy TaskExecutionPolicy) Task {
-	originalHandler := task.Handler()
-	originalOnComplete := task.OnComplete()
-	
-	return &statsTaskWrapper{
-		task: task,
-		handler: func(ctx context.Context) error {
-			err := originalHandler(ctx)
-			
-			// 更新统计信息
-			h.mu.Lock()
-			stats := h.stats[policy]
-			if err != nil {
-				stats.FailedTasks++
-			} else {
-				stats.CompletedTasks++
-			}
-			stats.LastExecution = time.Now()
-			h.mu.Unlock()
-			
-			return err
-		},
-		onComplete: func(ctx context.Context, err error) {
-			if originalOnComplete != nil {
-				originalOnComplete(ctx, err)
-			}
-		},
-	}
-}
-
-// statsTaskWrapper 用于统计的任务包装器
-type statsTaskWrapper struct {
-	task       Task
-	handler    func(ctx context.Context) error
-	onComplete func(ctx context.Context, err error)
-}
-
-func (t *statsTaskWrapper) GetTimeout() time.Duration {
-	return t.task.GetTimeout()
-}
-
-func (t *statsTaskWrapper) ID() string {
-	return t.task.ID()
-}
-
-func (t *statsTaskWrapper) Type() string {
-	return t.task.Type()
-}
-
-func (t *statsTaskWrapper) Schedule() time.Time {
-	return t.task.Schedule()
-}
-
-func (t *statsTaskWrapper) Handler() func(ctx context.Context) error {
-	return t.handler
-}
-
-func (t *statsTaskWrapper) OnComplete() func(ctx context.Context, err error) {
-	return t.onComplete
-}
-
-func (t *statsTaskWrapper) OnCancel() func(ctx context.Context) {
-	return t.task.OnCancel()
-}
-
-func (t *statsTaskWrapper) IsRecurring() bool {
-	return t.task.IsRecurring()
-}
-
-func (t *statsTaskWrapper) GetInterval() time.Duration {
-	return t.task.GetInterval()
-}
-
-// TaskInfo 实现TaskInfoProvider接口，委托给原始任务
-func (t *statsTaskWrapper) TaskInfo() *TaskInfo {
-	if infoProvider, ok := t.task.(TaskInfoProvider); ok {
-		return infoProvider.TaskInfo()
-	}
-	return nil
-}
-
-// updateStats 更新统计信息
-func (h *HybridTaskScheduler) updateStats(policy TaskExecutionPolicy, isNewTask bool) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-	
-	stats := h.stats[policy]
-	if isNewTask {
-		stats.TotalTasks++
-	}
+	// 默认使用并发模式
+	return ConcurrentMode
 }

@@ -66,7 +66,7 @@ func (b *TaskBuilder) WithOnCancel(onCancel func(ctx context.Context)) *TaskBuil
 
 // WithSchedule 设置任务调度时间
 func (b *TaskBuilder) WithSchedule(at time.Time) *TaskBuilder {
-	b.schedule.Type = ScheduleTypeOnce
+	b.schedule.Type = ScheduleTypeTimed
 	b.schedule.At = at
 	return b
 }
@@ -101,7 +101,7 @@ func (b *TaskBuilder) Build() Task {
 	switch b.schedule.Type {
 	case ScheduleTypeImmediate:
 		execTime = time.Now()
-	case ScheduleTypeOnce:
+	case ScheduleTypeTimed:
 		execTime = b.schedule.At
 	case ScheduleTypeRecurring:
 		execTime = time.Now().Add(b.schedule.Interval)
