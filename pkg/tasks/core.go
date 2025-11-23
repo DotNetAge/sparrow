@@ -2,21 +2,33 @@ package tasks
 
 import (
 	"context"
-	"time"
-
-	"github.com/DotNetAge/sparrow/pkg/usecase"
-)
+	"time")
 
 // TaskScheduler 任务调度器接口
 type TaskScheduler interface {
-	usecase.GracefulClose                            // 必须实现GracefulClose接口，用于优雅关闭和资源清理
-	usecase.Startable                                // 必须实现Startable接口，由主程序启动调度器
-	Schedule(task Task) error                        // Schedule 调度一个任务
-	Stop() error                                     // Stop 停止任务调度器
-	Cancel(taskID string) error                      // Cancel 取消一个任务
-	GetTaskStatus(taskID string) (TaskStatus, error) // GetTaskStatus 获取任务状态
-	ListTasks() []TaskInfo                           // ListTasks 列出所有任务
-	SetMaxConcurrentTasks(max int) error             // SetMaxConcurrentTasks 设置最大并发任务数
+	// Schedule 调度一个任务
+	Schedule(task Task) error
+
+	// Cancel 取消任务
+	Cancel(taskID string) error
+
+	// GetTaskStatus 获取任务状态
+	GetTaskStatus(taskID string) (TaskStatus, error)
+
+	// ListTasks 列出所有任务
+	ListTasks() []TaskInfo
+
+	// SetMaxConcurrentTasks 设置最大并发任务数（仅对支持并发的调度器有效）
+	SetMaxConcurrentTasks(max int) error
+
+	// Start 启动调度器
+	Start(ctx context.Context) error
+
+	// Stop 停止调度器
+	Stop() error
+
+	// Close 优雅关闭调度器并清理资源
+	Close(ctx context.Context) error
 }
 
 // TaskInfo 任务信息

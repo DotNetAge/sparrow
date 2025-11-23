@@ -13,28 +13,32 @@ import (
 
 type sequentialScheduler struct {
 	TaskScheduler
-	tasks        map[string]Task // 存储所有任务
-	taskMutex    sync.RWMutex    // 保护任务映射的互斥锁
-	wg           sync.WaitGroup  // 等待所有任务完成的等待组
-	isRunning    bool            // 是否有任务正在运行
-	stopChan     chan struct{}   // 停止信号通道
-	startOnce    sync.Once       // 确保调度器只启动一次
-	taskTTL      time.Duration   // 任务完成后的保存时间（默认5分钟）
-	maxTaskCount int             // 最大保存的任务数量（默认500个）
-	pendingTasks []string        // 待执行的任务ID队列
-	pendingMutex sync.Mutex      // 保护待执行任务队列的互斥锁
-	taskDoneChan chan struct{}   // 任务完成通知通道
+	tasks         map[string]Task // 存储所有任务
+	taskMutex     sync.RWMutex    // 保护任务映射的互斥锁
+	wg            sync.WaitGroup  // 等待所有任务完成的等待组
+	isRunning     bool            // 是否有任务正在运行
+	stopChan      chan struct{}   // 停止信号通道
+	startOnce     sync.Once       // 确保调度器只启动一次
+	taskTTL       time.Duration   // 任务完成后的保存时间（默认5分钟）
+	maxTaskCount  int             // 最大保存的任务数量（默认500个）
+	pendingTasks  []string        // 待执行的任务ID队列
+	pendingMutex  sync.Mutex      // 保护待执行任务队列的互斥锁
+	taskDoneChan  chan struct{}   // 任务完成通知通道
+	taskQueue     chan Task       // 任务队列
+	taskQueueClosed bool          // 任务队列是否已关闭
 }
 
 // NewSequentialScheduler 创建一个新的顺序执行模式任务调度器
 func NewSequentialScheduler() TaskScheduler {
 	ss := &sequentialScheduler{
-		tasks:        make(map[string]Task),
-		stopChan:     make(chan struct{}),
-		taskTTL:      5 * time.Minute, // 任务完成后保存5分钟
-		maxTaskCount: 500,             // 最大保存500个任务
-		pendingTasks: make([]string, 0),
-		taskDoneChan: make(chan struct{}, 1),
+		tasks:         make(map[string]Task),
+		stopChan:      make(chan struct{}),
+		taskTTL:       5 * time.Minute, // 任务完成后保存5分钟
+		maxTaskCount:  500,             // 最大保存500个任务
+		pendingTasks:  make([]string, 0),
+		taskDoneChan:  make(chan struct{}, 1),
+		taskQueue:     make(chan Task, 100), // 带缓冲的任务队列
+		taskQueueClosed: false,
 	}
 	return ss
 }
@@ -59,8 +63,21 @@ func (s *sequentialScheduler) Stop() error {
 
 // Close 优雅关闭调度器并清理资源
 func (s *sequentialScheduler) Close(ctx context.Context) error {
-	// 发送停止信号
-	s.stopChan <- struct{}{}
+	// 安全关闭stopChan
+	select {
+	case <-s.stopChan:
+		// 通道已关闭，不做操作
+	default:
+		close(s.stopChan)
+	}
+
+	// 安全关闭taskQueue
+	s.pendingMutex.Lock()
+	if !s.taskQueueClosed {
+		close(s.taskQueue)
+		s.taskQueueClosed = true
+	}
+	s.pendingMutex.Unlock()
 
 	// 等待工作协程完成
 	waitChan := make(chan struct{})
@@ -78,8 +95,14 @@ func (s *sequentialScheduler) Close(ctx context.Context) error {
 		return ctx.Err()
 	}
 
-	// 清理资源
-	close(s.stopChan)
+	// 安全关闭taskDoneChan
+	select {
+	case <-s.taskDoneChan:
+		// 通道已关闭或已有数据，清理后关闭
+	default:
+		// 通道为空，直接关闭
+	}
+	close(s.taskDoneChan)
 
 	return nil
 }
@@ -121,6 +144,17 @@ func (s *sequentialScheduler) Schedule(task Task) error {
 	default:
 		// 如果通道已满，忽略，因为任务执行器会在下一次循环中处理
 	}
+
+	// 尝试将任务添加到任务队列
+	s.pendingMutex.Lock()
+	if !s.taskQueueClosed {
+		select {
+		case s.taskQueue <- task:
+		default:
+			// 如果队列已满，忽略，pendingTasks仍然有效作为备份
+		}
+	}
+	s.pendingMutex.Unlock()
 
 	return nil
 }
@@ -200,6 +234,11 @@ func (s *sequentialScheduler) SetMaxConcurrentTasks(max int) error {
 
 // runTaskExecutor 运行任务执行器，按顺序执行任务
 func (s *sequentialScheduler) runTaskExecutor() {
+	defer func() {
+		// 确保在退出前重置运行状态
+		s.isRunning = false
+	}()
+
 	for {
 		// 检查是否有任务需要执行
 		var taskID string
@@ -207,7 +246,7 @@ func (s *sequentialScheduler) runTaskExecutor() {
 
 		// 查找下一个需要执行的任务
 		taskFound := false
-		s.taskMutex.Lock()
+		s.taskMutex.RLock()
 		for _, id := range s.pendingTasks {
 			currentTask, exists := s.tasks[id]
 			if exists {
@@ -224,7 +263,7 @@ func (s *sequentialScheduler) runTaskExecutor() {
 				}
 			}
 		}
-		s.taskMutex.Unlock()
+		s.taskMutex.RUnlock()
 
 		// 如果找到任务且当前没有任务在运行，则执行任务
 		if taskFound && !s.isRunning {

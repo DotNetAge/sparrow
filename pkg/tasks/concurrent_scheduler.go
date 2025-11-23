@@ -269,13 +269,28 @@ func (s *concurrentScheduler) cleanupExpiredTasks() {
 
 // executeTask 执行任务
 func (s *concurrentScheduler) executeTask(task Task) {
-	// 等待并发限制
-	s.taskMutex.Lock()
-	for s.activeTasks >= s.maxConcurrent {
-		s.activeTasksCond.Wait()
+	// 简化的并发控制实现，使用轮询代替条件变量复杂的等待
+	waitCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	
+	// 检查并等待可用的并发槽位
+	for {
+		s.taskMutex.Lock()
+		// 如果有可用槽位，直接执行
+		if s.activeTasks < s.maxConcurrent {
+			s.activeTasks++
+			s.taskMutex.Unlock()
+			break
+		}
+		s.taskMutex.Unlock()
+		
+		// 短暂睡眠后重试，避免CPU过度占用
+		select {
+			case <-time.After(100 * time.Millisecond):
+			case <-waitCtx.Done():
+				return
+			}
 	}
-	s.activeTasks++
-	s.taskMutex.Unlock()
 
 	// 任务完成后减少活跃任务数
 	defer func() {
@@ -293,16 +308,16 @@ func (s *concurrentScheduler) executeTask(task Task) {
 	}
 
 	// 创建任务上下文，支持超时控制
-	ctx := context.Background()
+	taskCtx := context.Background()
 	timeout := task.GetTimeout()
 	if timeout > 0 {
 		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, timeout)
+		taskCtx, cancel = context.WithTimeout(taskCtx, timeout)
 		defer cancel()
 	}
 
 	// 执行任务
-	err := task.Handler()(ctx)
+	err := task.Handler()(taskCtx)
 
 	// 处理任务执行结果
 	if taskInfoProvider, ok := task.(TaskInfoProvider); ok {
@@ -350,6 +365,6 @@ func (s *concurrentScheduler) executeTask(task Task) {
 
 	// 执行完成回调
 	if completeFunc := task.OnComplete(); completeFunc != nil {
-		go completeFunc(ctx, err)
+		go completeFunc(taskCtx, err)
 	}
 }

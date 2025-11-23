@@ -2,6 +2,7 @@ package tasks
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,10 +19,10 @@ const (
 
 // SchedulerWrapperOptions 任务调度器包装器配置选项
 type SchedulerWrapperOptions struct {
-	defaultRetryCount int                 // 默认重试次数
-	scheduler         TaskScheduler       // 自定义调度器实例
-	taskModeMapping   map[string]TaskExecutionMode // 任务类型与执行模式映射
-	maxConcurrentTasks int               // 最大并发任务数
+	defaultRetryCount  int                          // 默认重试次数
+	scheduler          TaskScheduler                // 自定义调度器实例
+	taskModeMapping    map[string]TaskExecutionMode // 任务类型与执行模式映射
+	maxConcurrentTasks int                          // 最大并发任务数
 }
 
 // SchedulerWrapperOption 定义配置选项函数类型
@@ -88,7 +89,7 @@ type SchedulerWrapper struct {
 func NewSchedulerWrapper(options ...SchedulerWrapperOption) *SchedulerWrapper {
 	// 设置默认配置
 	opts := &SchedulerWrapperOptions{
-		defaultRetryCount: 3, // 默认重试3次
+		defaultRetryCount: 3,                                  // 默认重试3次
 		taskModeMapping:   make(map[string]TaskExecutionMode), // 初始化任务类型映射
 	}
 
@@ -139,10 +140,14 @@ func (w *SchedulerWrapper) RunTaskAt(at time.Time, handler func(ctx context.Cont
 // handler: 任务处理函数
 // 返回: 错误信息
 func (w *SchedulerWrapper) RunTaskWithIDAt(taskId string, at time.Time, handler func(ctx context.Context) error) error {
-	return w.Instance.Schedule(w.buildTaskWithRetry(NewTaskBuilder().
+	task, err := w.buildTaskWithRetry(NewTaskBuilder().
 		WithID(taskId).
 		WithSchedule(at).
-		WithHandler(handler)))
+		WithHandler(handler))
+	if err != nil {
+		return err
+	}
+	return w.Instance.Schedule(task)
 }
 
 // RunTaskRecurring 提交一个周期性执行的任务
@@ -161,10 +166,14 @@ func (w *SchedulerWrapper) RunTaskRecurring(interval time.Duration, handler func
 // handler: 任务处理函数
 // 返回: 错误信息
 func (w *SchedulerWrapper) RunTaskWithIDRecurring(taskId string, interval time.Duration, handler func(ctx context.Context) error) error {
-	return w.Instance.Schedule(w.buildTaskWithRetry(NewTaskBuilder().
+	task, err := w.buildTaskWithRetry(NewTaskBuilder().
 		WithID(taskId).
 		WithRecurring(interval).
-		WithHandler(handler)))
+		WithHandler(handler))
+	if err != nil {
+		return err
+	}
+	return w.Instance.Schedule(task)
 }
 
 // RunTask 提交一个立即执行的任务
@@ -180,9 +189,13 @@ func (w *SchedulerWrapper) RunTask(handler func(ctx context.Context) error) (str
 // handler: 任务处理函数
 // 返回: 错误信息
 func (w *SchedulerWrapper) RunTaskWithID(taskId string, handler func(ctx context.Context) error) error {
-	return w.Instance.Schedule(w.buildTaskWithRetry(NewTaskBuilder().
+	task, err := w.buildTaskWithRetry(NewTaskBuilder().
 		WithID(taskId).
-		WithHandler(handler)))
+		WithHandler(handler))
+	if err != nil {
+		return err
+	}
+	return w.Instance.Schedule(task)
 }
 
 // RunTypedTask 提交一个指定类型的任务（主要用于混合调度器）
@@ -191,10 +204,14 @@ func (w *SchedulerWrapper) RunTaskWithID(taskId string, handler func(ctx context
 // 返回: 任务ID
 func (w *SchedulerWrapper) RunTypedTaskWithID(taskId, taskType string, handler func(ctx context.Context) error) error {
 	// 构建任务，默认支持重试
-	return w.Instance.Schedule(w.buildTaskWithRetry(NewTaskBuilder().
+	task, err := w.buildTaskWithRetry(NewTaskBuilder().
 		WithID(taskId).
 		WithType(taskType).
-		WithHandler(handler)))
+		WithHandler(handler))
+	if err != nil {
+		return err
+	}
+	return w.Instance.Schedule(task)
 }
 
 // RunTypedTask 提交一个指定类型的任务（主要用于混合调度器）
@@ -235,6 +252,14 @@ func (w *SchedulerWrapper) SetTaskTypeMode(taskType string, mode ExecutionMode) 
 	}
 }
 
+// 修改wrapper.go中的类型断言，确保正确设置并发数
+func (w *SchedulerWrapper) SetMaxConcurrentTasks(max int) error {
+	if cs, ok := w.Instance.(interface{ SetMaxConcurrentTasks(int) error }); ok {
+		return cs.SetMaxConcurrentTasks(max)
+	}
+	return fmt.Errorf("不支持设置最大并发数")
+}
+
 // Stop 停止任务调度器
 func (w *SchedulerWrapper) Stop() error {
 	return w.Instance.Stop()
@@ -260,7 +285,7 @@ func (w *SchedulerWrapper) ListTasks() []TaskInfo {
 // buildTaskWithRetry 构建任务，支持默认重试机制
 // buildTaskWithRetry 构建带有重试功能的任务
 // 使用通过Option模式注入的默认重试次数配置
-func (w *SchedulerWrapper) buildTaskWithRetry(builder *TaskBuilder) Task {
+func (w *SchedulerWrapper) buildTaskWithRetry(builder *TaskBuilder) (Task, error) {
 	// 使用通过配置注入的默认重试次数
 	return builder.WithRetry(w.options.defaultRetryCount).Build()
 }

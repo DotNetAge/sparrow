@@ -10,7 +10,6 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/config"
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/eventbus"
-	"github.com/DotNetAge/sparrow/pkg/logger"
 
 	// "github.com/DotNetAge/sparrow/pkg/eventbus"
 	"github.com/DotNetAge/sparrow/pkg/messaging"
@@ -184,118 +183,13 @@ func MemBus() Option {
 
 // Tasks 使用任务系统
 // 简化版本：默认使用并发模式，提供基本配置选项
-func Tasks(opts ...TaskOption) Option {
+func Tasks(opts ...tasks.SchedulerWrapperOption) Option {
 	return func(o *App) {
-		// 默认配置
-		config := &TaskConfig{
-			WorkerCount:        5,
-			MaxConcurrentTasks: 10,
-			Logger:             o.Logger,
-		}
-
-		// 应用用户配置
-		for _, opt := range opts {
-			opt(config)
-		}
-
 		// 创建任务调度器
-		scheduler := tasks.NewMemoryTaskScheduler(
-			tasks.WithLogger(config.Logger),
-			tasks.WithWorkerCount(config.WorkerCount),
-			tasks.WithMaxConcurrentTasks(config.MaxConcurrentTasks),
+		o.Scheduler = tasks.NewSchedulerWrapper(
+			opts...,
 		)
-
-		o.Scheduler = tasks.NewSchedulerWrapper(scheduler, DefaultRetryConfig())
 		o.NeedCleanup(o.Scheduler.Instance.(usecase.GracefulClose))
-	}
-}
-
-// TaskConfig 任务调度器配置
-type TaskConfig struct {
-	WorkerCount        int
-	MaxConcurrentTasks int
-	Logger             *logger.Logger
-}
-
-// TaskOption 任务配置选项
-type TaskOption func(*TaskConfig)
-
-// WithWorkerCount 设置工作协程数
-func WithWorkerCount(count int) TaskOption {
-	return func(c *TaskConfig) {
-		c.WorkerCount = count
-	}
-}
-
-// WithMaxConcurrentTasks 设置最大并发任务数
-func WithMaxConcurrentTasks(max int) TaskOption {
-	return func(c *TaskConfig) {
-		c.MaxConcurrentTasks = max
-	}
-}
-
-// WithConcurrentTask 注册一个或多个并发执行的任务类型
-func WithConcurrentTask(taskTypes ...string) tasks.HybridSchedulerOption {
-	policies := make(map[string]tasks.TaskExecutionPolicy)
-	for _, taskType := range taskTypes {
-		policies[taskType] = tasks.PolicyConcurrent
-	}
-	return tasks.WithTaskPolicies(policies)
-}
-
-// WithSequentialTask 注册一个或多个顺序执行的任务类型
-func WithSequentialTask(taskTypes ...string) tasks.HybridSchedulerOption {
-	policies := make(map[string]tasks.TaskExecutionPolicy)
-	for _, taskType := range taskTypes {
-		policies[taskType] = tasks.PolicySequential
-	}
-	return tasks.WithTaskPolicies(policies)
-}
-
-// HybridTasks 使用混合任务系统
-// 支持并发和顺序两种执行策略，根据任务类型自动选择
-// 可通过opts参数配置任务类型的执行策略
-func HybridTasks(opts ...tasks.HybridSchedulerOption) Option {
-	return func(o *App) {
-		// 默认配置
-		defaultOpts := []tasks.HybridSchedulerOption{
-			tasks.WithHybridLogger(o.Logger),
-			tasks.WithHybridWorkerCount(5, 1), // 并发5个，顺序1个
-			tasks.WithHybridMaxConcurrentTasks(10),
-		}
-
-		// 合并用户配置
-		allOpts := append(defaultOpts, opts...)
-
-		hybridScheduler := tasks.NewHybridTaskScheduler(allOpts...)
-		
-		// 只使用NeedCleanup注册调度器
-		// NeedCleanup内部可能已经将对象添加到了SubProcesses中
-		o.Scheduler = tasks.NewSchedulerWrapper(hybridScheduler, DefaultRetryConfig())
-		o.NeedCleanup(hybridScheduler)
-	}
-}
-
-// ===== 重试配置选项 =====
-
-// DefaultRetryConfig 默认重试配置
-func DefaultRetryConfig() *config.RetryConfig {
-	return &config.RetryConfig{
-		MaxRetries:        3,
-		InitialBackoff:    time.Second,
-		MaxBackoff:        30 * time.Second,
-		BackoffMultiplier: 2.0,
-		Enabled:           true,
-	}
-}
-
-// WithRetry 配置任务重试能力（已简化，默认已启用）
-func WithRetry() Option {
-	return func(app *App) {
-		config := DefaultRetryConfig()
-		if app.Scheduler != nil {
-			app.Scheduler.RetryConfig = config
-		}
 	}
 }
 

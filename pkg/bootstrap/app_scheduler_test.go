@@ -13,7 +13,7 @@ import (
 // TestAppScheduler_ImmediateTask 测试即时执行任务
 func TestAppScheduler_ImmediateTask(t *testing.T) {
 	// 创建应用实例，使用HybridTasks配置任务系统
-	app := NewApp(HybridTasks())
+	app := NewApp(Tasks())
 	defer app.CleanUp()
 
 	// 任务执行状态标记
@@ -22,6 +22,12 @@ func TestAppScheduler_ImmediateTask(t *testing.T) {
 		executed = true
 		return nil
 	})
+	// 启动应用以初始化调度器
+	go func() {
+		if err := app.Start(); err != nil {
+			t.Errorf("app.Start() failed: %v", err)
+		}
+	}()
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, taskID)
@@ -36,7 +42,9 @@ func TestAppScheduler_ImmediateTask(t *testing.T) {
 // TestAppScheduler_ScheduledTask 测试定时执行任务
 func TestAppScheduler_ScheduledTask(t *testing.T) {
 	// 创建应用实例，使用HybridTasks配置任务系统
-	app := NewApp(HybridTasks())
+	app := NewApp(Tasks(
+		tasks.WithSequential("sequential"),
+	))
 	defer app.CleanUp()
 
 	// 设置任务在100ms后执行
@@ -46,8 +54,16 @@ func TestAppScheduler_ScheduledTask(t *testing.T) {
 	executed := false
 	taskID, err := app.Scheduler.RunTaskAt(scheduleTime, func(ctx context.Context) error {
 		executed = true
+		app.Logger.Info("测试任务执行成功")
 		return nil
 	})
+
+	// 启动应用以初始化调度器
+	go func() {
+		if err := app.Start(); err != nil {
+			t.Errorf("app.Start() failed: %v", err)
+		}
+	}()
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, taskID)
@@ -65,17 +81,25 @@ func TestAppScheduler_ScheduledTask(t *testing.T) {
 // TestAppScheduler_RecurringTask 测试重复执行任务
 func TestAppScheduler_RecurringTask(t *testing.T) {
 	// 创建应用实例，使用HybridTasks配置任务系统
-	app := NewApp(HybridTasks())
+	app := NewApp(Tasks())
 	defer app.CleanUp()
 
 	// 计数器
 	var count int
 
 	// 创建每100ms重复执行的任务
+	// RunTaskRecurring 应该是以顺序方式以单协程非并发的方式执行任务，否则是否会出现协程争夺而导致疯狂地像死循环一样执行任务？
 	taskID, err := app.Scheduler.RunTaskRecurring(100*time.Millisecond, func(ctx context.Context) error {
 		count++
 		return nil
 	})
+
+	// 启动应用以初始化调度器
+	go func() {
+		if err := app.Start(); err != nil {
+			t.Errorf("app.Start() failed: %v", err)
+		}
+	}()
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, taskID)
@@ -92,14 +116,14 @@ func TestAppScheduler_RecurringTask(t *testing.T) {
 	// 等待取消生效
 	time.Sleep(50 * time.Millisecond)
 
-	// 验证任务执行了多次
-	assert.GreaterOrEqual(t, count, 3)
+	// 验证任务执行了多次 - 任务每100ms执行一次，等待350ms应该执行约3次
+	assert.Equal(t, 3, count)
 }
 
 // TestAppScheduler_CancelTask 测试取消任务
 func TestAppScheduler_CancelTask(t *testing.T) {
 	// 创建应用实例，使用HybridTasks配置任务系统
-	app := NewApp(HybridTasks())
+	app := NewApp(Tasks())
 	defer app.CleanUp()
 
 	// 设置任务在1秒后执行
@@ -116,10 +140,8 @@ func TestAppScheduler_CancelTask(t *testing.T) {
 	assert.NotEmpty(t, taskID)
 
 	// 取消任务
-	if ts, ok := app.Scheduler.Instance.(tasks.TaskScheduler); ok {
-		err = ts.Cancel(taskID)
-		assert.NoError(t, err)
-	}
+	err = app.Scheduler.CancelTask(taskID)
+	assert.NoError(t, err)
 
 	// 等待足够时间，验证任务未执行
 	time.Sleep(1100 * time.Millisecond)
@@ -129,7 +151,7 @@ func TestAppScheduler_CancelTask(t *testing.T) {
 // TestAppScheduler_FailedTaskWithRetry 测试失败任务的重试机制
 func TestAppScheduler_FailedTaskWithRetry(t *testing.T) {
 	// 创建应用实例，使用HybridTasks配置任务系统
-	app := NewApp(HybridTasks())
+	app := NewApp(Tasks())
 	defer app.CleanUp()
 
 	// 计数器，用于模拟失败
@@ -144,6 +166,13 @@ func TestAppScheduler_FailedTaskWithRetry(t *testing.T) {
 		}
 		return nil // 第三次执行成功
 	})
+
+	// 启动应用以初始化调度器
+	go func() {
+		if err := app.Start(); err != nil {
+			t.Errorf("app.Start() failed: %v", err)
+		}
+	}()
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, taskID)
@@ -162,16 +191,16 @@ func TestAppScheduler_FailedTaskWithRetry(t *testing.T) {
 func TestAppScheduler_HybridScheduler(t *testing.T) {
 	// 创建应用实例，并注册混合调度器
 	// 通过NeedCleanup注册，App.Start()会自动启动它
-	app := NewApp(HybridTasks(), ServerPort(8081)) // 使用不同端口避免冲突
+	app := NewApp(Tasks(), ServerPort(8081)) // 使用不同端口避免冲突
 	defer app.CleanUp()
-	
+
 	// 在goroutine中启动app.Start()，这样它会自动启动调度器
 	go func() {
 		if err := app.Start(); err != nil {
 			t.Errorf("app.Start() failed: %v", err)
 		}
 	}()
-	
+
 	// 等待一段时间确保调度器已完全启动
 	time.Sleep(500 * time.Millisecond)
 
@@ -198,14 +227,14 @@ func TestAppScheduler_SingleScheduler(t *testing.T) {
 	// 通过NeedCleanup注册，App.Start()会自动启动它
 	app := NewApp(Tasks(), ServerPort(8082)) // 使用不同端口避免冲突
 	defer app.CleanUp()
-	
+
 	// 在goroutine中启动app.Start()，这样它会自动启动调度器
 	go func() {
 		if err := app.Start(); err != nil {
 			t.Errorf("app.Start() failed: %v", err)
 		}
 	}()
-	
+
 	// 等待一段时间确保调度器已完全启动
 	time.Sleep(500 * time.Millisecond)
 
@@ -230,9 +259,9 @@ func TestAppScheduler_SingleScheduler(t *testing.T) {
 func TestAppScheduler_TaskTypePolicy(t *testing.T) {
 	// 创建应用实例，配置混合调度器并注册任务类型策略
 	app := NewApp(
-		HybridTasks(
-			WithConcurrentTask("email", "notification"),
-			WithSequentialTask("payment", "order"),
+		Tasks(
+			tasks.WithConcurrent("email", "notification"),
+			tasks.WithSequential("payment", "order"),
 		),
 		ServerPort(8083),
 	)
@@ -244,7 +273,7 @@ func TestAppScheduler_TaskTypePolicy(t *testing.T) {
 			t.Errorf("app.Start() failed: %v", err)
 		}
 	}()
-	
+
 	// 等待调度器初始化
 	time.Sleep(500 * time.Millisecond)
 
@@ -276,9 +305,9 @@ func TestAppScheduler_TaskTypePolicy(t *testing.T) {
 func TestAppScheduler_ConcurrentVsSequentialExecution(t *testing.T) {
 	// 创建应用实例，配置混合调度器并注册任务类型策略
 	app := NewApp(
-		HybridTasks(
-			WithConcurrentTask("concurrent_task"),
-			WithSequentialTask("sequential_task"),
+		Tasks(
+			tasks.WithConcurrent("concurrent_task"),
+			tasks.WithSequential("sequential_task"),
 		),
 		ServerPort(8084), // 使用不同端口避免冲突
 	)
@@ -290,7 +319,7 @@ func TestAppScheduler_ConcurrentVsSequentialExecution(t *testing.T) {
 			t.Errorf("app.Start() failed: %v", err)
 		}
 	}()
-	
+
 	// 等待调度器初始化
 	time.Sleep(500 * time.Millisecond)
 
@@ -341,7 +370,7 @@ func TestAppScheduler_ConcurrentVsSequentialExecution(t *testing.T) {
 	concurrentTimeDiff1 := concurrentStartTimes[1].Sub(concurrentStartTimes[0])
 	concurrentTimeDiff2 := concurrentStartTimes[2].Sub(concurrentStartTimes[1])
 	fmt.Printf("并发任务启动时间差: %v, %v\n", concurrentTimeDiff1, concurrentTimeDiff2)
-	
+
 	// 并发任务的启动时间差异应该远小于任务执行时间
 	assert.Less(t, concurrentTimeDiff1, concurrentExecutionTime/2)
 	assert.Less(t, concurrentTimeDiff2, concurrentExecutionTime/2)
@@ -351,7 +380,7 @@ func TestAppScheduler_ConcurrentVsSequentialExecution(t *testing.T) {
 	sequentialTimeDiff1 := sequentialStartTimes[1].Sub(sequentialStartTimes[0])
 	sequentialTimeDiff2 := sequentialStartTimes[2].Sub(sequentialStartTimes[1])
 	fmt.Printf("顺序任务启动时间差: %v, %v\n", sequentialTimeDiff1, sequentialTimeDiff2)
-	
+
 	// 顺序任务的启动时间差异应该接近或大于任务执行时间
 	// 允许一定的误差范围
 	minExpectedDiff := sequentialExecutionTime * 9 / 10 // 允许10%的误差
@@ -363,9 +392,9 @@ func TestAppScheduler_ConcurrentVsSequentialExecution(t *testing.T) {
 func TestAppScheduler_MixedTaskTypesExecution(t *testing.T) {
 	// 创建应用实例，同时注册多种任务类型策略
 	app := NewApp(
-		HybridTasks(
-			WithConcurrentTask("email", "notification"),
-			WithSequentialTask("payment", "order"),
+		Tasks(
+			tasks.WithConcurrent("email", "notification"),
+			tasks.WithSequential("payment", "order"),
 		),
 		ServerPort(8085), // 使用不同端口避免冲突
 	)
@@ -377,14 +406,14 @@ func TestAppScheduler_MixedTaskTypesExecution(t *testing.T) {
 			t.Errorf("app.Start() failed: %v", err)
 		}
 	}()
-	
+
 	// 等待调度器初始化
 	time.Sleep(500 * time.Millisecond)
 
 	// 记录任务执行时间和顺序的通道
 	resultsChan := make(chan struct {
-		TaskType string
-		TaskID   int
+		TaskType  string
+		TaskID    int
 		StartTime time.Time
 		EndTime   time.Time
 	}, 8)
@@ -400,8 +429,8 @@ func TestAppScheduler_MixedTaskTypesExecution(t *testing.T) {
 			time.Sleep(taskExecutionTime) // 模拟工作负载
 			endTime := time.Now()
 			resultsChan <- struct {
-				TaskType string
-				TaskID   int
+				TaskType  string
+				TaskID    int
 				StartTime time.Time
 				EndTime   time.Time
 			}{"email", taskID, startTime, endTime}
@@ -418,8 +447,8 @@ func TestAppScheduler_MixedTaskTypesExecution(t *testing.T) {
 			time.Sleep(taskExecutionTime) // 模拟工作负载
 			endTime := time.Now()
 			resultsChan <- struct {
-				TaskType string
-				TaskID   int
+				TaskType  string
+				TaskID    int
 				StartTime time.Time
 				EndTime   time.Time
 			}{"notification", taskID, startTime, endTime}
@@ -436,8 +465,8 @@ func TestAppScheduler_MixedTaskTypesExecution(t *testing.T) {
 			time.Sleep(taskExecutionTime) // 模拟工作负载
 			endTime := time.Now()
 			resultsChan <- struct {
-				TaskType string
-				TaskID   int
+				TaskType  string
+				TaskID    int
 				StartTime time.Time
 				EndTime   time.Time
 			}{"payment", taskID, startTime, endTime}
@@ -454,8 +483,8 @@ func TestAppScheduler_MixedTaskTypesExecution(t *testing.T) {
 			time.Sleep(taskExecutionTime) // 模拟工作负载
 			endTime := time.Now()
 			resultsChan <- struct {
-				TaskType string
-				TaskID   int
+				TaskType  string
+				TaskID    int
 				StartTime time.Time
 				EndTime   time.Time
 			}{"order", taskID, startTime, endTime}

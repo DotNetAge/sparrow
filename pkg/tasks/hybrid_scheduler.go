@@ -2,6 +2,7 @@ package tasks
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"time"
 )
@@ -83,6 +84,10 @@ func (s *HybridScheduler) Close(ctx context.Context) error {
 // Schedule 调度一个任务
 // 根据任务类型选择合适的调度器
 func (s *HybridScheduler) Schedule(task Task) error {
+	if task == nil {
+		return errors.New("任务不能为空")
+	}
+
 	// 确定使用哪个调度器
 	var scheduler TaskScheduler
 
@@ -100,21 +105,37 @@ func (s *HybridScheduler) Schedule(task Task) error {
 		}
 	}
 
-	// 调度任务
+	// 调度任务并返回错误
 	return scheduler.Schedule(task)
 }
 
 // Cancel 取消指定的任务
 // 需要在两个调度器中都尝试取消
 func (s *HybridScheduler) Cancel(taskID string) error {
-	// 先尝试在并发调度器中取消
-	err1 := s.concurrentScheduler.Cancel(taskID)
-	if err1 == nil {
-		return nil
+	if taskID == "" {
+		return errors.New("任务ID不能为空")
 	}
 
-	// 如果并发调度器中没有找到任务，尝试在顺序调度器中取消
-	return s.sequentialScheduler.Cancel(taskID)
+	// 尝试在两个调度器中取消任务
+	hasTask := false
+	
+	// 先尝试在顺序调度器中取消
+	err := s.sequentialScheduler.Cancel(taskID)
+	if err == nil {
+		hasTask = true
+	}
+	
+	// 再尝试在并发调度器中取消
+	err = s.concurrentScheduler.Cancel(taskID)
+	if err == nil {
+		hasTask = true
+	}
+
+	if !hasTask {
+		return errors.New("任务不存在")
+	}
+
+	return nil
 }
 
 // GetTaskStatus 获取任务状态

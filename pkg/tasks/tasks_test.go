@@ -421,7 +421,7 @@ func TestTaskBuilderAndSchedulerWrapper(t *testing.T) {
 	builder := NewTaskBuilder().WithID("direct-builder-test").WithHandler(func(ctx context.Context) error {
 		return nil
 	})
-	task := builder.Build()
+	task, _ := builder.Build()
 	assert.NotNil(t, task)
 	assert.Equal(t, "direct-builder-test", task.ID())
 
