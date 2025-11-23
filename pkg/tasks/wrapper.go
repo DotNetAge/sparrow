@@ -117,6 +117,18 @@ func NewSchedulerWrapper(options ...SchedulerWrapperOption) *SchedulerWrapper {
 		}
 	}
 
+	// 应用任务类型执行模式设置到混合调度器
+	if hs, ok := opts.scheduler.(*HybridScheduler); ok {
+		for taskType, mode := range opts.taskModeMapping {
+			switch mode {
+			case ModeSequential:
+				hs.WithSequential(taskType)
+			case ModeConcurrent:
+				hs.WithConcurrent(taskType)
+			}
+		}
+	}
+
 	// 保存配置到包装器实例中，方便后续使用
 	wrapper := &SchedulerWrapper{
 		Instance: opts.scheduler,

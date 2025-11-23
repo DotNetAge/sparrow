@@ -279,7 +279,7 @@ func TestAppScheduler_TaskTypePolicy(t *testing.T) {
 	// 使用通道来确保任务按顺序执行并获取准确的执行时间
 	paymentDone := make(chan struct{})
 	orderDone := make(chan struct{})
-	
+
 	paymentAt := time.Time{}
 	orderAt := time.Time{}
 
@@ -288,7 +288,7 @@ func TestAppScheduler_TaskTypePolicy(t *testing.T) {
 		paymentAt = time.Now()
 		fmt.Printf("payment task executed at %v\n", paymentAt)
 		// 添加更明显的延迟，确保与order任务有明显的时间差
-		time.Sleep(300 * time.Millisecond)
+		time.Sleep(10 * time.Second)
 		paymentDone <- struct{}{}
 		return nil
 	})
@@ -299,7 +299,7 @@ func TestAppScheduler_TaskTypePolicy(t *testing.T) {
 	_, err = app.Scheduler.RunTypedTask("order", func(ctx context.Context) error {
 		orderAt = time.Now()
 		fmt.Printf("order task executed at %v\n", orderAt)
-		time.Sleep(100 * time.Millisecond)
+		// time.Sleep(10 * time.Millisecond)
 		orderDone <- struct{}{}
 		return nil
 	})
@@ -312,7 +312,7 @@ func TestAppScheduler_TaskTypePolicy(t *testing.T) {
 
 	// 打印时间差以便调试
 	fmt.Printf("Time difference: %v\n", orderAt.Sub(paymentAt))
-	
+
 	// 验证payment任务确实在order任务之前执行
 	assert.True(t, paymentAt.Before(orderAt))
 }
