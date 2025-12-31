@@ -49,6 +49,20 @@ func SQLiteDB(schema string) Option {
 				app.Logger.Error("连接SQLite数据库失败", "error", err)
 				panic(err)
 			}
+			// 启用WAL模式提高并发性能
+			_, err = db.Exec(`
+							PRAGMA journal_mode = WAL;
+							PRAGMA synchronous = NORMAL;
+							PRAGMA cache_size = -2000;  -- 2MB缓存
+							PRAGMA busy_timeout = 5000;  -- 5秒超时
+							PRAGMA foreign_keys = ON;
+		`)
+
+			if err != nil {
+				app.Logger.Error("配置SQLite数据库失败", "error", err)
+				panic(err)
+			}
+
 			_, err = db.Exec(schema)
 			if err != nil {
 				app.Logger.Error("执行SQLite数据库Schema失败", "error", err)
