@@ -41,12 +41,17 @@ func ServerHost(host string) Option {
 }
 
 // SQLDB 配置SQL数据库连接
-func SQLiteDB() Option {
+func SQLiteDB(schema string) Option {
 	return func(app *App) {
 		app.Container.Register(func() *sql.DB {
 			db, err := sql.Open("sqlite3", app.Config.SQL.Dbname)
 			if err != nil {
 				app.Logger.Error("连接SQLite数据库失败", "error", err)
+				panic(err)
+			}
+			_, err = db.Exec(schema)
+			if err != nil {
+				app.Logger.Error("执行SQLite数据库Schema失败", "error", err)
 				panic(err)
 			}
 			return db
