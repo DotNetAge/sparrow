@@ -1,6 +1,7 @@
 package bootstrap
 
 import (
+	"database/sql"
 	"strconv"
 	"time"
 
@@ -13,7 +14,6 @@ import (
 
 	// "github.com/DotNetAge/sparrow/pkg/eventbus"
 	"github.com/DotNetAge/sparrow/pkg/messaging"
-	"github.com/DotNetAge/sparrow/pkg/persistence/eventstore"
 	"github.com/DotNetAge/sparrow/pkg/persistence/repo"
 	"github.com/DotNetAge/sparrow/pkg/projection"
 	"github.com/DotNetAge/sparrow/pkg/tasks"
@@ -41,8 +41,16 @@ func ServerHost(host string) Option {
 }
 
 // SQLDB 配置SQL数据库连接
-func SQLDB() Option {
-	return func(o *App) {
+func SQLiteDB() Option {
+	return func(app *App) {
+		app.Container.Register(func() *sql.DB {
+			db, err := sql.Open("sqlite3", app.Config.SQL.Dbname)
+			if err != nil {
+				app.Logger.Error("连接SQLite数据库失败", "error", err)
+				panic(err)
+			}
+			return db
+		})
 	}
 }
 
@@ -128,18 +136,18 @@ func BadgerDB() Option {
 }
 
 // BadgerStore 使用Badger作为事件存储
-func BadgerStore() Option {
-	return func(o *App) {
-		o.Container.Register(func() usecase.EventStore {
-			store, err := eventstore.NewBadgerEventStore(o.Config.Badger.EventStoreDir, o.Logger)
-			if err != nil {
-				o.Logger.Error("创建Badger事件存储失败", "error", err)
-				panic(err)
-			}
-			return store
-		})
-	}
-}
+// func BadgerStore() Option {
+// 	return func(o *App) {
+// 		o.Container.Register(func() usecase.EventStore {
+// 			store, err := eventstore.NewBadgerEventStore(o.Config.Badger.EventStoreDir, o.Logger)
+// 			if err != nil {
+// 				o.Logger.Error("创建Badger事件存储失败", "error", err)
+// 				panic(err)
+// 			}
+// 			return store
+// 		})
+// 	}
+// }
 
 func newRedis(config *config.RedisConfig) *redis.Client {
 	return redis.NewClient(&redis.Options{
@@ -150,29 +158,29 @@ func newRedis(config *config.RedisConfig) *redis.Client {
 }
 
 // RedisStore 使用Redis作为事件存储
-func RedisStore() Option {
-	return func(o *App) {
-		o.Container.Register(func() usecase.EventStore {
-			var redisClient *redis.Client
-			if err := o.Container.ResolveInstance(&redisClient); err != nil {
-				o.Logger.Error("解析Redis客户端失败", "error", err)
-				panic(err)
-			}
-			store, err := eventstore.NewRedisEventStore(redisClient, o.Config.App.Name+":", o.Logger)
-			if err != nil {
-				o.Logger.Error("创建Redis事件存储失败", "error", err)
-				panic(err)
-			}
-			return store
-		})
-	}
-}
+// func RedisStore() Option {
+// 	return func(o *App) {
+// 		o.Container.Register(func() usecase.EventStore {
+// 			var redisClient *redis.Client
+// 			if err := o.Container.ResolveInstance(&redisClient); err != nil {
+// 				o.Logger.Error("解析Redis客户端失败", "error", err)
+// 				panic(err)
+// 			}
+// 			store, err := eventstore.NewRedisEventStore(redisClient, o.Config.App.Name+":", o.Logger)
+// 			if err != nil {
+// 				o.Logger.Error("创建Redis事件存储失败", "error", err)
+// 				panic(err)
+// 			}
+// 			return store
+// 		})
+// 	}
+// }
 
-// SQLStore 使用SQL作为事件存储
-func SQLStore() Option {
-	return func(o *App) {
-	}
-}
+// // SQLStore 使用SQL作为事件存储
+// func SQLStore() Option {
+// 	return func(o *App) {
+// 	}
+// }
 
 // MemBus 使用内存作为事件总线
 func MemBus() Option {
@@ -228,6 +236,21 @@ func BadgerRepo[T entity.Entity]() Option {
 		prefix := utils.Snake(name)
 		o.Container.RegisterNamed(repoName, func() usecase.Repository[T] {
 			return repo.NewBadgerRepository[T](db, prefix)
+		})
+	}
+}
+
+func SQLRepo[T entity.Entity]() Option {
+	return func(o *App) {
+		var db *sql.DB
+		if err := o.Container.ResolveInstance(&db); err != nil {
+			o.Logger.Panic("解析SQL数据库实例失败", "error", err)
+		}
+		name := utils.GetShotTypeName[T]()
+		repoName := utils.Pascal(name + "Repo")
+		// prefix := utils.Snake(name)
+		o.Container.RegisterNamed(repoName, func() usecase.Repository[T] {
+			return repo.NewSqlDBRepository[T](db)
 		})
 	}
 }
