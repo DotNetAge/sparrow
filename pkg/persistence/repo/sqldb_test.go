@@ -445,11 +445,11 @@ func TestSqlDBRepository_FindWithConditions(t *testing.T) {
 	// 测试条件查询
 	options := usecase.QueryOptions{
 		Conditions: []usecase.QueryCondition{
-			{Field: "age", Operator: "GT", Value: 25},
-			{Field: "age", Operator: "LTE", Value: 35},
+			{Field: "Age", Operator: "GT", Value: 25},
+			{Field: "Age", Operator: "LTE", Value: 35},
 		},
 		SortFields: []usecase.SortField{
-			{Field: "age", Ascending: true},
+			{Field: "Age", Ascending: true},
 		},
 		Limit:  2,
 		Offset: 0,

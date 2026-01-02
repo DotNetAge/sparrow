@@ -660,7 +660,7 @@ func (r *SqlDBRepository[T]) FindWithConditions(ctx context.Context, options use
 			if !sortField.Ascending {
 				order = "DESC"
 			}
-			query += fmt.Sprintf(" %s %s", sortField.Field, order)
+			query += fmt.Sprintf(" %s %s", r.toSnakeCase(sortField.Field), order)
 		}
 	} else {
 		// 默认排序
@@ -746,7 +746,7 @@ func (r *SqlDBRepository[T]) existsInTransaction(ctx context.Context, tx *sql.Tx
 
 // buildCondition 构建单个查询条件的SQL
 func (r *SqlDBRepository[T]) buildCondition(condition usecase.QueryCondition) (string, []interface{}) {
-	field := condition.Field
+	field := r.toSnakeCase(condition.Field)
 	op := condition.Operator
 	value := condition.Value
 
