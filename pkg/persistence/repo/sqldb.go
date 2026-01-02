@@ -874,33 +874,25 @@ func (r *SqlDBRepository[T]) scanRow(rows *sql.Rows, entity *T) error {
 func (r *SqlDBRepository[T]) insertEntity(ctx context.Context, db interface{}, entity T) error {
 	// 获取实体的值
 	entityValue := reflect.ValueOf(entity)
-	if entityValue.Kind() == reflect.Ptr {
-		entityValue = entityValue.Elem()
-	}
 
-	// 获取实体的类型
-	entityType := entityValue.Type()
+	// 提取所有字段（包括嵌入结构体的字段）
+	fields, err := r.extractFields(entityValue)
+	if err != nil {
+		return err
+	}
 
 	// 收集字段名和值
 	var columns []string
 	var values []interface{}
 	var placeholders []string
 
-	for i := 0; i < entityType.NumField(); i++ {
-		field := entityType.Field(i)
-		fieldValue := entityValue.Field(i)
-
-		// 跳过不可导出的字段
-		if !field.IsExported() {
-			continue
-		}
-
+	for fieldName, fieldValue := range fields {
 		// 将字段名转换为下划线命名的列名
-		columnName := r.toSnakeCase(field.Name)
+		columnName := r.toSnakeCase(fieldName)
 
 		// 添加到列表
 		columns = append(columns, columnName)
-		values = append(values, fieldValue.Interface())
+		values = append(values, fieldValue)
 		placeholders = append(placeholders, "?")
 	}
 
@@ -913,49 +905,46 @@ func (r *SqlDBRepository[T]) insertEntity(ctx context.Context, db interface{}, e
 	)
 
 	// 根据db类型选择执行方式
-	var err error
+	var errExec error
 	switch v := db.(type) {
 	case *sql.DB:
-		_, err = v.ExecContext(ctx, query, values...)
+		_, errExec = v.ExecContext(ctx, query, values...)
 	case *sql.Tx:
-		_, err = v.ExecContext(ctx, query, values...)
+		_, errExec = v.ExecContext(ctx, query, values...)
 	default:
-		err = errors.New("invalid db type")
+		errExec = errors.New("invalid db type")
 	}
 
-	return err
+	return errExec
 }
 
 // updateEntity 更新实体到数据库
 func (r *SqlDBRepository[T]) updateEntity(ctx context.Context, db interface{}, entity T) error {
 	// 获取实体的值
 	entityValue := reflect.ValueOf(entity)
-	if entityValue.Kind() == reflect.Ptr {
-		entityValue = entityValue.Elem()
-	}
 
-	// 获取实体的类型
-	entityType := entityValue.Type()
+	// 提取所有字段（包括嵌入结构体的字段）
+	fields, err := r.extractFields(entityValue)
+	if err != nil {
+		return err
+	}
 
 	// 收集字段名和值，排除id字段
 	var updates []string
 	var values []interface{}
 
-	for i := 0; i < entityType.NumField(); i++ {
-		field := entityType.Field(i)
-		fieldValue := entityValue.Field(i)
-
-		// 跳过不可导出的字段和id字段
-		if !field.IsExported() || field.Name == "ID" {
+	for fieldName, fieldValue := range fields {
+		// 跳过id字段
+		if fieldName == "ID" || fieldName == "Id" {
 			continue
 		}
 
 		// 将字段名转换为下划线命名的列名
-		columnName := r.toSnakeCase(field.Name)
+		columnName := r.toSnakeCase(fieldName)
 
 		// 添加到列表
 		updates = append(updates, fmt.Sprintf("%s = ?", columnName))
-		values = append(values, fieldValue.Interface())
+		values = append(values, fieldValue)
 	}
 
 	// 添加id参数
@@ -969,17 +958,17 @@ func (r *SqlDBRepository[T]) updateEntity(ctx context.Context, db interface{}, e
 	)
 
 	// 根据db类型选择执行方式
-	var err error
+	var errExec error
 	switch v := db.(type) {
 	case *sql.DB:
-		_, err = v.ExecContext(ctx, query, values...)
+		_, errExec = v.ExecContext(ctx, query, values...)
 	case *sql.Tx:
-		_, err = v.ExecContext(ctx, query, values...)
+		_, errExec = v.ExecContext(ctx, query, values...)
 	default:
-		err = errors.New("invalid db type")
+		errExec = errors.New("invalid db type")
 	}
 
-	return err
+	return errExec
 }
 
 // toSnakeCase 将驼峰命名转换为下划线命名
@@ -1018,11 +1007,56 @@ func (r *SqlDBRepository[T]) toCamelCase(s string) string {
 	words := strings.Split(s, "_")
 	for _, word := range words {
 		if word == "id" {
-			// 特殊处理id，转换为ID
-			result.WriteString("ID")
+			// 特殊处理id，转换为Id
+			result.WriteString("Id")
 		} else {
 			result.WriteString(strings.Title(word))
 		}
 	}
 	return result.String()
+}
+
+// extractFields 递归提取结构体及其嵌入结构体的所有字段
+func (r *SqlDBRepository[T]) extractFields(value reflect.Value) (map[string]interface{}, error) {
+	// 确保我们处理的是值而不是指针
+	for value.Kind() == reflect.Ptr {
+		if value.IsNil() {
+			return nil, fmt.Errorf("cannot extract fields from nil pointer")
+		}
+		value = value.Elem()
+	}
+
+	if value.Kind() != reflect.Struct {
+		return nil, fmt.Errorf("extractFields expects a struct, got %v", value.Kind())
+	}
+
+	result := make(map[string]interface{})
+	valueType := value.Type()
+
+	for i := 0; i < value.NumField(); i++ {
+		field := valueType.Field(i)
+		fieldValue := value.Field(i)
+
+		// 跳过不可导出的字段
+		if !field.IsExported() {
+			continue
+		}
+
+		// 如果是嵌入字段，递归提取其字段
+		if field.Anonymous {
+			embeddedFields, err := r.extractFields(fieldValue)
+			if err != nil {
+				return nil, err
+			}
+			// 将嵌入字段的字段合并到结果中
+			for name, val := range embeddedFields {
+				result[name] = val
+			}
+		} else {
+			// 直接字段，添加到结果中
+			result[field.Name] = fieldValue.Interface()
+		}
+	}
+
+	return result, nil
 }

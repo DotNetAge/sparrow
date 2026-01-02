@@ -17,38 +17,39 @@ import (
 
 // TestEntity 测试实体
 type TestEntity struct {
-	ID        string     `json:"id"`
-	Name      string     `json:"name"`
-	Age       int        `json:"age"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
+	entity.BaseEntity
+	// ID        string     `json:"id"`
+	Name string `json:"name"`
+	Age  int    `json:"age"`
+	// CreatedAt time.Time  `json:"created_at"`
+	// UpdatedAt time.Time  `json:"updated_at"`
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 }
 
 // GetID 获取ID
-func (e *TestEntity) GetID() string {
-	return e.ID
-}
+// func (e *TestEntity) GetID() string {
+// 	return e.ID
+// }
 
-// SetID 设置ID
-func (e *TestEntity) SetID(id string) {
-	e.ID = id
-}
+// // SetID 设置ID
+// func (e *TestEntity) SetID(id string) {
+// 	e.ID = id
+// }
 
-// GetCreatedAt 获取创建时间
-func (e *TestEntity) GetCreatedAt() time.Time {
-	return e.CreatedAt
-}
+// // GetCreatedAt 获取创建时间
+// func (e *TestEntity) GetCreatedAt() time.Time {
+// 	return e.CreatedAt
+// }
 
-// GetUpdatedAt 获取更新时间
-func (e *TestEntity) GetUpdatedAt() time.Time {
-	return e.UpdatedAt
-}
+// // GetUpdatedAt 获取更新时间
+// func (e *TestEntity) GetUpdatedAt() time.Time {
+// 	return e.UpdatedAt
+// }
 
-// SetUpdatedAt 设置更新时间
-func (e *TestEntity) SetUpdatedAt(t time.Time) {
-	e.UpdatedAt = t
-}
+// // SetUpdatedAt 设置更新时间
+// func (e *TestEntity) SetUpdatedAt(t time.Time) {
+// 	e.UpdatedAt = t
+// }
 
 var _ entity.Entity = (*TestEntity)(nil)
 
@@ -93,9 +94,9 @@ func TestSqlDBRepository_Save(t *testing.T) {
 
 	// 创建测试实体
 	testEntity := &TestEntity{
-		ID:   "1",
-		Name: "Test User",
-		Age:  30,
+		BaseEntity: *entity.NewBaseEntity("1"),
+		Name:       "Test User",
+		Age:        30,
 	}
 
 	// 测试保存
@@ -106,7 +107,7 @@ func TestSqlDBRepository_Save(t *testing.T) {
 	result, err := repo.FindByID(context.Background(), "1")
 	require.NoError(t, err)
 	require.NotNil(t, result)
-	assert.Equal(t, "1", result.ID)
+	assert.Equal(t, "1", result.Id)
 	assert.Equal(t, "Test User", result.Name)
 	assert.Equal(t, 30, result.Age)
 	assert.True(t, result.CreatedAt.Before(time.Now()) || result.CreatedAt.Equal(time.Now()))
@@ -137,9 +138,9 @@ func TestSqlDBRepository_FindByID(t *testing.T) {
 
 	// 创建测试实体
 	testEntity := &TestEntity{
-		ID:   "1",
-		Name: "Test User",
-		Age:  30,
+		BaseEntity: *entity.NewBaseEntity("1"),
+		Name:       "Test User",
+		Age:        30,
 	}
 
 	// 保存实体
@@ -150,7 +151,8 @@ func TestSqlDBRepository_FindByID(t *testing.T) {
 	result, err := repo.FindByID(context.Background(), "1")
 	require.NoError(t, err)
 	require.NotNil(t, result)
-	assert.Equal(t, "1", result.ID)
+	assert.Equal(t, "1", result.Id)
+	assert.Equal(t, "Test User", result.Name)
 
 	// 测试查找不存在的实体
 	_, err = repo.FindByID(context.Background(), "non-existent")
@@ -167,9 +169,9 @@ func TestSqlDBRepository_FindAll(t *testing.T) {
 
 	// 创建测试实体
 	entities := []*TestEntity{
-		{ID: "1", Name: "User 1", Age: 20},
-		{ID: "2", Name: "User 2", Age: 25},
-		{ID: "3", Name: "User 3", Age: 30},
+		{BaseEntity: *entity.NewBaseEntity("1"), Name: "User 1", Age: 20},
+		{BaseEntity: *entity.NewBaseEntity("2"), Name: "User 2", Age: 25},
+		{BaseEntity: *entity.NewBaseEntity("3"), Name: "User 3", Age: 30},
 	}
 
 	// 保存实体
@@ -194,9 +196,9 @@ func TestSqlDBRepository_Update(t *testing.T) {
 
 	// 创建测试实体
 	testEntity := &TestEntity{
-		ID:   "1",
-		Name: "Test User",
-		Age:  30,
+		BaseEntity: *entity.NewBaseEntity("1"),
+		Name:       "Test User",
+		Age:        30,
 	}
 
 	// 保存实体
@@ -227,9 +229,9 @@ func TestSqlDBRepository_Delete(t *testing.T) {
 
 	// 创建测试实体
 	testEntity := &TestEntity{
-		ID:   "1",
-		Name: "Test User",
-		Age:  30,
+		BaseEntity: *entity.NewBaseEntity("1"),
+		Name:       "Test User",
+		Age:        30,
 	}
 
 	// 保存实体
@@ -255,9 +257,9 @@ func TestSqlDBRepository_SaveBatch(t *testing.T) {
 
 	// 创建测试实体
 	entities := []*TestEntity{
-		{ID: "1", Name: "User 1", Age: 20},
-		{ID: "2", Name: "User 2", Age: 25},
-		{ID: "3", Name: "User 3", Age: 30},
+		{BaseEntity: *entity.NewBaseEntity("1"), Name: "User 1", Age: 20},
+		{BaseEntity: *entity.NewBaseEntity("2"), Name: "User 2", Age: 25},
+		{BaseEntity: *entity.NewBaseEntity("3"), Name: "User 3", Age: 30},
 	}
 
 	// 测试批量保存
@@ -280,9 +282,9 @@ func TestSqlDBRepository_FindByIDs(t *testing.T) {
 
 	// 创建测试实体
 	entities := []*TestEntity{
-		{ID: "1", Name: "User 1", Age: 20},
-		{ID: "2", Name: "User 2", Age: 25},
-		{ID: "3", Name: "User 3", Age: 30},
+		{BaseEntity: *entity.NewBaseEntity("1"), Name: "User 1", Age: 20},
+		{BaseEntity: *entity.NewBaseEntity("2"), Name: "User 2", Age: 25},
+		{BaseEntity: *entity.NewBaseEntity("3"), Name: "User 3", Age: 30},
 	}
 
 	// 保存实体
@@ -299,7 +301,7 @@ func TestSqlDBRepository_FindByIDs(t *testing.T) {
 	// 验证结果
 	ids := make([]string, len(result))
 	for i, entity := range result {
-		ids[i] = entity.ID
+		ids[i] = entity.Id
 	}
 	assert.Contains(t, ids, "1")
 	assert.Contains(t, ids, "3")
@@ -316,9 +318,9 @@ func TestSqlDBRepository_FindWithPagination(t *testing.T) {
 	// 创建测试实体
 	for i := 1; i <= 5; i++ {
 		testEntity := &TestEntity{
-			ID:   fmt.Sprintf("%d", i),
-			Name: fmt.Sprintf("User %d", i),
-			Age:  20 + i,
+			BaseEntity: *entity.NewBaseEntity(fmt.Sprintf("%d", i)),
+			Name:       fmt.Sprintf("User %d", i),
+			Age:        20 + i,
 		}
 		err := repo.Save(context.Background(), testEntity)
 		require.NoError(t, err)
@@ -340,8 +342,8 @@ func TestSqlDBRepository_Count(t *testing.T) {
 
 	// 创建测试实体
 	entities := []*TestEntity{
-		{ID: "1", Name: "User 1", Age: 20},
-		{ID: "2", Name: "User 2", Age: 25},
+		{BaseEntity: *entity.NewBaseEntity("1"), Name: "User 1", Age: 20},
+		{BaseEntity: *entity.NewBaseEntity("2"), Name: "User 2", Age: 25},
 	}
 
 	// 保存实体
@@ -366,9 +368,9 @@ func TestSqlDBRepository_FindByField(t *testing.T) {
 
 	// 创建测试实体
 	entities := []*TestEntity{
-		{ID: "1", Name: "User 1", Age: 20},
-		{ID: "2", Name: "User 2", Age: 25},
-		{ID: "3", Name: "User 3", Age: 25},
+		{BaseEntity: *entity.NewBaseEntity("1"), Name: "User 1", Age: 20},
+		{BaseEntity: *entity.NewBaseEntity("2"), Name: "User 2", Age: 25},
+		{BaseEntity: *entity.NewBaseEntity("3"), Name: "User 3", Age: 25},
 	}
 
 	// 保存实体
@@ -398,9 +400,9 @@ func TestSqlDBRepository_Exists(t *testing.T) {
 
 	// 创建测试实体
 	testEntity := &TestEntity{
-		ID:   "1",
-		Name: "Test User",
-		Age:  30,
+		BaseEntity: *entity.NewBaseEntity("1"),
+		Name:       "Test User",
+		Age:        30,
 	}
 
 	// 保存实体
@@ -428,10 +430,10 @@ func TestSqlDBRepository_FindWithConditions(t *testing.T) {
 
 	// 创建测试实体
 	entities := []*TestEntity{
-		{ID: "1", Name: "User 1", Age: 20},
-		{ID: "2", Name: "User 2", Age: 25},
-		{ID: "3", Name: "User 3", Age: 30},
-		{ID: "4", Name: "User 4", Age: 35},
+		{BaseEntity: *entity.NewBaseEntity("1"), Name: "User 1", Age: 20},
+		{BaseEntity: *entity.NewBaseEntity("2"), Name: "User 2", Age: 25},
+		{BaseEntity: *entity.NewBaseEntity("3"), Name: "User 3", Age: 30},
+		{BaseEntity: *entity.NewBaseEntity("4"), Name: "User 4", Age: 35},
 	}
 
 	// 保存实体
@@ -472,10 +474,10 @@ func TestSqlDBRepository_CountWithConditions(t *testing.T) {
 
 	// 创建测试实体
 	entities := []*TestEntity{
-		{ID: "1", Name: "User 1", Age: 20},
-		{ID: "2", Name: "User 2", Age: 25},
-		{ID: "3", Name: "User 3", Age: 30},
-		{ID: "4", Name: "User 4", Age: 35},
+		{BaseEntity: *entity.NewBaseEntity("1"), Name: "User 1", Age: 20},
+		{BaseEntity: *entity.NewBaseEntity("2"), Name: "User 2", Age: 25},
+		{BaseEntity: *entity.NewBaseEntity("3"), Name: "User 3", Age: 30},
+		{BaseEntity: *entity.NewBaseEntity("4"), Name: "User 4", Age: 35},
 	}
 
 	// 保存实体

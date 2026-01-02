@@ -49,6 +49,7 @@ func SQLiteDB(schema string) Option {
 				app.Logger.Error("连接SQLite数据库失败", "error", err)
 				panic(err)
 			}
+
 			// 启用WAL模式提高并发性能
 			_, err = db.Exec(`
 							PRAGMA journal_mode = WAL;
