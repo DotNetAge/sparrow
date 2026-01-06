@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -799,9 +800,75 @@ func (r *BadgerRepository[T]) compareField(fieldValue interface{}, operator stri
 			// 如果字段值不是数组，直接检查字段值是否在条件值列表中
 			return r.isValueInSlice(fieldValueStr, conditionValue)
 		}
+	case "GT":
+		// 大于
+		return r.compareNumeric(fieldValue, conditionValue, func(f, c float64) bool { return f > c })
+	case "GTE":
+		// 大于等于
+		return r.compareNumeric(fieldValue, conditionValue, func(f, c float64) bool { return f >= c })
+	case "LT":
+		// 小于
+		return r.compareNumeric(fieldValue, conditionValue, func(f, c float64) bool { return f < c })
+	case "LTE":
+		// 小于等于
+		return r.compareNumeric(fieldValue, conditionValue, func(f, c float64) bool { return f <= c })
 	default:
 		// 其他操作符可以根据需要实现
 		return false
+	}
+}
+
+// compareNumeric 比较数值类型的值
+func (r *BadgerRepository[T]) compareNumeric(fieldValue interface{}, conditionValue interface{}, compareFunc func(float64, float64) bool) bool {
+	// 尝试将字段值转换为 float64
+	fieldFloat, err := r.toFloat64(fieldValue)
+	if err != nil {
+		return false
+	}
+
+	// 尝试将条件值转换为 float64
+	conditionFloat, err := r.toFloat64(conditionValue)
+	if err != nil {
+		return false
+	}
+
+	// 使用比较函数进行比较
+	return compareFunc(fieldFloat, conditionFloat)
+}
+
+// toFloat64 将值转换为 float64
+func (r *BadgerRepository[T]) toFloat64(value interface{}) (float64, error) {
+	switch v := value.(type) {
+	case int:
+		return float64(v), nil
+	case int8:
+		return float64(v), nil
+	case int16:
+		return float64(v), nil
+	case int32:
+		return float64(v), nil
+	case int64:
+		return float64(v), nil
+	case uint:
+		return float64(v), nil
+	case uint8:
+		return float64(v), nil
+	case uint16:
+		return float64(v), nil
+	case uint32:
+		return float64(v), nil
+	case uint64:
+		return float64(v), nil
+	case float32:
+		return float64(v), nil
+	case float64:
+		return v, nil
+	case string:
+		return strconv.ParseFloat(v, 64)
+	default:
+		// 尝试使用 fmt.Sprintf 转换为字符串，再解析为 float64
+		strValue := fmt.Sprintf("%v", value)
+		return strconv.ParseFloat(strValue, 64)
 	}
 }
 
