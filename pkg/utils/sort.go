@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"math/rand"
 	"reflect"
 	"sort"
 	"strings"
@@ -8,6 +9,10 @@ import (
 
 	"github.com/DotNetAge/sparrow/pkg/usecase"
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 // SortEntities 对实体列表进行排序
 // 这个函数使用更简洁的方式处理实体排序，尽量减少反射的使用
@@ -124,4 +129,12 @@ func compareValues(a, b reflect.Value) bool {
 // 添加这个函数是为了避免在其他地方引用strings包
 func Split(s, sep string) []string {
 	return strings.Split(s, sep)
+}
+
+// ShuffleStrings 随机打乱字符串切片
+func ShuffleStrings(slice []string) {
+	for i := len(slice) - 1; i > 0; i-- {
+		j := rand.Intn(i + 1)
+		slice[i], slice[j] = slice[j], slice[i]
+	}
 }

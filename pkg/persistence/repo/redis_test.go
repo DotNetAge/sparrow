@@ -928,3 +928,44 @@ func TestRedisRepository_CountByField(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, int64(0), zeroCount)
 }
+
+// TestRedisRepository_Random 测试随机获取实体功能
+func TestRedisRepository_Random(t *testing.T) {
+	repo, cleanup := setupTestRedisRepository(t)
+	defer cleanup()
+
+	ctx := context.Background()
+
+	// 准备测试数据
+	entity1 := createComplexEntity(1)
+	entity2 := createComplexEntity(2)
+	entity3 := createComplexEntity(3)
+
+	// 保存测试实体
+	err := repo.Save(ctx, entity1)
+	assert.NoError(t, err)
+	err = repo.Save(ctx, entity2)
+	assert.NoError(t, err)
+	err = repo.Save(ctx, entity3)
+	assert.NoError(t, err)
+
+	// 测试随机获取1个实体
+	randomEntities, err := repo.Random(ctx, 1)
+	assert.NoError(t, err)
+	assert.Len(t, randomEntities, 1)
+
+	// 测试随机获取2个实体
+	randomEntities, err = repo.Random(ctx, 2)
+	assert.NoError(t, err)
+	assert.Len(t, randomEntities, 2)
+
+	// 测试随机获取超过实体总数的情况
+	randomEntities, err = repo.Random(ctx, 10)
+	assert.NoError(t, err)
+	assert.Len(t, randomEntities, 3)
+
+	// 测试负数参数
+	randomEntities, err = repo.Random(ctx, -1)
+	assert.NoError(t, err)
+	assert.Len(t, randomEntities, 1)
+}

@@ -519,6 +519,44 @@ func (r *PostgresRepository[T]) Count(ctx context.Context) (int64, error) {
 	return count, err
 }
 
+// Random 返回随机实体
+func (r *PostgresRepository[T]) Random(ctx context.Context, take int) ([]T, error) {
+	if take <= 0 {
+		take = 1
+	}
+
+	query := fmt.Sprintf(`
+		SELECT * FROM %s 
+		WHERE deleted_at IS NULL 
+		ORDER BY RANDOM() 
+		LIMIT $1`, r.tableName)
+
+	// 使用QueryxContext而不是直接Select，以便能够使用我们的scanEntity方法处理复杂类型
+	rows, err := r.db.QueryxContext(ctx, query, take)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var entities []T
+	for rows.Next() {
+		// 创建一个新的实体实例
+		var entity T
+		// 使用我们改进的scanEntity方法来处理查询结果
+		if err := r.scanEntity(ctx, rows, &entity); err != nil {
+			return nil, err
+		}
+		entities = append(entities, entity)
+	}
+
+	// 检查遍历过程中是否有错误
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return entities, nil
+}
+
 // FindByField 按字段查找实体
 func (r *PostgresRepository[T]) FindByField(ctx context.Context, field string, value interface{}) ([]T, error) {
 	if field == "" {

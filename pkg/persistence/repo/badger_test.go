@@ -18,7 +18,7 @@ import (
 // setupTestBadgerRepository 创建测试用的BadgerRepository实例
 func setupTestBadgerRepository(t *testing.T) (*BadgerRepository[*entity.Task], func()) {
 	t.Helper()
-	
+
 	// 创建临时内存数据库
 	opts := badger.DefaultOptions("").WithInMemory(true)
 	db, err := badger.Open(opts)
@@ -29,7 +29,7 @@ func setupTestBadgerRepository(t *testing.T) (*BadgerRepository[*entity.Task], f
 
 	// 清理函数
 	cleanup := func() {
-	db.Close()
+		db.Close()
 	}
 
 	return repo, cleanup
@@ -95,6 +95,51 @@ func TestBadgerRepository_Update(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "updated_type", updatedTask.Type)
 	assert.Equal(t, entity.TaskStatusRunning, updatedTask.Status)
+}
+
+// TestBadgerRepository_Update_NotFound 测试更新不存在的实体
+
+// TestBadgerRepository_Random 测试随机获取实体
+func TestBadgerRepository_Random(t *testing.T) {
+	// 设置测试环境
+	repo, cleanup := setupTestBadgerRepository(t)
+	defer cleanup()
+
+	// 创建多个测试任务
+	task1 := entity.NewTask("test_type1", map[string]interface{}{"key": "value1"})
+	task1.Id = "test_id1"
+	task2 := entity.NewTask("test_type2", map[string]interface{}{"key": "value2"})
+	task2.Id = "test_id2"
+	task3 := entity.NewTask("test_type3", map[string]interface{}{"key": "value3"})
+	task3.Id = "test_id3"
+
+	// 保存测试任务
+	err := repo.Save(context.Background(), task1)
+	assert.NoError(t, err)
+	err = repo.Save(context.Background(), task2)
+	assert.NoError(t, err)
+	err = repo.Save(context.Background(), task3)
+	assert.NoError(t, err)
+
+	// 测试随机获取1个实体
+	randomTasks, err := repo.Random(context.Background(), 1)
+	assert.NoError(t, err)
+	assert.Len(t, randomTasks, 1)
+
+	// 测试随机获取2个实体
+	randomTasks, err = repo.Random(context.Background(), 2)
+	assert.NoError(t, err)
+	assert.Len(t, randomTasks, 2)
+
+	// 测试随机获取超过实体总数的情况
+	randomTasks, err = repo.Random(context.Background(), 10)
+	assert.NoError(t, err)
+	assert.Len(t, randomTasks, 3)
+
+	// 测试负数参数
+	randomTasks, err = repo.Random(context.Background(), -1)
+	assert.NoError(t, err)
+	assert.Len(t, randomTasks, 1)
 }
 
 // TestBadgerRepository_Update_NotFound 测试更新不存在的实体

@@ -597,3 +597,45 @@ func TestMemoryRepository_CountWithConditions(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, int64(2), count)
 }
+
+// TestMemoryRepository_Random 测试随机获取实体
+func TestMemoryRepository_Random(t *testing.T) {
+	// 创建仓库实例
+	repo := NewMemoryRepository[*entity.Task]()
+
+	// 创建多个测试任务
+	task1 := entity.NewTask("test_type1", map[string]interface{}{"key": "value1"})
+	task1.Id = "test_id1"
+	task2 := entity.NewTask("test_type2", map[string]interface{}{"key": "value2"})
+	task2.Id = "test_id2"
+	task3 := entity.NewTask("test_type3", map[string]interface{}{"key": "value3"})
+	task3.Id = "test_id3"
+
+	// 保存测试任务
+	err := repo.Save(context.Background(), task1)
+	assert.NoError(t, err)
+	err = repo.Save(context.Background(), task2)
+	assert.NoError(t, err)
+	err = repo.Save(context.Background(), task3)
+	assert.NoError(t, err)
+
+	// 测试随机获取1个实体
+	randomTasks, err := repo.Random(context.Background(), 1)
+	assert.NoError(t, err)
+	assert.Len(t, randomTasks, 1)
+
+	// 测试随机获取2个实体
+	randomTasks, err = repo.Random(context.Background(), 2)
+	assert.NoError(t, err)
+	assert.Len(t, randomTasks, 2)
+
+	// 测试随机获取超过实体总数的情况
+	randomTasks, err = repo.Random(context.Background(), 10)
+	assert.NoError(t, err)
+	assert.Len(t, randomTasks, 3)
+
+	// 测试负数参数
+	randomTasks, err = repo.Random(context.Background(), -1)
+	assert.NoError(t, err)
+	assert.Len(t, randomTasks, 1)
+}

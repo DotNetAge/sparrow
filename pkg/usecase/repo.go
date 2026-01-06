@@ -38,4 +38,6 @@ type Repository[T any] interface {
 	FindWithConditions(ctx context.Context, options QueryOptions) ([]T, error)
 	// CountWithConditions 根据条件统计
 	CountWithConditions(ctx context.Context, conditions []QueryCondition) (int64, error)
+	// Random 返回随机实体
+	Random(ctx context.Context, take int) ([]T, error)
 }

@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"reflect"
 	"sync"
 	"time"
@@ -11,6 +12,10 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/errs"
 	"github.com/DotNetAge/sparrow/pkg/usecase"
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 // MemoryRepository 内存仓储实现
 // 基于BaseRepository[T]的完整内存实现
@@ -485,6 +490,47 @@ func (r *MemoryRepository[T]) CountWithConditions(ctx context.Context, condition
 	}
 
 	return count, nil
+}
+
+// Random 返回随机实体
+func (r *MemoryRepository[T]) Random(ctx context.Context, take int) ([]T, error) {
+	if take <= 0 {
+		take = 1
+	}
+
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	// 获取所有实体的ID
+	ids := make([]string, 0, len(r.entities))
+	for id := range r.entities {
+		ids = append(ids, id)
+	}
+
+	if len(ids) == 0 {
+		return []T{}, nil
+	}
+
+	// 随机打乱ID列表
+	for i := len(ids) - 1; i > 0; i-- {
+		j := rand.Intn(i + 1)
+		ids[i], ids[j] = ids[j], ids[i]
+	}
+
+	// 选择前take个ID
+	if len(ids) > take {
+		ids = ids[:take]
+	}
+
+	// 根据ID获取实体
+	entities := make([]T, 0, len(ids))
+	for _, id := range ids {
+		if entity, exists := r.entities[id]; exists {
+			entities = append(entities, entity)
+		}
+	}
+
+	return entities, nil
 }
 
 // matchCondition 检查实体是否满足单个查询条件

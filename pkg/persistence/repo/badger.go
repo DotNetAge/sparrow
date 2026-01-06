@@ -594,6 +594,53 @@ func (r *BadgerRepository[T]) CountByField(ctx context.Context, field string, va
 	return int64(len(entities)), nil
 }
 
+// Random 返回随机实体
+func (r *BadgerRepository[T]) Random(ctx context.Context, take int) ([]T, error) {
+	if take <= 0 {
+		take = 1
+	}
+
+	// 先获取所有实体的键
+	var keys []string
+
+	err := r.db.View(func(txn *badger.Txn) error {
+		prefix := []byte(r.prefix)
+
+		opts := badger.DefaultIteratorOptions
+		opts.Prefix = prefix
+
+		it := txn.NewIterator(opts)
+		defer it.Close()
+
+		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
+			item := it.Item()
+			key := string(item.Key())
+			// 移除前缀，只保留ID部分
+			id := strings.TrimPrefix(key, r.prefix)
+			keys = append(keys, id)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get keys: %w", err)
+	}
+
+	if len(keys) == 0 {
+		return []T{}, nil
+	}
+
+	// 随机选择take个键
+	utils.ShuffleStrings(keys)
+	if len(keys) > take {
+		keys = keys[:take]
+	}
+
+	// 根据选择的键获取实体
+	return r.FindByIDs(ctx, keys)
+}
+
 // FindWithConditions 根据条件查询
 func (r *BadgerRepository[T]) FindWithConditions(ctx context.Context, options usecase.QueryOptions) ([]T, error) {
 	if options.Limit <= 0 {
@@ -764,7 +811,7 @@ func (r *BadgerRepository[T]) isValueInSlice(value string, slice interface{}) bo
 	if sliceValue.Kind() != reflect.Slice {
 		return false
 	}
-	
+
 	for i := 0; i < sliceValue.Len(); i++ {
 		item := fmt.Sprintf("%v", sliceValue.Index(i).Interface())
 		if item == value {

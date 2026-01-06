@@ -495,3 +495,46 @@ func TestSqlDBRepository_CountWithConditions(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, int64(2), count)
 }
+
+// TestSqlDBRepository_Random 测试随机获取实体功能
+func TestSqlDBRepository_Random(t *testing.T) {
+	// 初始化数据库
+	db := initTestDB(t)
+	defer cleanupTestDB(db, t)
+
+	// 创建仓储
+	repo := NewSqlDBRepository[*TestEntity](db)
+
+	// 创建测试实体
+	entities := []*TestEntity{
+		{BaseEntity: *entity.NewBaseEntity("1"), Name: "User 1", Age: 20},
+		{BaseEntity: *entity.NewBaseEntity("2"), Name: "User 2", Age: 25},
+		{BaseEntity: *entity.NewBaseEntity("3"), Name: "User 3", Age: 30},
+	}
+
+	// 保存实体
+	for _, entity := range entities {
+		err := repo.Save(context.Background(), entity)
+		require.NoError(t, err)
+	}
+
+	// 测试随机获取1个实体
+	randomEntities, err := repo.Random(context.Background(), 1)
+	require.NoError(t, err)
+	assert.Len(t, randomEntities, 1)
+
+	// 测试随机获取2个实体
+	randomEntities, err = repo.Random(context.Background(), 2)
+	require.NoError(t, err)
+	assert.Len(t, randomEntities, 2)
+
+	// 测试随机获取超过实体总数的情况
+	randomEntities, err = repo.Random(context.Background(), 10)
+	require.NoError(t, err)
+	assert.Len(t, randomEntities, 3)
+
+	// 测试负数参数
+	randomEntities, err = repo.Random(context.Background(), -1)
+	require.NoError(t, err)
+	assert.Len(t, randomEntities, 1)
+}

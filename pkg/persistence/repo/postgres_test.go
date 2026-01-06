@@ -1080,3 +1080,45 @@ func TestDirectSQLXOperations(t *testing.T) {
 	assert.Equal(t, entityID, simpleEntity.ID)
 	assert.Equal(t, entityName, simpleEntity.Name)
 }
+
+// TestPostgresRepository_Random 测试随机获取实体
+func TestPostgresRepository_Random(t *testing.T) {
+	// 设置测试环境
+	repo, cleanup := setupTestPostgresRepository(t)
+	defer cleanup()
+
+	ctx := context.Background()
+
+	// 创建多个测试实体
+	entity1 := createPostgresComplexEntity(1)
+	entity2 := createPostgresComplexEntity(2)
+	entity3 := createPostgresComplexEntity(3)
+
+	// 保存测试实体
+	err := repo.Save(ctx, entity1)
+	assert.NoError(t, err)
+	err = repo.Save(ctx, entity2)
+	assert.NoError(t, err)
+	err = repo.Save(ctx, entity3)
+	assert.NoError(t, err)
+
+	// 测试随机获取1个实体
+	randomEntities, err := repo.Random(ctx, 1)
+	assert.NoError(t, err)
+	assert.Len(t, randomEntities, 1)
+
+	// 测试随机获取2个实体
+	randomEntities, err = repo.Random(ctx, 2)
+	assert.NoError(t, err)
+	assert.Len(t, randomEntities, 2)
+
+	// 测试随机获取超过实体总数的情况
+	randomEntities, err = repo.Random(ctx, 10)
+	assert.NoError(t, err)
+	assert.Len(t, randomEntities, 3)
+
+	// 测试负数参数
+	randomEntities, err = repo.Random(ctx, -1)
+	assert.NoError(t, err)
+	assert.Len(t, randomEntities, 1)
+}

@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"gorm.io/gorm"
 
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/errs"
@@ -19,6 +20,92 @@ import (
 )
 
 // 实体定义
+// 测试实体
+
+// User 测试用的用户实体
+// 实现了entity.Entity接口
+// 包含gorm.Model支持软删除
+
+type User struct {
+	gorm.Model
+	ID        string    `gorm:"primaryKey" json:"id"`
+	Name      string    `gorm:"size:100;not null" json:"name"`
+	Email     string    `gorm:"size:100;uniqueIndex" json:"email"`
+	Age       int       `gorm:"default:0" json:"age"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	DeletedAt *time.Time
+}
+
+// GetID 获取实体ID
+func (u User) GetID() string {
+	return u.ID
+}
+
+// SetID 设置实体ID
+func (u *User) SetID(id string) {
+	u.ID = id
+}
+
+// GetCreatedAt 获取创建时间
+func (u User) GetCreatedAt() time.Time {
+	return u.CreatedAt
+}
+
+// SetCreatedAt 设置创建时间
+func (u *User) SetCreatedAt(t time.Time) {
+	u.CreatedAt = t
+}
+
+// GetUpdatedAt 获取更新时间
+func (u User) GetUpdatedAt() time.Time {
+	return u.UpdatedAt
+}
+
+// SetUpdatedAt 设置更新时间
+func (u *User) SetUpdatedAt(t time.Time) {
+	u.UpdatedAt = t
+}
+
+// 简单实体，不包含软删除字段
+
+type SimpleEntity struct {
+	ID        string    `gorm:"primaryKey" json:"id"`
+	Name      string    `gorm:"size:100;not null" json:"name"`
+	Value     string    `json:"value"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// GetID 获取实体ID
+func (s SimpleEntity) GetID() string {
+	return s.ID
+}
+
+// SetID 设置实体ID
+func (s *SimpleEntity) SetID(id string) {
+	s.ID = id
+}
+
+// GetCreatedAt 获取创建时间
+func (s SimpleEntity) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// SetCreatedAt 设置创建时间
+func (s *SimpleEntity) SetCreatedAt(t time.Time) {
+	s.CreatedAt = t
+}
+
+// GetUpdatedAt 获取更新时间
+func (s SimpleEntity) GetUpdatedAt() time.Time {
+	return s.UpdatedAt
+}
+
+// SetUpdatedAt 设置更新时间
+func (s *SimpleEntity) SetUpdatedAt(t time.Time) {
+	s.UpdatedAt = t
+}
 
 // OrderItem 订单项实体
 type OrderItem struct {
@@ -32,11 +119,11 @@ type OrderItem struct {
 // Order 订单实体
 type Order struct {
 	entity.BaseEntity
-	OrderNumber string      `json:"order_number"`
-	CustomerID  string      `json:"customer_id"`
-	Status      string      `json:"status"`
-	TotalAmount float64     `json:"total_amount"`
-	Items       []OrderItem `json:"items"`
+	OrderNumber     string      `json:"order_number"`
+	CustomerID      string      `json:"customer_id"`
+	Status          string      `json:"status"`
+	TotalAmount     float64     `json:"total_amount"`
+	Items           []OrderItem `json:"items"`
 	ShippingAddress struct {
 		Name    string `json:"name"`
 		Phone   string `json:"phone"`
@@ -46,9 +133,9 @@ type Order struct {
 		Country string `json:"country"`
 	} `json:"shipping_address"`
 	PaymentInfo struct {
-		Method      string `json:"method"`
+		Method        string `json:"method"`
 		TransactionID string `json:"transaction_id"`
-		Status      string `json:"status"`
+		Status        string `json:"status"`
 	} `json:"payment_info"`
 }
 
@@ -825,9 +912,9 @@ func TestMongoDBRepository_WithComplexEntity(t *testing.T) {
 			Country string `json:"country"`
 		}{"张三", "13800138000", "科技路100号", "深圳", "518000", "中国"},
 		PaymentInfo: struct {
-			Method      string `json:"method"`
+			Method        string `json:"method"`
 			TransactionID string `json:"transaction_id"`
-			Status      string `json:"status"`
+			Status        string `json:"status"`
 		}{"credit_card", "pay-tx-789", "completed"},
 	}
 	// 使用MongoDB风格的ID
@@ -872,6 +959,62 @@ func TestMongoDBRepository_WithComplexEntity(t *testing.T) {
 	_, err = repo.FindByID(ctx, order.GetID())
 	assert.Error(t, err)
 	assert.IsType(t, &errs.RepositoryError{}, err)
+}
+
+// TestMongoDBRepository_Random 测试随机获取实体
+func TestMongoDBRepository_Random(t *testing.T) {
+	// 设置测试环境
+	client, dbName := setupTestMongoDB(t)
+	repo := NewMongoDBRepository[*User](client, dbName)
+	ctx := context.Background()
+
+	// 创建多个测试用户
+	user1 := &User{
+		ID:    "user-1",
+		Name:  "User 1",
+		Email: "user1@example.com",
+		Age:   25,
+	}
+	user2 := &User{
+		ID:    "user-2",
+		Name:  "User 2",
+		Email: "user2@example.com",
+		Age:   30,
+	}
+	user3 := &User{
+		ID:    "user-3",
+		Name:  "User 3",
+		Email: "user3@example.com",
+		Age:   35,
+	}
+
+	// 保存测试用户
+	err := repo.Save(ctx, user1)
+	assert.NoError(t, err)
+	err = repo.Save(ctx, user2)
+	assert.NoError(t, err)
+	err = repo.Save(ctx, user3)
+	assert.NoError(t, err)
+
+	// 测试随机获取1个用户
+	randomUsers, err := repo.Random(ctx, 1)
+	assert.NoError(t, err)
+	assert.Len(t, randomUsers, 1)
+
+	// 测试随机获取2个用户
+	randomUsers, err = repo.Random(ctx, 2)
+	assert.NoError(t, err)
+	assert.Len(t, randomUsers, 2)
+
+	// 测试随机获取超过用户总数的情况
+	randomUsers, err = repo.Random(ctx, 10)
+	assert.NoError(t, err)
+	assert.Len(t, randomUsers, 3)
+
+	// 测试负数参数
+	randomUsers, err = repo.Random(ctx, -1)
+	assert.NoError(t, err)
+	assert.Len(t, randomUsers, 1)
 }
 
 // 确保测试通过

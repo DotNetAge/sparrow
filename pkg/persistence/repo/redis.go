@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"reflect"
 	"strconv"
 	"strings"
@@ -689,6 +690,45 @@ func (r *RedisRepository[T]) CountWithConditions(ctx context.Context, conditions
 	}
 
 	return int64(count), nil
+}
+
+// Random 返回随机实体
+func (r *RedisRepository[T]) Random(ctx context.Context, take int) ([]T, error) {
+	if take <= 0 {
+		take = 1
+	}
+
+	// 获取所有实体的键
+	pattern := r.prefix + "*"
+	keys, err := r.client.Keys(ctx, pattern).Result()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get keys: %w", err)
+	}
+
+	if len(keys) == 0 {
+		return []T{}, nil
+	}
+
+	// 提取ID并打乱
+	ids := make([]string, 0, len(keys))
+	for _, key := range keys {
+		id := strings.TrimPrefix(key, r.prefix)
+		ids = append(ids, id)
+	}
+
+	// 随机打乱ID列表
+	for i := len(ids) - 1; i > 0; i-- {
+		j := rand.Intn(i + 1)
+		ids[i], ids[j] = ids[j], ids[i]
+	}
+
+	// 选择前take个ID
+	if len(ids) > take {
+		ids = ids[:take]
+	}
+
+	// 根据选择的ID获取实体
+	return r.FindByIDs(ctx, ids)
 }
 
 // matchConditions 检查实体是否满足所有条件

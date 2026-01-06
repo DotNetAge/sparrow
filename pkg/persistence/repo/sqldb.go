@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"database/sql"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"reflect"
@@ -726,6 +727,48 @@ func (r *SqlDBRepository[T]) CountWithConditions(ctx context.Context, conditions
 	return count, nil
 }
 
+// Random 返回随机实体
+func (r *SqlDBRepository[T]) Random(ctx context.Context, take int) ([]T, error) {
+	if take <= 0 {
+		take = 1
+	}
+
+	// 构建查询语句
+	query := fmt.Sprintf("SELECT * FROM %s", r.tableName)
+
+	// 如果支持软删除，添加条件
+	if r.hasSoftDelete() {
+		query += " WHERE deleted_at IS NULL"
+	}
+
+	// 添加随机排序和限制
+	query += " ORDER BY RANDOM() LIMIT ?"
+
+	// 执行查询
+	rows, err := r.db.QueryContext(ctx, query, take)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// 扫描结果
+	var entities []T
+	for rows.Next() {
+		var entity T
+		err := r.scanRow(rows, &entity)
+		if err != nil {
+			return nil, err
+		}
+		entities = append(entities, entity)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return entities, nil
+}
+
 // 辅助方法
 
 // existsInTransaction 在事务中检查实体是否存在
@@ -836,7 +879,6 @@ func (r *SqlDBRepository[T]) scanRow(rows *sql.Rows, entity *T) error {
 	entityValue := reflect.ValueOf(entity).Elem()
 
 	// 处理指针，直到获取到实际的结构体值
-	// 但要确保不会处理到零值
 	for entityValue.Kind() == reflect.Ptr {
 		if entityValue.IsNil() {
 			// 如果指针是 nil，创建一个新的实例
@@ -851,23 +893,121 @@ func (r *SqlDBRepository[T]) scanRow(rows *sql.Rows, entity *T) error {
 
 	// 遍历列并设置扫描目标
 	for i, column := range columns {
-		// 将列名转换为驼峰命名的字段名
-		fieldName := r.toCamelCase(column)
-
-		// 查找字段
-		field := entityValue.FieldByName(fieldName)
-		if !field.IsValid() || !field.CanSet() {
+		// 尝试找到对应的字段（支持值对象）
+		field, err := r.findFieldForColumn(entityValue, column)
+		if err != nil {
 			// 如果字段不存在或不可设置，使用匿名变量
 			dest[i] = &sql.RawBytes{}
 			continue
 		}
 
-		// 设置扫描目标
-		dest[i] = field.Addr().Interface()
+		// 检查字段类型是否为 time.Time
+		if field.Type() == reflect.TypeOf(time.Time{}) {
+			// 对于 time.Time 类型，我们需要一个指针来处理 NULL 值
+			timePtr := new(time.Time)
+			dest[i] = timePtr
+			// 保存字段引用，以便在扫描后设置值
+			finalField := field
+			// 使用闭包来保存字段引用
+			dest[i] = &nullableTime{
+				timePtr: timePtr,
+				setValue: func(val interface{}) {
+					if val != nil {
+						if t, ok := val.(time.Time); ok {
+							finalField.Set(reflect.ValueOf(t))
+						}
+					}
+				},
+			}
+		} else {
+			// 其他类型直接设置扫描目标
+			dest[i] = field.Addr().Interface()
+		}
 	}
 
 	// 执行扫描
 	return rows.Scan(dest...)
+}
+
+// nullableTime 用于处理 SQL NULL 到 time.Time 的转换
+type nullableTime struct {
+	timePtr  *time.Time
+	setValue func(interface{})
+}
+
+// Scan 实现 sql.Scanner 接口
+func (nt *nullableTime) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+	t, ok := value.(time.Time)
+	if !ok {
+		return fmt.Errorf("unsupported type: %T", value)
+	}
+	*nt.timePtr = t
+	if nt.setValue != nil {
+		nt.setValue(t)
+	}
+	return nil
+}
+
+// Value 实现 driver.Valuer 接口
+func (nt *nullableTime) Value() (driver.Value, error) {
+	if nt.timePtr == nil {
+		return nil, nil
+	}
+	return *nt.timePtr, nil
+}
+
+// findFieldForColumn 查找列对应的字段，支持值对象
+func (r *SqlDBRepository[T]) findFieldForColumn(entityValue reflect.Value, column string) (reflect.Value, error) {
+	// 尝试直接查找字段（处理简单字段）
+	camelColumn := r.toCamelCase(column)
+	field := entityValue.FieldByName(camelColumn)
+	if field.IsValid() && field.CanSet() {
+		return field, nil
+	}
+
+	// 特殊处理ID字段，尝试"Id"形式（与BaseEntity保持一致）
+	if column == "id" {
+		field = entityValue.FieldByName("Id")
+		if field.IsValid() && field.CanSet() {
+			return field, nil
+		}
+	}
+
+	// 处理包含值对象的列名
+	if strings.Contains(column, "_") {
+		// 尝试不同的分割点，找到正确的值对象字段
+		for i := 1; i < len(column); i++ {
+			if column[i] == '_' {
+				// 分割列名为值对象部分和字段部分
+				voPart := column[:i]
+				remainingPart := column[i+1:]
+
+				// 转换值对象部分为驼峰命名
+				voFieldName := r.toCamelCase(voPart)
+				voField := entityValue.FieldByName(voFieldName)
+
+				if voField.IsValid() {
+					// 确保值对象不为 nil
+					if voField.Kind() == reflect.Ptr {
+						if voField.IsNil() {
+							// 创建值对象实例
+							newInstance := reflect.New(voField.Type().Elem())
+							voField.Set(newInstance)
+						}
+						voField = voField.Elem()
+					}
+
+					// 递归查找剩余部分对应的字段
+					return r.findFieldForColumn(voField, remainingPart)
+				}
+			}
+		}
+	}
+
+	return reflect.Value{}, fmt.Errorf("field not found: %s", column)
 }
 
 // insertEntity 插入实体到数据库
@@ -973,27 +1113,29 @@ func (r *SqlDBRepository[T]) updateEntity(ctx context.Context, db interface{}, e
 
 // toSnakeCase 将驼峰命名转换为下划线命名
 func (r *SqlDBRepository[T]) toSnakeCase(s string) string {
+	// 特殊处理ID
+	if s == "ID" {
+		return "id"
+	}
+
 	var result strings.Builder
 	n := len(s)
 
-	// 特殊处理两个字符的全大写情况，如ID
-	if n == 2 && unicode.IsUpper(rune(s[0])) && unicode.IsUpper(rune(s[1])) {
-		result.WriteRune(unicode.ToLower(rune(s[0])))
-		result.WriteRune(unicode.ToLower(rune(s[1])))
-		return result.String()
-	}
-
+	// 遍历字符串，处理每个字符
 	for i, c := range s {
 		if i > 0 && unicode.IsUpper(c) {
-			// 检查是否是连续大写字母的情况（如HTTP）
-			if i+1 < n && unicode.IsUpper(rune(s[i+1])) {
-				// 如果下一个字符也是大写，且不是最后一个字符，则不添加下划线
-				// 只在当前字符是连续大写字母的最后一个时添加下划线
-				if i+2 >= n || !unicode.IsUpper(rune(s[i+2])) {
+			// 检查前一个字符是否是下划线
+			if i > 0 && s[i-1] != '_' {
+				// 检查是否是连续大写字母的情况（如HTTP）
+				if i+1 < n && unicode.IsUpper(rune(s[i+1])) {
+					// 如果下一个字符也是大写，且不是最后一个字符，则不添加下划线
+					// 只在当前字符是连续大写字母的最后一个时添加下划线
+					if i+2 >= n || !unicode.IsUpper(rune(s[i+2])) {
+						result.WriteRune('_')
+					}
+				} else {
 					result.WriteRune('_')
 				}
-			} else {
-				result.WriteRune('_')
 			}
 		}
 		result.WriteRune(unicode.ToLower(c))
@@ -1007,8 +1149,8 @@ func (r *SqlDBRepository[T]) toCamelCase(s string) string {
 	words := strings.Split(s, "_")
 	for _, word := range words {
 		if word == "id" {
-			// 特殊处理id，转换为Id
-			result.WriteString("Id")
+			// 特殊处理id，转换为ID（与测试实体保持一致）
+			result.WriteString("ID")
 		} else {
 			result.WriteString(strings.Title(word))
 		}
@@ -1016,8 +1158,13 @@ func (r *SqlDBRepository[T]) toCamelCase(s string) string {
 	return result.String()
 }
 
-// extractFields 递归提取结构体及其嵌入结构体的所有字段
+// extractFields 递归提取结构体及其嵌入结构体、值对象的所有字段
 func (r *SqlDBRepository[T]) extractFields(value reflect.Value) (map[string]interface{}, error) {
+	return r.extractFieldsWithPrefix(value, "")
+}
+
+// extractFieldsWithPrefix 带前缀的字段提取，用于处理值对象
+func (r *SqlDBRepository[T]) extractFieldsWithPrefix(value reflect.Value, prefix string) (map[string]interface{}, error) {
 	// 确保我们处理的是值而不是指针
 	for value.Kind() == reflect.Ptr {
 		if value.IsNil() {
@@ -1042,9 +1189,21 @@ func (r *SqlDBRepository[T]) extractFields(value reflect.Value) (map[string]inte
 			continue
 		}
 
-		// 如果是嵌入字段，递归提取其字段
+		// 检查字段是否为值对象（结构体但不是嵌入字段，且不是time.Time）
+		isValueObject := !field.Anonymous && fieldValue.Kind() == reflect.Struct && fieldValue.Type() != reflect.TypeOf(time.Time{})
+		if fieldValue.Kind() == reflect.Ptr {
+			if !fieldValue.IsNil() {
+				elem := fieldValue.Elem()
+				isValueObject = !field.Anonymous && elem.Kind() == reflect.Struct && elem.Type() != reflect.TypeOf(time.Time{})
+			} else {
+				// 跳过nil值对象
+				continue
+			}
+		}
+
 		if field.Anonymous {
-			embeddedFields, err := r.extractFields(fieldValue)
+			// 如果是嵌入字段，递归提取其字段
+			embeddedFields, err := r.extractFieldsWithPrefix(fieldValue, prefix)
 			if err != nil {
 				return nil, err
 			}
@@ -1052,9 +1211,27 @@ func (r *SqlDBRepository[T]) extractFields(value reflect.Value) (map[string]inte
 			for name, val := range embeddedFields {
 				result[name] = val
 			}
+		} else if isValueObject {
+			// 如果是值对象，递归提取其字段并添加前缀
+			voPrefix := field.Name
+			if prefix != "" {
+				voPrefix = prefix + "_" + field.Name
+			}
+			voFields, err := r.extractFieldsWithPrefix(fieldValue, voPrefix)
+			if err != nil {
+				return nil, err
+			}
+			// 将值对象的字段添加到结果中
+			for name, val := range voFields {
+				result[name] = val
+			}
 		} else {
 			// 直接字段，添加到结果中
-			result[field.Name] = fieldValue.Interface()
+			fieldName := field.Name
+			if prefix != "" {
+				fieldName = prefix + "_" + field.Name
+			}
+			result[fieldName] = fieldValue.Interface()
 		}
 	}
 

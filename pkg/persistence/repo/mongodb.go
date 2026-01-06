@@ -83,8 +83,8 @@ func (r *MongoDBRepository[T]) Save(ctx context.Context, entity T) error {
 	collection := r.getCollection()
 
 	// 转换ID为ObjectID
-	objectID, err := primitive.ObjectIDFromHex(entity.GetID())
-	if err != nil {
+	objectID, _ := primitive.ObjectIDFromHex(entity.GetID())
+	if objectID == primitive.NilObjectID {
 		// 如果不是有效的ObjectID，可能是自定义ID格式，不进行转换
 		objectID = primitive.NilObjectID
 	}
@@ -112,29 +112,29 @@ func (r *MongoDBRepository[T]) Save(ctx context.Context, entity T) error {
 			createdAtField.Set(reflect.ValueOf(time.Now()))
 		}
 
-		// 插入实体
-		if objectID != primitive.NilObjectID {
-			// 如果是有效的ObjectID，使用ID字段
-			doc := make(map[string]interface{})
-			doc["_id"] = objectID
-
-			// 遍历实体字段
-			entityElem := entityValue
-			entityType := entityElem.Type()
-			for i := 0; i < entityType.NumField(); i++ {
-				field := entityType.Field(i)
-				// 跳过ID字段
-				if strings.EqualFold(field.Name, "ID") || strings.EqualFold(field.Name, "Id") {
-					continue
-				}
-				doc[field.Name] = entityElem.Field(i).Interface()
-			}
-
-			_, err = collection.InsertOne(ctx, doc)
-		} else {
-			// 使用自定义ID
-			_, err = collection.InsertOne(ctx, entity)
+		// 插入实体 - 使用bson.M来确保正确的ID映射
+		doc, err := bson.Marshal(entity)
+		if err != nil {
+			return err
 		}
+
+		var docMap bson.M
+		if err := bson.Unmarshal(doc, &docMap); err != nil {
+			return err
+		}
+
+		// 设置正确的_id字段
+		if objectID != primitive.NilObjectID {
+			docMap["_id"] = objectID
+		} else {
+			docMap["_id"] = entity.GetID()
+		}
+
+		// 删除可能存在的ID字段，避免重复
+		delete(docMap, "ID")
+		delete(docMap, "Id")
+
+		_, err = collection.InsertOne(ctx, docMap)
 	}
 
 	return err
@@ -297,62 +297,95 @@ func (r *MongoDBRepository[T]) SaveBatch(ctx context.Context, entities []T) erro
 
 	collection := r.getCollection()
 
-	// 使用事务批量处理
-	session, err := r.client.StartSession()
-	if err != nil {
-		return err
-	}
-	defer session.EndSession(ctx)
-
-	return mongo.WithSession(ctx, session, func(sc mongo.SessionContext) error {
-		// 开始事务
-		if err := session.StartTransaction(); err != nil {
+	// 批量处理每个实体
+	for _, entity := range entities {
+		// 检查是否存在
+		exists, err := r.Exists(ctx, entity.GetID())
+		if err != nil {
 			return err
 		}
 
-		for _, entity := range entities {
-			// 检查是否存在
-			exists, err := r.existsInSession(sc, entity.GetID())
+		entity.SetUpdatedAt(time.Now())
+
+		if exists {
+			// 更新实体
+			objectID, _ := primitive.ObjectIDFromHex(entity.GetID())
+			filter := bson.M{"_id": entity.GetID()}
+			if objectID != primitive.NilObjectID {
+				filter = bson.M{"_id": objectID}
+			}
+
+			update := bson.M{"$set": entity}
+			if _, err := collection.UpdateOne(ctx, filter, update); err != nil {
+				return err
+			}
+		} else {
+			// 新实体设置创建时间
+			entityValue := reflect.ValueOf(entity)
+			if entityValue.Kind() == reflect.Ptr {
+				entityValue = entityValue.Elem()
+			}
+
+			createdAtField := entityValue.FieldByName("CreatedAt")
+			if createdAtField.IsValid() && createdAtField.CanSet() && createdAtField.Type() == reflect.TypeOf(time.Time{}) {
+				createdAtField.Set(reflect.ValueOf(time.Now()))
+			}
+
+			// 转换ID为ObjectID
+			objectID, err := primitive.ObjectIDFromHex(entity.GetID())
+			if err != nil {
+				// 如果不是有效的ObjectID，可能是自定义ID格式，不进行转换
+				objectID = primitive.NilObjectID
+			}
+
+			// 插入实体
+			if objectID != primitive.NilObjectID {
+				// 如果是有效的ObjectID，使用ID字段
+				doc := make(map[string]interface{})
+				doc["_id"] = objectID
+
+				// 遍历实体字段
+				entityElem := entityValue
+				entityType := entityElem.Type()
+				for i := 0; i < entityType.NumField(); i++ {
+					field := entityType.Field(i)
+					// 跳过ID字段
+					if strings.EqualFold(field.Name, "ID") || strings.EqualFold(field.Name, "Id") {
+						continue
+					}
+					doc[field.Name] = entityElem.Field(i).Interface()
+				}
+
+				_, err = collection.InsertOne(ctx, doc)
+			} else {
+				// 使用自定义ID
+				doc := make(map[string]interface{})
+				doc["_id"] = entity.GetID()
+
+				// 遍历实体字段
+				entityElem := entityValue
+				entityType := entityElem.Type()
+				for i := 0; i < entityType.NumField(); i++ {
+					field := entityType.Field(i)
+					// 跳过ID字段
+					if strings.EqualFold(field.Name, "ID") || strings.EqualFold(field.Name, "Id") {
+						continue
+					}
+					if fieldValue := entityElem.Field(i); fieldValue.CanInterface() {
+						doc[field.Name] = fieldValue.Interface()
+					}
+				}
+
+				_, err = collection.InsertOne(ctx, doc)
+			}
+
 			if err != nil {
 				return err
 			}
-
-			entity.SetUpdatedAt(time.Now())
-
-			if exists {
-				// 更新实体
-				objectID, _ := primitive.ObjectIDFromHex(entity.GetID())
-				filter := bson.M{"_id": entity.GetID()}
-				if objectID != primitive.NilObjectID {
-					filter = bson.M{"_id": objectID}
-				}
-
-				update := bson.M{"$set": entity}
-				if _, err := collection.UpdateOne(sc, filter, update); err != nil {
-					return err
-				}
-			} else {
-				// 新实体设置创建时间
-				entityValue := reflect.ValueOf(entity)
-				if entityValue.Kind() == reflect.Ptr {
-					entityValue = entityValue.Elem()
-				}
-
-				createdAtField := entityValue.FieldByName("CreatedAt")
-				if createdAtField.IsValid() && createdAtField.CanSet() && createdAtField.Type() == reflect.TypeOf(time.Time{}) {
-					createdAtField.Set(reflect.ValueOf(time.Now()))
-				}
-
-				// 插入实体
-				if _, err := collection.InsertOne(sc, entity); err != nil {
-					return err
-				}
-			}
 		}
+	}
 
-		// 提交事务
-		return session.CommitTransaction(sc)
-	})
+	return nil
 }
 
 // FindByIDs 根据多个ID查找实体
@@ -580,9 +613,9 @@ func (r *MongoDBRepository[T]) Exists(ctx context.Context, id string) (bool, err
 	collection := r.getCollection()
 
 	// 转换ID为ObjectID
-	objectID, err := primitive.ObjectIDFromHex(id)
+	objectID, _ := primitive.ObjectIDFromHex(id)
 	filter := bson.M{"_id": id}
-	if err == nil {
+	if objectID != primitive.NilObjectID {
 		filter = bson.M{"_id": objectID}
 	}
 
@@ -653,6 +686,33 @@ func (r *MongoDBRepository[T]) CountWithConditions(ctx context.Context, conditio
 	}
 
 	return collection.CountDocuments(ctx, filter)
+}
+
+// Random 返回随机实体
+func (r *MongoDBRepository[T]) Random(ctx context.Context, take int) ([]T, error) {
+	if take <= 0 {
+		take = 1
+	}
+
+	var entities []T
+	collection := r.getCollection()
+
+	// 使用 MongoDB 的 $sample 聚合操作来实现随机采样
+	pipeline := mongo.Pipeline{
+		{{"$sample", bson.D{{"size", take}}}},
+	}
+
+	cursor, err := collection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	if err := cursor.All(ctx, &entities); err != nil {
+		return nil, err
+	}
+
+	return entities, nil
 }
 
 // 辅助方法
