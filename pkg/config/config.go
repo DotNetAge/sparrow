@@ -24,6 +24,7 @@ func SetDefaults(viper *viper.Viper) {
 	viper.SetDefault("app.version", "1.0.0")
 	// openssl rand -base64 16
 	viper.SetDefault("app.secret", "+eCa9GyoBC8rjWhnxYLq4A==")
+	viper.SetDefault("app.key_path", "./data/perms")
 
 	viper.SetDefault("server.host", "0.0.0.0")
 	viper.SetDefault("server.port", 8080)

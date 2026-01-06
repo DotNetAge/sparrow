@@ -2,7 +2,11 @@ package bootstrap
 
 import (
 	"database/sql"
+	"fmt"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/DotNetAge/sparrow/pkg/adapter/http/middlewares"
@@ -277,8 +281,37 @@ func WithJWT(expire time.Duration, refreshExp time.Duration) Option {
 	}
 }
 
-func WithRSA(clientPublicKeys map[string]string) Option {
+func loadClientKeysFromPath(keyPath string) map[string]string {
+	clientPublicKeys := make(map[string]string)
+	files, err := os.ReadDir(keyPath)
+	if err != nil {
+		panic(fmt.Sprintf("读取RSA密钥目录失败: %v", err))
+	}
+
+	for _, file := range files {
+		if file.IsDir() || !strings.HasSuffix(file.Name(), ".pub") {
+			continue
+		}
+
+		keyFilePath := filepath.Join(keyPath, file.Name())
+		publicKey, err := os.ReadFile(keyFilePath)
+		if err != nil {
+			panic(fmt.Sprintf("读取RSA公钥文件 %s 失败: %v", keyFilePath, err))
+		}
+
+		clientID := strings.TrimSuffix(file.Name(), ".pub")
+		clientPublicKeys[clientID] = string(publicKey)
+	}
+
+	return clientPublicKeys
+}
+func WithRSA() Option {
 	return func(app *App) {
+		if app.Config.App.KeyPath == "" {
+			app.Logger.Panic("RSA密钥路径为空，无法加载公钥")
+		}
+
+		clientPublicKeys := loadClientKeysFromPath(app.Config.App.KeyPath)
 		rsaMiddleware, err := middlewares.NewRSAClientAuthMiddleware(clientPublicKeys)
 		if err != nil {
 			app.Logger.Panic("创建RSA认证中间件失败", "error", err)
