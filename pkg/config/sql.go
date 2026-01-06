@@ -1,14 +1,13 @@
 package config
 
-
 type SQLConfig struct {
-  Driver   string `mapstructure:"driver"`
+	Driver   string `mapstructure:"driver"`
 	Host     string `mapstructure:"host"`
 	Port     string `mapstructure:"port"`
 	User     string `mapstructure:"user"`
 	Password string `mapstructure:"password"`
 	Dbname   string `mapstructure:"dbname"`
-	ESDbname  string `mapstructure:"es_dbname"` // 作为事件存储时的数据库名
+	ESDbname string `mapstructure:"es_dbname"` // 作为事件存储时的数据库名
 }
 
 func (c *SQLConfig) Dsn() string {

@@ -6,7 +6,7 @@ import (
 
 // Entity 定义实体接口约束
 type Entity interface {
-  // GetID 获取ID
+	// GetID 获取ID
 	GetID() string
 	// SetID 设置ID
 	SetID(id string)

@@ -155,20 +155,6 @@ func BadgerDB() Option {
 	}
 }
 
-// BadgerStore 使用Badger作为事件存储
-// func BadgerStore() Option {
-// 	return func(o *App) {
-// 		o.Container.Register(func() usecase.EventStore {
-// 			store, err := eventstore.NewBadgerEventStore(o.Config.Badger.EventStoreDir, o.Logger)
-// 			if err != nil {
-// 				o.Logger.Error("创建Badger事件存储失败", "error", err)
-// 				panic(err)
-// 			}
-// 			return store
-// 		})
-// 	}
-// }
-
 func newRedis(config *config.RedisConfig) *redis.Client {
 	return redis.NewClient(&redis.Options{
 		Addr:     config.Host + ":" + strconv.Itoa(config.Port),
@@ -176,31 +162,6 @@ func newRedis(config *config.RedisConfig) *redis.Client {
 		DB:       config.DB,
 	})
 }
-
-// RedisStore 使用Redis作为事件存储
-// func RedisStore() Option {
-// 	return func(o *App) {
-// 		o.Container.Register(func() usecase.EventStore {
-// 			var redisClient *redis.Client
-// 			if err := o.Container.ResolveInstance(&redisClient); err != nil {
-// 				o.Logger.Error("解析Redis客户端失败", "error", err)
-// 				panic(err)
-// 			}
-// 			store, err := eventstore.NewRedisEventStore(redisClient, o.Config.App.Name+":", o.Logger)
-// 			if err != nil {
-// 				o.Logger.Error("创建Redis事件存储失败", "error", err)
-// 				panic(err)
-// 			}
-// 			return store
-// 		})
-// 	}
-// }
-
-// // SQLStore 使用SQL作为事件存储
-// func SQLStore() Option {
-// 	return func(o *App) {
-// 	}
-// }
 
 // MemBus 使用内存作为事件总线
 func MemBus() Option {
@@ -290,6 +251,14 @@ func RedisRepo[T entity.Entity]() Option {
 	}
 }
 
+func MemRepo[T entity.Entity]() Option {
+	return func(o *App) {
+		name := utils.GetShotTypeName[T]()
+		repoName := utils.Pascal(name + "Repo")
+		o.Container.RegisterNamed(repoName, repo.NewMemoryRepository[T])
+	}
+}
+
 func Middlewares(middleware ...gin.HandlerFunc) Option {
 	return func(o *App) {
 		o.Engine.Use(middleware...)
@@ -297,7 +266,6 @@ func Middlewares(middleware ...gin.HandlerFunc) Option {
 }
 
 func WithJWT(expire time.Duration, refreshExp time.Duration) Option {
-
 	return func(app *App) {
 		app.Auth = Authorization{
 			Tokens: auth.NewTokenGenerator([]byte(app.Config.App.Secret), expire, refreshExp),
@@ -305,6 +273,21 @@ func WithJWT(expire time.Duration, refreshExp time.Duration) Option {
 				middlewares.JWTAuthMiddleware([]byte(app.Config.App.Secret)),
 			},
 		}
+	}
+}
+
+func WithRSA(clientPublicKeys map[string]string) Option {
+	return func(app *App) {
+		rsaMiddleware, err := middlewares.NewRSAClientAuthMiddleware(clientPublicKeys)
+		if err != nil {
+			app.Logger.Panic("创建RSA认证中间件失败", "error", err)
+		}
+
+		if app.Auth.Middlewares == nil {
+			app.Auth.Middlewares = []gin.HandlerFunc{}
+		}
+
+		app.Auth.Middlewares = append(app.Auth.Middlewares, rsaMiddleware)
 	}
 }
 

@@ -72,10 +72,10 @@ func createComplexEntity(idx int) *ComplexEntity {
 	now := time.Now().UTC()
 	entity := &ComplexEntity{
 		BaseEntity: entity.BaseEntity{
-		Id:        generateComplexEntityID(idx),
-		CreatedAt: now,
-		UpdatedAt: now,
-	},
+			Id:        generateComplexEntityID(idx),
+			CreatedAt: now,
+			UpdatedAt: now,
+		},
 		Name:        fmt.Sprintf("Complex Entity %d", idx),
 		Description: fmt.Sprintf("This is a complex entity with index %d", idx),
 		Status:      "active",

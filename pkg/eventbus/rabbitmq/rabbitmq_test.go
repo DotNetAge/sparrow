@@ -67,7 +67,7 @@ func TestNewRabbitMQEventBus(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, bus)
 
-bus.Close()
+	bus.Close()
 }
 
 // TestRabbitMQEventBus_SubAndPub 测试订阅和发布事件

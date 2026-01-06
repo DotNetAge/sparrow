@@ -40,7 +40,6 @@ type App struct {
 	Auth         Authorization
 	Scheduler    *tasks.SchedulerWrapper
 	retryCancel  context.CancelFunc // 用于取消重试goroutine的函数
-
 }
 
 var (

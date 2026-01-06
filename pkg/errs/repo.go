@@ -15,11 +15,11 @@ type RepositoryError struct {
 
 func (e *RepositoryError) Error() string {
 	if e.Cause != nil {
-		return fmt.Sprintf("repository error: %s %s, id=%s, message=%s, cause=%v", 
+		return fmt.Sprintf("repository error: %s %s, id=%s, message=%s, cause=%v",
 			e.EntityType, e.Operation, e.ID, e.Message, e.Cause)
 	}
-	return fmt.Sprintf("repository error: %s %s, id=%s, message=%s", 
-			e.EntityType, e.Operation, e.ID, e.Message)
+	return fmt.Sprintf("repository error: %s %s, id=%s, message=%s",
+		e.EntityType, e.Operation, e.ID, e.Message)
 }
 
 func (e *RepositoryError) Unwrap() error {

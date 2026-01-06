@@ -77,7 +77,7 @@ func TestJWTAuthMiddleware(t *testing.T) {
 			router.Use(JWTAuthMiddleware(secret))
 			router.GET("/test", func(c *gin.Context) {
 				// 验证上下文是否包含用户信息
-					currentUser := auth.Current(c.Request.Context())
+				currentUser := auth.Current(c.Request.Context())
 				if tc.hasUserContext {
 					assert.True(t, currentUser != nil, "上下文应该包含currentUser")
 					assert.Equal(t, "test-user", currentUser.Username, "用户名应该正确")

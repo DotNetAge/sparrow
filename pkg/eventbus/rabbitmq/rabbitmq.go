@@ -18,16 +18,16 @@ import (
 // 使用RabbitMQ的发布/订阅功能处理事件
 // 2024-10-12: 初始版本
 type rabbitBus struct {
-	conn       *amqp.Connection
-	channel    *amqp.Channel
-	exchange   string
-	name       string
-	subs       map[string][]*amqp.Channel
-	handlers   map[string]eventbus.EventHandler
+	conn            *amqp.Connection
+	channel         *amqp.Channel
+	exchange        string
+	name            string
+	subs            map[string][]*amqp.Channel
+	handlers        map[string]eventbus.EventHandler
 	runningHandlers map[string]bool
-	closed     bool
-	mu         sync.RWMutex
-	logger     *logger.Logger
+	closed          bool
+	mu              sync.RWMutex
+	logger          *logger.Logger
 }
 
 // 确保rabbitBus实现了EventBus接口
@@ -36,7 +36,7 @@ var _ eventbus.EventBus = (*rabbitBus)(nil)
 // NewRabbitMQEventBus 创建基于RabbitMQ的事件总线实例
 func NewRabbitMQEventBus(cfg *config.RabbitMQConfig) (eventbus.EventBus, error) {
 	// 构建RabbitMQ连接URL
-	url := fmt.Sprintf("amqp://%s:%s@%s:%d/%s", 
+	url := fmt.Sprintf("amqp://%s:%s@%s:%d/%s",
 		cfg.Username, cfg.Password, cfg.Host, cfg.Port, cfg.VHost)
 
 	// 创建连接
@@ -71,11 +71,11 @@ func NewRabbitMQEventBus(cfg *config.RabbitMQConfig) (eventbus.EventBus, error) 
 	err = ch.ExchangeDeclare(
 		exchangeName, // 交换机名称
 		"topic",      // 类型：topic支持通配符
-		true,          // 持久化
-		false,         // 自动删除
-		false,         // 内部的
-		false,         // 非阻塞
-		nil,           // 参数
+		true,         // 持久化
+		false,        // 自动删除
+		false,        // 内部的
+		false,        // 非阻塞
+		nil,          // 参数
 	)
 	if err != nil {
 		ch.Close()
@@ -126,12 +126,12 @@ func (b *rabbitBus) Pub(ctx context.Context, evt eventbus.Event) error {
 
 	// 发布消息
 	msg := amqp.Publishing{
-		ContentType:  "application/json",
-		Body:         data,
-		Timestamp:    time.Now(),
-		MessageId:    messageID,
+		ContentType: "application/json",
+		Body:        data,
+		Timestamp:   time.Now(),
+		MessageId:   messageID,
 		Headers: amqp.Table{
-			"event_type":  subject,
+			"event_type": subject,
 			"created_at": createdAt.Format(time.RFC3339),
 		},
 	}
@@ -184,11 +184,11 @@ func (b *rabbitBus) Sub(eventType string, handler eventbus.EventHandler) error {
 
 	// 将队列绑定到交换机
 	if err := subCh.QueueBind(
-		queue.Name,  // 队列名称
-		subject,     // 路由键
-		b.exchange,  // 交换机
-		false,       // 非阻塞
-		nil,         // 参数
+		queue.Name, // 队列名称
+		subject,    // 路由键
+		b.exchange, // 交换机
+		false,      // 非阻塞
+		nil,        // 参数
 	); err != nil {
 		subCh.Close()
 		b.logger.Error("绑定队列失败", "error", err, "subject", subject)
@@ -232,14 +232,14 @@ func (b *rabbitBus) handleMessages(subject string, handler eventbus.EventHandler
 	processorKey := fmt.Sprintf("%s-handler", subject)
 	b.runningHandlers[processorKey] = true
 	b.mu.Unlock()
-	
+
 	// 确保在函数退出时标记为不运行
 	defer func() {
 		b.mu.Lock()
 		delete(b.runningHandlers, processorKey)
 		b.mu.Unlock()
 	}()
-	
+
 	// 处理接收到的消息
 	for d := range msgs {
 		// 检查事件总线是否已关闭
@@ -249,22 +249,22 @@ func (b *rabbitBus) handleMessages(subject string, handler eventbus.EventHandler
 			break
 		}
 		b.mu.RUnlock()
-	
+
 		b.logger.Info("接收到RabbitMQ消息", "subject", subject, "message_id", d.MessageId)
-	
+
 		// 解析事件类型
 		eventType := subject
 		if eventTypeFromHeader, ok := d.Headers["event_type"].(string); ok {
 			eventType = eventTypeFromHeader
 		}
-	
+
 		// 反序列化事件数据
 		var payload map[string]interface{}
 		if err := json.Unmarshal(d.Body, &payload); err != nil {
 			b.logger.Error("反序列化事件数据失败", "error", err, "subject", subject)
 			continue
 		}
-	
+
 		// 创建上下文并调用处理器
 		ctx := context.Background()
 		// 使用 eventbus.Event 类型
@@ -274,7 +274,7 @@ func (b *rabbitBus) handleMessages(subject string, handler eventbus.EventHandler
 			Timestamp: d.Timestamp,
 			Payload:   payload,
 		}
-	
+
 		// 调用处理器
 		if err := handler(ctx, event); err != nil {
 			b.logger.Error("处理事件失败", "error", err, "subject", subject)
@@ -282,7 +282,7 @@ func (b *rabbitBus) handleMessages(subject string, handler eventbus.EventHandler
 			b.logger.Info("成功处理事件", "subject", subject)
 		}
 	}
-	
+
 	b.logger.Info("消息通道已关闭", "subject", subject)
 }
 

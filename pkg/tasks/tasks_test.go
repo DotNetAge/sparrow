@@ -43,10 +43,10 @@ func TestMaxConcurrentTasks(t *testing.T) {
 					if current > maxActiveTasks.Load() {
 						maxActiveTasks.Store(current)
 					}
-					
+
 					// 睡眠一段时间以确保多个任务同时执行
 					time.Sleep(100 * time.Millisecond)
-					
+
 					// 减少活跃任务数
 					activeTasks.Add(-1)
 					taskCompleteChan <- true
@@ -99,10 +99,10 @@ func TestMaxConcurrentTasks(t *testing.T) {
 					if current > maxActiveTasks.Load() {
 						maxActiveTasks.Store(current)
 					}
-					
+
 					// 睡眠一段时间以确保多个任务同时执行
 					time.Sleep(100 * time.Millisecond)
-					
+
 					// 减少活跃任务数
 					activeTasks.Add(-1)
 					taskCompleteChan <- true
@@ -455,7 +455,7 @@ func TestTaskBuilderAndSchedulerWrapper(t *testing.T) {
 		return nil
 	})
 	assert.NoError(t, err)
-	
+
 	err = wrapper.CancelTask(taskID2)
 	assert.NoError(t, err)
 

@@ -116,13 +116,13 @@ func (s *HybridScheduler) Cancel(taskID string) error {
 
 	// 尝试在两个调度器中取消任务
 	hasTask := false
-	
+
 	// 先尝试在顺序调度器中取消
 	err := s.sequentialScheduler.Cancel(taskID)
 	if err == nil {
 		hasTask = true
 	}
-	
+
 	// 再尝试在并发调度器中取消
 	err = s.concurrentScheduler.Cancel(taskID)
 	if err == nil {
