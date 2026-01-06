@@ -11,6 +11,7 @@ import (
 	"github.com/DotNetAge/sparrow/pkg/config"
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/eventbus"
+	"github.com/casbin/casbin/v2"
 
 	// "github.com/DotNetAge/sparrow/pkg/eventbus"
 	"github.com/DotNetAge/sparrow/pkg/messaging"
@@ -288,6 +289,30 @@ func WithRSA(clientPublicKeys map[string]string) Option {
 		}
 
 		app.Auth.Middlewares = append(app.Auth.Middlewares, rsaMiddleware)
+	}
+}
+
+// WithRBAC 添加RBAC中间件，需要在.env中配置 model_path与policy_path的路径
+func WithRBAC() Option {
+	return func(app *App) {
+		app.Container.Register(func() *casbin.Enforcer {
+			enforcer, err := casbin.NewEnforcer(app.Config.Casbin.ModelPath, app.Config.Casbin.PolicyPath)
+			if err != nil {
+				app.Logger.Panic("创建Casbin enforce失败", "error", err)
+			}
+			return enforcer
+		})
+
+		var enforcer *casbin.Enforcer
+		err := app.Container.ResolveInstance(&enforcer)
+		if err != nil {
+			app.Logger.Panic("解析Casbin enforce失败", "error", err)
+		}
+		middleware := middlewares.RBACMiddleware(enforcer)
+		if app.Auth.Middlewares == nil {
+			app.Auth.Middlewares = []gin.HandlerFunc{}
+		}
+		app.Auth.Middlewares = append(app.Auth.Middlewares, middleware)
 	}
 }
 
