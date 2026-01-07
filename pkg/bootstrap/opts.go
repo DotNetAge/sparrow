@@ -264,6 +264,7 @@ func MemRepo[T entity.Entity]() Option {
 	}
 }
 
+// 向应用添加中间件（最底层的方法）
 func Middlewares(middleware ...gin.HandlerFunc) Option {
 	return func(o *App) {
 		o.Engine.Use(middleware...)
@@ -272,12 +273,8 @@ func Middlewares(middleware ...gin.HandlerFunc) Option {
 
 func WithJWT(expire time.Duration, refreshExp time.Duration) Option {
 	return func(app *App) {
-		app.Auth = Authorization{
-			Tokens: auth.NewTokenGenerator([]byte(app.Config.App.Secret), expire, refreshExp),
-			Middlewares: []gin.HandlerFunc{
-				middlewares.JWTAuthMiddleware([]byte(app.Config.App.Secret)),
-			},
-		}
+		app.Auth = NewAuthorization(auth.NewTokenGenerator([]byte(app.Config.App.Secret), expire, refreshExp))
+		app.Auth.AddMiddleware("jwt", middlewares.JWTAuthMiddleware([]byte(app.Config.App.Secret)))
 	}
 }
 
@@ -305,6 +302,7 @@ func loadClientKeysFromPath(keyPath string) map[string]string {
 
 	return clientPublicKeys
 }
+
 func WithRSA() Option {
 	return func(app *App) {
 		if app.Config.App.KeyPath == "" {
@@ -317,11 +315,10 @@ func WithRSA() Option {
 			app.Logger.Panic("创建RSA认证中间件失败", "error", err)
 		}
 
-		if app.Auth.Middlewares == nil {
-			app.Auth.Middlewares = []gin.HandlerFunc{}
+		if app.Auth == nil {
+			app.Logger.Panic("未初始化授权系统,请先调用WithJWT")
 		}
-
-		app.Auth.Middlewares = append(app.Auth.Middlewares, rsaMiddleware)
+		app.Auth.AddMiddleware("rsa", rsaMiddleware)
 	}
 }
 
@@ -341,11 +338,12 @@ func WithRBAC() Option {
 		if err != nil {
 			app.Logger.Panic("解析Casbin enforce失败", "error", err)
 		}
-		middleware := middlewares.RBACMiddleware(enforcer)
-		if app.Auth.Middlewares == nil {
-			app.Auth.Middlewares = []gin.HandlerFunc{}
+
+		if app.Auth == nil {
+			app.Logger.Panic("未初始化授权系统,请先调用WithJWT")
 		}
-		app.Auth.Middlewares = append(app.Auth.Middlewares, middleware)
+
+		app.Auth.AddMiddleware("rbac", middlewares.RBACMiddleware(enforcer))
 	}
 }
 

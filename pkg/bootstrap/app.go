@@ -10,7 +10,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/DotNetAge/sparrow/pkg/auth"
 	"github.com/DotNetAge/sparrow/pkg/config"
 	"github.com/DotNetAge/sparrow/pkg/entity"
 	"github.com/DotNetAge/sparrow/pkg/logger"
@@ -23,11 +22,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type Authorization struct {
-	Tokens      auth.TokenGenerator
-	Middlewares []gin.HandlerFunc
-}
-
 type App struct {
 	Name         string
 	Config       *config.Config // 全局配置
@@ -37,7 +31,7 @@ type App struct {
 	Debug        bool           // 是否开启调试模式
 	SubProcesses []usecase.GracefulClose
 	Subscribers  messaging.Subscribers
-	Auth         Authorization
+	Auth         *Authorization
 	Scheduler    *tasks.SchedulerWrapper
 	retryCancel  context.CancelFunc // 用于取消重试goroutine的函数
 }
