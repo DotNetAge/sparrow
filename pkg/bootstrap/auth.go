@@ -8,14 +8,14 @@ import (
 type Authorization struct {
 	Tokens           auth.TokenGenerator
 	Middlewares      []gin.HandlerFunc
-	namedMiddlewares map[string][]gin.HandlerFunc
+	namedMiddlewares map[string]gin.HandlerFunc
 }
 
 func NewAuthorization(tokens auth.TokenGenerator) *Authorization {
 	a := &Authorization{
 		Tokens:           tokens,
 		Middlewares:      []gin.HandlerFunc{},
-		namedMiddlewares: map[string][]gin.HandlerFunc{},
+		namedMiddlewares: map[string]gin.HandlerFunc{},
 	}
 	return a
 }
@@ -27,11 +27,11 @@ func (a *Authorization) AddMiddlewares(middleware ...gin.HandlerFunc) {
 
 // AddMiddleware 增加命名中间件
 func (a *Authorization) AddMiddleware(name string, middleware gin.HandlerFunc) {
-	a.namedMiddlewares[name] = append(a.namedMiddlewares[name], middleware)
+	a.namedMiddlewares[name] = middleware
 	a.Middlewares = append(a.Middlewares, middleware)
 }
 
 // GetMiddleware 获取命名中间件
-func (a *Authorization) GetMiddleware(name string) []gin.HandlerFunc {
+func (a *Authorization) GetMiddleware(name string) gin.HandlerFunc {
 	return a.namedMiddlewares[name]
 }
