@@ -1147,9 +1147,12 @@ func (r *SqlDBRepository[T]) toSnakeCase(s string) string {
 func (r *SqlDBRepository[T]) toCamelCase(s string) string {
 	var result strings.Builder
 	words := strings.Split(s, "_")
-	for _, word := range words {
-		if word == "id" {
-			// 特殊处理id，转换为ID（与测试实体保持一致）
+	for i, word := range words {
+		if i > 0 && word == "id" {
+			// 非首单词的id转换为Id，与实体字段命名保持一致
+			result.WriteString("Id")
+		} else if word == "id" {
+			// 首单词的id转换为ID
 			result.WriteString("ID")
 		} else {
 			result.WriteString(strings.Title(word))
