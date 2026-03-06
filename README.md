@@ -16,7 +16,7 @@
 
 <div align="center">
 
-[English](./README.md) | [中文](./README.zh.md) | [详细文档](http://sparrow.rayainfo.cn/)
+[English](./README.md) | [中文](./README.zh.md) | [Documents](http://sparrow.rayainfo.cn/)
 
 </div>
 
