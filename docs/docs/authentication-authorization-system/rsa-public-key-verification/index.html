@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-authentication-authorization-system/rsa-public-key-verification" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">rsa-public-key-verification | Sparrow</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://sparrow.rayainfo.cn/img/sparrow-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://sparrow.rayainfo.cn/img/sparrow-social-card.jpg"><meta data-rh="true" property="og:url" content="https://sparrow.rayainfo.cn/docs/authentication-authorization-system/rsa-public-key-verification"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" property="og:locale:alternate" content="zh"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="rsa-public-key-verification | Sparrow"><meta data-rh="true" name="description" content="table-of-contents"><meta data-rh="true" property="og:description" content="table-of-contents"><link data-rh="true" rel="icon" href="/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://sparrow.rayainfo.cn/docs/authentication-authorization-system/rsa-public-key-verification"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/authentication-authorization-system/rsa-public-key-verification" hreflang="en"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/zh/docs/authentication-authorization-system/rsa-public-key-verification" hreflang="zh"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/authentication-authorization-system/rsa-public-key-verification" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"rsa-public-key-verification","item":"https://sparrow.rayainfo.cn/docs/authentication-authorization-system/rsa-public-key-verification"}]}</script><link rel="stylesheet" href="/assets/css/styles.63623602.css">
+<script src="/assets/js/runtime~main.12b7ca60.js" defer="defer"></script>
+<script src="/assets/js/main.c8504be0.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/"><div class="navbar__logo"><img src="/img/logo.png" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/img/logo.png" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">Sparrow</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/getting-started">Docs</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="iconLanguage_nlXk"><path fill="currentColor" d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"></path></svg>English</a><ul class="dropdown__menu"><li><a href="/docs/authentication-authorization-system/rsa-public-key-verification" target="_self" rel="noopener noreferrer" class="dropdown__link dropdown__link--active" lang="en">English</a></li><li><a href="/zh/docs/authentication-authorization-system/rsa-public-key-verification" target="_self" rel="noopener noreferrer" class="dropdown__link" lang="zh">简体中文</a></li></ul></div><a href="https://github.com/DotNetAge/sparrow" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/getting-started"><span title="Getting Started" class="linkLabel_WmDU">Getting Started</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/example-project"><span title="Example Project" class="linkLabel_WmDU">Example Project</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/development-guide"><span title="Development Guide" class="linkLabel_WmDU">Development Guide</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/testing-strategy"><span title="Testing Strategy" class="linkLabel_WmDU">Testing Strategy</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/logging-monitoring"><span title="Logging and Monitoring" class="linkLabel_WmDU">Logging and Monitoring</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/utility-functions"><span title="Utility Functions Library" class="linkLabel_WmDU">Utility Functions Library</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/deployment-operations"><span title="Deployment and Operations" class="linkLabel_WmDU">Deployment and Operations</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/project-overview/"><span title="Project Overview" class="categoryLinkLabel_W154">Project Overview</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/architecture-design/architecture-overview"><span title="Architecture Design" class="categoryLinkLabel_W154">Architecture Design</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/application-framework/"><span title="Application Framework" class="categoryLinkLabel_W154">Application Framework</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/interface-adapters/"><span title="Interface Adapters" class="categoryLinkLabel_W154">Interface Adapters</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/data-persistence/"><span title="Data Persistence" class="categoryLinkLabel_W154">Data Persistence</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/event-driven-system/"><span title="Event-Driven System" class="categoryLinkLabel_W154">Event-Driven System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/task-scheduling-system/"><span title="Task Scheduling System" class="categoryLinkLabel_W154">Task Scheduling System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/domain-model/"><span title="Domain Model" class="categoryLinkLabel_W154">Domain Model</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/docs/authentication-authorization-system/"><span title="Authentication and Authorization System" class="categoryLinkLabel_W154">Authentication and Authorization System</span></a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/authentication-authorization-system/"><span title="authentication-authorization-system" class="linkLabel_WmDU">authentication-authorization-system</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/authentication-authorization-system/jwt-authentication-mechanism"><span title="jwt-authentication-mechanism" class="linkLabel_WmDU">jwt-authentication-mechanism</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/authentication-authorization-system/rbac-permission-control"><span title="rbac-permission-control" class="linkLabel_WmDU">rbac-permission-control</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/docs/authentication-authorization-system/rsa-public-key-verification"><span title="rsa-public-key-verification" class="linkLabel_WmDU">rsa-public-key-verification</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/authentication-authorization-system/security-middleware-system"><span title="security-middleware-system" class="linkLabel_WmDU">security-middleware-system</span></a></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/message-passing/"><span title="Message Passing" class="categoryLinkLabel_W154">Message Passing</span></a></div></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Authentication and Authorization System</span></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">rsa-public-key-verification</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>rsa-public-key-verification</h1></header>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="table-of-contents">table-of-contents<a href="#table-of-contents" class="hash-link" aria-label="Direct link to table-of-contents" title="Direct link to table-of-contents" translate="no">​</a></h2>
+<ol>
+<li class=""><a href="#introduction" class="">introduction</a></li>
+<li class=""><a href="#project-structure" class="">project-structure</a></li>
+<li class=""><a href="#core-components" class="">core-components</a></li>
+<li class=""><a href="#architecture-overview" class="">architecture-overview</a></li>
+<li class=""><a href="#detailed-component-analysis" class="">detailed-component-analysis</a></li>
+<li class=""><a href="#dependency-analysis" class="">dependency-analysis</a></li>
+<li class=""><a href="#performance-considerations" class="">performance-considerations</a></li>
+<li class=""><a href="#troubleshooting-guide" class="">troubleshooting-guide</a></li>
+<li class=""><a href="#conclusion" class="">conclusion</a></li>
+<li class=""><a href="#appendix-best-practices-and-example-paths" class="">appendix-best-practices-and-example-paths</a></li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="introduction">introduction<a href="#introduction" class="hash-link" aria-label="Direct link to introduction" title="Direct link to introduction" translate="no">​</a></h2>
+<p>this document is for security engineers and backend developers, systematically explaining the implementation principles, interface design, middleware integration methods, and security best practices of the rsa public key verification system in this repository. key coverage includes:</p>
+<ul>
+<li class="">rsa digital signature verification process and pss algorithm usage</li>
+<li class="">public-private key pair generation and management (including pem/ssh public key parsing)</li>
+<li class="">timestamp and nonce (random number) replay prevention mechanism</li>
+<li class="">middleware integration and signature verification failure handling</li>
+<li class="">key rotation strategy and certificate chain verification extension suggestions</li>
+<li class="">security best practices (key storage, integrity verification, replay protection)</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="project-structure">project-structure<a href="#project-structure" class="hash-link" aria-label="Direct link to project-structure" title="Direct link to project-structure" translate="no">​</a></h2>
+<p>core modules related to rsa verification are distributed as follows:</p>
+<ul>
+<li class="">authentication-and-interface-layer:-defines-interfaces-and-configurations,-error-constants,-token-generation,-etc</li>
+<li class="">middleware-layer:-http-layer-rsa-verification-middleware,-responsible-for-request-header-parsing,-signature-verification,-replay-prevention-and-caching</li>
+<li class="">in-memory-implementation:-nonce-storage,-public-key-provider,-signature-cache-in-memory-implementations</li>
+<li class="">bootstrap-and-assembly:-application-startup,-middleware-registration-and-named-middleware-management</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">interfaces-and-configuration<!-- -->
+<ul>
+<li class="">noncestore:-random-number-storage-and-existence-check,-used-for-replay-prevention</li>
+<li class="">publickeyprovider:-provides-rsa-public-key-by-client-id</li>
+<li class="">signaturecache:-caches-signature-verification-results,-improves-performance</li>
+<li class="">rsaauthconfig:-authentication-configuration-(request-header-key-names,-time-window,-component-instances)</li>
+</ul>
+</li>
+<li class="">in-memory-implementation<!-- -->
+<ul>
+<li class="">memorynoncestore:-memory-based-random-number-storage-with-expiration-cleanup</li>
+<li class="">memorypublickeyprovider:-memory-public-key-mapping,-supports-concurrent-read-write</li>
+<li class="">memorysignaturecache:-memory-signature-cache-with-expiration-cleanup</li>
+</ul>
+</li>
+<li class="">middleware<!-- -->
+<ul>
+<li class="">rsaclientauthmiddleware/configurablersaclientauthmiddleware:-http-middleware,-completes-header-parsing,-timestamp-validation,-nonce-validation,-signature-verification,-caching-and-context-injection</li>
+<li class="">newrsaclientauthmiddleware/newconfigurablersaclientauthmiddlewarefrompem:-convenient-factories,-support-pem/ssh-public-key-parsing</li>
+</ul>
+</li>
+<li class="">error-constants:-unified-authentication-error-types</li>
+<li class="">token-generation-(complementary-to-rsa-verification):-jwt-token-generation-and-refresh</li>
+</ul>
+<p>the-following-diagram-shows-the-complete-process-from-http-request-entry,-to-middleware-executing-rsa-verification,-caching-and-replay-prevention,-to-subsequent-handlers.</p>
+<!-- -->
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="interfaces-and-configuration-pkgauthrsago">interfaces-and-configuration-(pkg/auth/rsa.go)<a href="#interfaces-and-configuration-pkgauthrsago" class="hash-link" aria-label="Direct link to interfaces-and-configuration-(pkg/auth/rsa.go)" title="Direct link to interfaces-and-configuration-(pkg/auth/rsa.go)" translate="no">​</a></h3>
+<ul>
+<li class="">noncestore:-provides-set/exists,-used-to-record-random-numbers-and-their-expiration-times,-preventing-replay</li>
+<li class="">publickeyprovider:-returns-corresponding-rsa-public-key-according-to-clientid</li>
+<li class="">signaturecache:-provides-get/set,-caches-verification-results,-reduces-repeated-calculations</li>
+<li class="">rsaauthconfig:-centralized-configuration-of-request-header-key-names,-time-window,-component-instances;-provides-default-configuration</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">memorynoncestore<!-- -->
+<ul>
+<li class="">data-structure:-map[string]time.time</li>
+<li class="">concurrency-control:-rwmutex</li>
+<li class="">cleanup-strategy:-timer-scans-and-deletes-expired-items-every-10-minutes</li>
+</ul>
+</li>
+<li class="">memorypublickeyprovider<!-- -->
+<ul>
+<li class="">data-structure:-map[string]*rsa.publickey</li>
+<li class="">concurrency-control:-rwmutex</li>
+<li class="">dynamic-addition:-addpublickey-supports-runtime-addition-of-client-public-keys</li>
+</ul>
+</li>
+<li class="">memorysignaturecache<!-- -->
+<ul>
+<li class="">data-structure:-map[string]cacheentry(valid,-expiration)</li>
+<li class="">concurrency-control:-rwmutex</li>
+<li class="">cleanup-strategy:-timer-scans-and-deletes-expired-items-every-10-minutes</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">key-functional-points<!-- -->
+<ul>
+<li class="">header-parsing:-x-client-id,-x-client-signature,-x-nonce,-x-timestamp</li>
+<li class="">cache-acceleration:-query-cache-using-&quot;clientid:signature:nonce<!-- -->:timestamp<!-- -->&quot;-as-key</li>
+<li class="">timestamp-validation:-parse-to-unix-seconds,-difference-from-current-time-not-exceeding-timewindow</li>
+<li class="">nonce-validation:-check-if-exists-and-not-expired,-avoid-replay</li>
+<li class="">public-key-retrieval:-through-publickeyprovider.getpublickey(clientid)</li>
+<li class="">data-construction:-clientid-+-nonce-+-timestamp-+-request-body</li>
+<li class="">signature-decoding-and-verification:-base64-&gt;-sha256-&gt;-rsa-pss-verify</li>
+<li class="">after-success-write-random-number-and-cache,-failure-returns-corresponding-error</li>
+</ul>
+</li>
+<li class="">public-key-parsing<!-- -->
+<ul>
+<li class="">supports-pem-(pkix),-ssh-public-key-parsing,-compatible-with-multiple-formats</li>
+</ul>
+</li>
+<li class="">factory-functions<!-- -->
+<ul>
+<li class="">rsaclientauthmiddleware/newrsaclientauthmiddleware:-directly-pass-public-key-mapping-or-pem-string-mapping</li>
+<li class="">configurablersaclientauthmiddleware/newconfigurablersaclientauthmiddlewarefrompem:-supports-custom-configuration</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">
+<p>error-types</p>
+<ul>
+<li class="">unauthorized-client,-missing-authentication-info,-invalid-signature,-invalid-timestamp,-expired-timestamp,-invalid-nonce,-duplicate-request,-failed-to-read-request-body,-request-verification-failed</li>
+</ul>
+</li>
+<li class="">
+<p>unit-test-coverage</p>
+<ul>
+<li class="">normal-flow,-missing-headers,-invalid-clientid,-invalid-signature,-expired-timestamp,-configurable-middleware,-replay-attack-(duplicate-request)</li>
+</ul>
+</li>
+<li class="">
+<p>token-generator-interface-and-implementation:-supports-generating-access/refresh-token-pairs,-supports-refreshing-tokens</p>
+</li>
+<li class="">
+<p>jwt-claims:-contains-registered-claims-and-business-fields-(userid,-roles)</p>
+</li>
+<li class="">
+<p>principal-information:-stores-current-user-principal-in-context</p>
+</li>
+<li class="">
+<p>relationship-with-rsa-verification:-jwt-and-rsa-verification-can-be-used-in-parallel,-responsible-for-different-levels-of-identity-and-integrity-guarantee-respectively</p>
+</li>
+<li class="">
+<p>authorization:-centrally-manages-token-generator-and-middleware-collection,-supports-named-middleware-registration-and-retrieval</p>
+</li>
+<li class="">
+<p>app:-application-startup,-http-server,-signal-handling-and-graceful-shutdown,-facilitates-middleware-registration-at-startup-phase</p>
+</li>
+<li class="">
+<p>middleware-depends-on-interfaces:-through-rsaauthconfig-inject-noncestore,-signaturecache,-publickeyprovider,-achieve-loose-coupling</p>
+</li>
+<li class="">
+<p>in-memory-implementation-as-default-implementation,-facilitates-rapid-integration-and-testing</p>
+</li>
+<li class="">
+<p>public-key-parsing-supports-pem/ssh,-enhances-compatibility-with-existing-infrastructure</p>
+</li>
+<li class="">
+<p>error-constants-centrally-defined,-facilitates-unified-handling-and-logging</p>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">
+<p>caching-strategy</p>
+<ul>
+<li class="">signaturecache:-using-&quot;clientid:signature:nonce<!-- -->:timestamp<!-- -->&quot;-as-key,-after-hit-directly-allow,-significantly-reducing-verification-overhead-for-duplicate-requests</li>
+<li class="">cleanup-cycle:-scan-once-every-10-minutes,-balancing-memory-usage-and-accuracy</li>
+</ul>
+</li>
+<li class="">
+<p>concurrent-safety</p>
+<ul>
+<li class="">three-types-of-in-memory-implementations-all-use-rwmutex,-better-performance-in-read-heavy-write-light-scenarios</li>
+</ul>
+</li>
+<li class="">
+<p>io-and-hash</p>
+<ul>
+<li class="">request-body-only-read-once-and-reset,-avoiding-subsequent-handlers-being-unable-to-read</li>
+<li class="">sha256-hash-and-rsa-pss-verification-are-both-cpu-intensive,-suggest-combining-with-caching-and-rate-limiting-strategies</li>
+</ul>
+</li>
+<li class="">
+<p>common-errors-and-positioning</p>
+<ul>
+<li class="">missing-headers:-confirm-if-request-contains-x-client-id,-x-client-signature,-x-nonce,-x-timestamp</li>
+<li class="">invalid-signature:-check-if-signature-is-base64-encoded,-whether-signature-data-is-consistent-with-construction-rules-(clientid-+-nonce-+-timestamp-+-body)</li>
+<li class="">timestamp-expired:-confirm-client-time-synchronization,-whether-timewindow-setting-is-reasonable</li>
+<li class="">duplicate-request:-nonce-already-exists-and-not-expired,-check-if-client-reuses-same-nonce</li>
+<li class="">client-not-found:-confirm-if-public-key-mapping-contains-this-clientid</li>
+</ul>
+</li>
+<li class="">
+<p>logs-and-observability</p>
+<ul>
+<li class="">record-key-steps-in-middleware-(parse-headers,-timestamp-validation,-nonce-validation,-signature-verification,-cache-hit/miss),-facilitates-problem-positioning</li>
+</ul>
+</li>
+<li class="">
+<p>unit-test-reference</p>
+<ul>
+<li class="">can-reference-test-cases-to-construct-minimum-reproducible-scenarios,-gradually-eliminate-problems</li>
+</ul>
+</li>
+</ul>
+<p>this-rsa-public-key-verification-system-provides-configurable,-extensible-http-middleware-with-replay-prevention-capability-through-clear-interface-abstraction-and-in-memory-implementation.-its-core-advantages-are:</p>
+<ul>
+<li class="">clear-responsibility-separation-and-pluggable-design</li>
+<li class="">complete-replay-prevention-and-caching-mechanism</li>
+<li class="">good-support-for-multiple-public-key-formats</li>
+<li class="">seamless-integration-with-application-startup-and-middleware-registration</li>
+</ul>
+<p>in-production-environments,-suggest-combining-with-persistent-storage,-key-rotation-and-certificate-chain-verification-extensions-to-further-improve-security-and-maintainability.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="appendix-best-practices-and-example-paths">appendix-best-practices-and-example-paths<a href="#appendix-best-practices-and-example-paths" class="hash-link" aria-label="Direct link to appendix-best-practices-and-example-paths" title="Direct link to appendix-best-practices-and-example-paths" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="rsa-signature-algorithm-and-key-length">rsa-signature-algorithm-and-key-length<a href="#rsa-signature-algorithm-and-key-length" class="hash-link" aria-label="Direct link to rsa-signature-algorithm-and-key-length" title="Direct link to rsa-signature-algorithm-and-key-length" translate="no">​</a></h3>
+<ul>
+<li class="">signature-algorithm:-use-rsa-pss-(pss-mode-has-stronger-security)</li>
+<li class="">hash-algorithm:-sha-256</li>
+<li class="">key-length:-suggest-using-2048-bits-and-above;-if-pursuing-higher-security-level,-can-adopt-3072-or-4096-bits</li>
+<li class="">selection-basis:-balance-between-performance-and-security;-2048-bits-is-sufficiently-secure-and-performs-well-in-most-scenarios</li>
+</ul>
+<p>example-paths</p>
+<ul>
+<li class="">signature-and-verification-process-reference:-<a href="file://pkg/adapter/http/middlewares/rsa_perm.go#l131-l141" target="_blank" rel="noopener noreferrer" class="">rsa_perm.go</a></li>
+<li class="">default-time-window-and-header-key-names-reference:-<a href="file://pkg/auth/rsa.go#l39-l67" target="_blank" rel="noopener noreferrer" class="">rsa.go</a></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="public-private-key-pair-generation-and-management">public-private-key-pair-generation-and-management<a href="#public-private-key-pair-generation-and-management" class="hash-link" aria-label="Direct link to public-private-key-pair-generation-and-management" title="Direct link to public-private-key-pair-generation-and-management" translate="no">​</a></h3>
+<ul>
+<li class="">generation:-use-standard-library-or-tools-to-generate-rsa-private-key-and-public-key</li>
+<li class="">distribution:-distribute-public-key-to-clients;-store-private-key-securely-in-controlled-environment</li>
+<li class="">update:-dynamically-add-new-public-keys-through-publickeyprovider&#x27;s-addpublickey,-achieve-smooth-transition</li>
+</ul>
+<p>example-paths</p>
+<ul>
+<li class="">public-key-provider-interface-and-dynamic-addition:-<a href="file://pkg/auth/rsa.go#l21-l24" target="_blank" rel="noopener noreferrer" class="">rsa.go</a>,-<a href="file://pkg/auth/rsa_impl.go#l91-l97" target="_blank" rel="noopener noreferrer" class="">rsa_impl.go</a></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="certificate-chain-verification-mechanism-extension-suggestion">certificate-chain-verification-mechanism-(extension-suggestion)<a href="#certificate-chain-verification-mechanism-extension-suggestion" class="hash-link" aria-label="Direct link to certificate-chain-verification-mechanism-(extension-suggestion)" title="Direct link to certificate-chain-verification-mechanism-(extension-suggestion)" translate="no">​</a></h3>
+<ul>
+<li class="">current-implementation-supports-direct-public-key-verification;-if-certificate-chain-verification-is-needed,-can-encapsulate-certificate-chain-parsing-and-validation-logic-on-top-of-publickeyprovider</li>
+<li class="">suggest-introducing-certificate-revocation-list-(crl)-or-online-certificate-status-protocol-(ocsp)-to-enhance-certificate-validity-checking</li>
+</ul>
+<p>example-paths</p>
+<ul>
+<li class="">public-key-parsing-compatible-with-pem/ssh:-<a href="file://pkg/adapter/http/middlewares/rsa_perm.go#l205-l241" target="_blank" rel="noopener noreferrer" class="">rsa_perm.go</a></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="middleware-integration-and-key-rotation">middleware-integration-and-key-rotation<a href="#middleware-integration-and-key-rotation" class="hash-link" aria-label="Direct link to middleware-integration-and-key-rotation" title="Direct link to middleware-integration-and-key-rotation" translate="no">​</a></h3>
+<ul>
+<li class="">integration:-register-middleware-through-authorization,-or-directly-mount-on-routes</li>
+<li class="">key-rotation:-first-add-new-public-key,-then-gradually-replace-old-public-key,-finally-clean-up-historical-public-keys</li>
+</ul>
+<p>example-paths</p>
+<ul>
+<li class="">middleware-registration-and-named-middleware:-<a href="file://pkg/bootstrap/auth.go#l23-l37" target="_blank" rel="noopener noreferrer" class="">auth.go</a></li>
+<li class="">public-key-dynamic-addition:-<a href="file://pkg/auth/rsa_impl.go#l91-l97" target="_blank" rel="noopener noreferrer" class="">rsa_impl.go</a></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="signature-integrity-check-and-replay-attack-protection">signature-integrity-check-and-replay-attack-protection<a href="#signature-integrity-check-and-replay-attack-protection" class="hash-link" aria-label="Direct link to signature-integrity-check-and-replay-attack-protection" title="Direct link to signature-integrity-check-and-replay-attack-protection" translate="no">​</a></h3>
+<ul>
+<li class="">integrity:-ensure-data-has-not-been-tampered-through-sha256-hash-and-rsa-pss-verification</li>
+<li class="">replay-protection:-dual-protection-of-nonce-storage-and-timestamp-window</li>
+</ul>
+<p>example-paths</p>
+<ul>
+<li class="">timestamp-and-nonce-validation:-<a href="file://pkg/adapter/http/middlewares/rsa_perm.go#l71-l100" target="_blank" rel="noopener noreferrer" class="">rsa_perm.go</a></li>
+<li class="">nonce-storage-and-cleanup:-<a href="file://pkg/auth/rsa_impl.go#l12-l63" target="_blank" rel="noopener noreferrer" class="">rsa_impl.go</a></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="actual-code-examples-example-paths">actual-code-examples-(example-paths)<a href="#actual-code-examples-example-paths" class="hash-link" aria-label="Direct link to actual-code-examples-(example-paths)" title="Direct link to actual-code-examples-(example-paths)" translate="no">​</a></h3>
+<ul>
+<li class="">verify-client-signature-(middleware-usage):-<a href="file://pkg/adapter/http/middlewares/rsa_perm.go#l23-l38" target="_blank" rel="noopener noreferrer" class="">rsa_perm.go</a></li>
+<li class="">handle-signature-verification-failure-(error-return):-<a href="file://pkg/adapter/http/middlewares/rsa_perm.go#l50-l55" target="_blank" rel="noopener noreferrer" class="">rsa_perm.go</a>,-<a href="file://pkg/auth/errors.go#l6-l16" target="_blank" rel="noopener noreferrer" class="">errors.go</a></li>
+<li class="">handle-certificate-update-(dynamic-addition-of-public-key):-<a href="file://pkg/auth/rsa_impl.go#l91-l97" target="_blank" rel="noopener noreferrer" class="">rsa_impl.go</a></li>
+<li class="">multi-level-signature-verification-(extensible-idea):-stack-multi-level-public-key-strategies-on-top-of-publickeyprovider-(such-as-by-tenant/version-dimension)</li>
+</ul></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages navigation"><a class="pagination-nav__link pagination-nav__link--prev" href="/docs/authentication-authorization-system/rbac-permission-control"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">rbac-permission-control</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/docs/authentication-authorization-system/security-middleware-system"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">security-middleware-system</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#table-of-contents" class="table-of-contents__link toc-highlight">table-of-contents</a></li><li><a href="#introduction" class="table-of-contents__link toc-highlight">introduction</a></li><li><a href="#project-structure" class="table-of-contents__link toc-highlight">project-structure</a><ul><li><a href="#interfaces-and-configuration-pkgauthrsago" class="table-of-contents__link toc-highlight">interfaces-and-configuration-(pkg/auth/rsa.go)</a></li></ul></li><li><a href="#appendix-best-practices-and-example-paths" class="table-of-contents__link toc-highlight">appendix-best-practices-and-example-paths</a><ul><li><a href="#rsa-signature-algorithm-and-key-length" class="table-of-contents__link toc-highlight">rsa-signature-algorithm-and-key-length</a></li><li><a href="#public-private-key-pair-generation-and-management" class="table-of-contents__link toc-highlight">public-private-key-pair-generation-and-management</a></li><li><a href="#certificate-chain-verification-mechanism-extension-suggestion" class="table-of-contents__link toc-highlight">certificate-chain-verification-mechanism-(extension-suggestion)</a></li><li><a href="#middleware-integration-and-key-rotation" class="table-of-contents__link toc-highlight">middleware-integration-and-key-rotation</a></li><li><a href="#signature-integrity-check-and-replay-attack-protection" class="table-of-contents__link toc-highlight">signature-integrity-check-and-replay-attack-protection</a></li><li><a href="#actual-code-examples-example-paths" class="table-of-contents__link toc-highlight">actual-code-examples-(example-paths)</a></li></ul></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Guangzhou Ruiya Information Technology Co., Ltd. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>

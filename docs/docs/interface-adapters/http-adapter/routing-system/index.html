@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-interface-adapters/http-adapter/routing-system" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">Routing System | Sparrow</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://sparrow.rayainfo.cn/img/sparrow-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://sparrow.rayainfo.cn/img/sparrow-social-card.jpg"><meta data-rh="true" property="og:url" content="https://sparrow.rayainfo.cn/docs/interface-adapters/http-adapter/routing-system"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" property="og:locale:alternate" content="zh"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Routing System | Sparrow"><meta data-rh="true" name="description" content="Table of Contents"><meta data-rh="true" property="og:description" content="Table of Contents"><link data-rh="true" rel="icon" href="/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://sparrow.rayainfo.cn/docs/interface-adapters/http-adapter/routing-system"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/interface-adapters/http-adapter/routing-system" hreflang="en"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/zh/docs/interface-adapters/http-adapter/routing-system" hreflang="zh"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/interface-adapters/http-adapter/routing-system" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Routing System","item":"https://sparrow.rayainfo.cn/docs/interface-adapters/http-adapter/routing-system"}]}</script><link rel="stylesheet" href="/assets/css/styles.63623602.css">
+<script src="/assets/js/runtime~main.12b7ca60.js" defer="defer"></script>
+<script src="/assets/js/main.c8504be0.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/"><div class="navbar__logo"><img src="/img/logo.png" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/img/logo.png" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">Sparrow</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/getting-started">Docs</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="iconLanguage_nlXk"><path fill="currentColor" d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"></path></svg>English</a><ul class="dropdown__menu"><li><a href="/docs/interface-adapters/http-adapter/routing-system" target="_self" rel="noopener noreferrer" class="dropdown__link dropdown__link--active" lang="en">English</a></li><li><a href="/zh/docs/interface-adapters/http-adapter/routing-system" target="_self" rel="noopener noreferrer" class="dropdown__link" lang="zh">简体中文</a></li></ul></div><a href="https://github.com/DotNetAge/sparrow" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/getting-started"><span title="Getting Started" class="linkLabel_WmDU">Getting Started</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/example-project"><span title="Example Project" class="linkLabel_WmDU">Example Project</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/development-guide"><span title="Development Guide" class="linkLabel_WmDU">Development Guide</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/testing-strategy"><span title="Testing Strategy" class="linkLabel_WmDU">Testing Strategy</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/logging-monitoring"><span title="Logging and Monitoring" class="linkLabel_WmDU">Logging and Monitoring</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/utility-functions"><span title="Utility Functions Library" class="linkLabel_WmDU">Utility Functions Library</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/deployment-operations"><span title="Deployment and Operations" class="linkLabel_WmDU">Deployment and Operations</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/project-overview/"><span title="Project Overview" class="categoryLinkLabel_W154">Project Overview</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/architecture-design/architecture-overview"><span title="Architecture Design" class="categoryLinkLabel_W154">Architecture Design</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/application-framework/"><span title="Application Framework" class="categoryLinkLabel_W154">Application Framework</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/docs/interface-adapters/"><span title="Interface Adapters" class="categoryLinkLabel_W154">Interface Adapters</span></a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/interface-adapters/"><span title="Interface Adapters" class="linkLabel_WmDU">Interface Adapters</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/interface-adapters/websocket-adapter"><span title="WebSocket Adapter" class="linkLabel_WmDU">WebSocket Adapter</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" tabindex="0" href="/docs/interface-adapters/http-adapter/"><span title="HTTP Adapter" class="categoryLinkLabel_W154">HTTP Adapter</span></a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/interface-adapters/http-adapter/"><span title="HTTP Adapter" class="linkLabel_WmDU">HTTP Adapter</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/docs/interface-adapters/http-adapter/routing-system"><span title="Routing System" class="linkLabel_WmDU">Routing System</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/interface-adapters/http-adapter/handler-layer"><span title="Handler Layer" class="linkLabel_WmDU">Handler Layer</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/interface-adapters/http-adapter/middleware-system"><span title="Middleware System" class="linkLabel_WmDU">Middleware System</span></a></li></ul></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/data-persistence/"><span title="Data Persistence" class="categoryLinkLabel_W154">Data Persistence</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/event-driven-system/"><span title="Event-Driven System" class="categoryLinkLabel_W154">Event-Driven System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/task-scheduling-system/"><span title="Task Scheduling System" class="categoryLinkLabel_W154">Task Scheduling System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/domain-model/"><span title="Domain Model" class="categoryLinkLabel_W154">Domain Model</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/authentication-authorization-system/"><span title="Authentication and Authorization System" class="categoryLinkLabel_W154">Authentication and Authorization System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/message-passing/"><span title="Message Passing" class="categoryLinkLabel_W154">Message Passing</span></a></div></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Interface Adapters</span></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">HTTP Adapter</span></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">Routing System</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>Routing System</h1></header>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="table-of-contents">Table of Contents<a href="#table-of-contents" class="hash-link" aria-label="Direct link to Table of Contents" title="Direct link to Table of Contents" translate="no">​</a></h2>
+<ol>
+<li class=""><a href="#introduction" class="">Introduction</a></li>
+<li class=""><a href="#project-structure" class="">Project Structure</a></li>
+<li class=""><a href="#core-components" class="">Core Components</a></li>
+<li class=""><a href="#architecture-overview" class="">Architecture Overview</a></li>
+<li class=""><a href="#detailed-component-analysis" class="">Detailed Component Analysis</a></li>
+<li class=""><a href="#dependency-analysis" class="">Dependency Analysis</a></li>
+<li class=""><a href="#performance-considerations" class="">Performance Considerations</a></li>
+<li class=""><a href="#troubleshooting-guide" class="">Troubleshooting Guide</a></li>
+<li class=""><a href="#conclusion" class="">Conclusion</a></li>
+<li class=""><a href="#appendix" class="">Appendix</a></li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="introduction">Introduction<a href="#introduction" class="hash-link" aria-label="Direct link to Introduction" title="Direct link to Introduction" translate="no">​</a></h2>
+<p>This document targets API designers and backend developers, systematically organizes Gin-based HTTP routing system: including route registration mechanism, middleware chain execution order and parameter passing, parameter extraction and path variable binding, query parameter parsing, route prefix and version control strategy, as well as RESTful design principles and extension methods. The document takes &quot;health check&quot;, &quot;session management&quot;, &quot;task management&quot; three main routes as examples, combined with middleware chain (JWT, RBAC, RSA client signature) for in-depth analysis, and provides actionable routing design guide.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="project-structure">Project Structure<a href="#project-structure" class="hash-link" aria-label="Direct link to Project Structure" title="Direct link to Project Structure" translate="no">​</a></h2>
+<p>Routing system adopts layered and function domain division organization:</p>
+<ul>
+<li class=""><strong>Route Registration Layer</strong>: Splits registration functions by domain in router package, centrally assembles during application startup phase.</li>
+<li class=""><strong>Handler Layer</strong>: Implements specific business interfaces in handlers package, responsible for parameter parsing, calling use case services and returning responses.</li>
+<li class=""><strong>Middleware Layer</strong>: Implements authentication and authorization logic in middlewares package, throughout request lifecycle.</li>
+<li class=""><strong>Engine and Startup</strong>: Creates Gin engine, assembles middleware and routes in bootstrap, and starts HTTP service.</li>
+</ul>
+<!-- -->
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="core-components">Core Components<a href="#core-components" class="hash-link" aria-label="Direct link to Core Components" title="Direct link to Core Components" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="route-registrars">Route Registrars<a href="#route-registrars" class="hash-link" aria-label="Direct link to Route Registrars" title="Direct link to Route Registrars" translate="no">​</a></h3>
+<ul>
+<li class=""><strong>Health Check</strong>: RegisterHealthRoutes registers /health and /ready.</li>
+<li class=""><strong>Session Management</strong>: RegisterSessionRoutes registers session creation, query, update, delete and data read.</li>
+<li class=""><strong>Task Management</strong>: RegisterTaskRoutes reserved, current file is in commented state, not yet enabled.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="handlers">Handlers<a href="#handlers" class="hash-link" aria-label="Direct link to Handlers" title="Direct link to Handlers" translate="no">​</a></h3>
+<ul>
+<li class=""><strong>HealthHandler</strong>: Implements health and readiness check, reads application name and version from configuration.</li>
+<li class=""><strong>SessionHandler</strong>: Implements session lifecycle and data read/write, uses Gin&#x27;s path parameters and JSON/query binding.</li>
+<li class=""><strong>TaskHandler</strong>: Reserved, current file is in commented state, not yet enabled.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="middleware">Middleware<a href="#middleware" class="hash-link" aria-label="Direct link to Middleware" title="Direct link to Middleware" translate="no">​</a></h3>
+<ul>
+<li class=""><strong>JWTAuthMiddleware</strong>: Parses Bearer token from Authorization header, validates signature and expiration, injects user principal to context.</li>
+<li class=""><strong>RBACMiddleware</strong>: Executes subject-resource-action (RBAC) authorization based on Casbin.</li>
+<li class=""><strong>RSAClientAuthMiddleware</strong>: Validates request body signature based on RSA-PSS, prevents replay and tampering.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="engine-and-startup">Engine and Startup<a href="#engine-and-startup" class="hash-link" aria-label="Direct link to Engine and Startup" title="Direct link to Engine and Startup" translate="no">​</a></h3>
+<ul>
+<li class="">App.NewApp creates gin.Default engine; App.Start starts HTTP server and gracefully shuts down.</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="architecture-overview">Architecture Overview<a href="#architecture-overview" class="hash-link" aria-label="Direct link to Architecture Overview" title="Direct link to Architecture Overview" translate="no">​</a></h2>
+<p>The following diagram shows the full link from request entering engine to handler returning response, including middleware chain execution order and parameter passing.</p>
+<!-- -->
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="detailed-component-analysis">Detailed Component Analysis<a href="#detailed-component-analysis" class="hash-link" aria-label="Direct link to Detailed Component Analysis" title="Direct link to Detailed Component Analysis" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="health-check-route">Health Check Route<a href="#health-check-route" class="hash-link" aria-label="Direct link to Health Check Route" title="Direct link to Health Check Route" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="url-pattern-and-method">URL Pattern and Method<a href="#url-pattern-and-method" class="hash-link" aria-label="Direct link to URL Pattern and Method" title="Direct link to URL Pattern and Method" translate="no">​</a></h4>
+<ul>
+<li class=""><strong>GET /health</strong>: Health check</li>
+<li class=""><strong>GET /ready</strong>: Liveness check</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="parameters-and-response">Parameters and Response<a href="#parameters-and-response" class="hash-link" aria-label="Direct link to Parameters and Response" title="Direct link to Parameters and Response" translate="no">​</a></h4>
+<ul>
+<li class="">Response contains status, application name, version, timestamp and other information.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="configuration-source">Configuration Source<a href="#configuration-source" class="hash-link" aria-label="Direct link to Configuration Source" title="Direct link to Configuration Source" translate="no">​</a></h4>
+<ul>
+<li class="">Application name and version read from environment variables first, otherwise falls back to configuration file.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="handler-responsibilities">Handler Responsibilities<a href="#handler-responsibilities" class="hash-link" aria-label="Direct link to Handler Responsibilities" title="Direct link to Handler Responsibilities" translate="no">​</a></h4>
+<ul>
+<li class="">Reads configuration, constructs unified health/readiness response.</li>
+</ul>
+<!-- -->
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="session-route">Session Route<a href="#session-route" class="hash-link" aria-label="Direct link to Session Route" title="Direct link to Session Route" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="url-pattern-and-method-1">URL Pattern and Method<a href="#url-pattern-and-method-1" class="hash-link" aria-label="Direct link to URL Pattern and Method" title="Direct link to URL Pattern and Method" translate="no">​</a></h4>
+<ul>
+<li class=""><strong>POST /sessions</strong>: Create session</li>
+<li class=""><strong>GET /sessions/<!-- -->:id</strong>: Query session by ID</li>
+<li class=""><strong>PUT /sessions/<!-- -->:id</strong>: Update session data (requires JSON payload)</li>
+<li class=""><strong>GET /sessions/<!-- -->:id<!-- -->/data</strong>: Read session specific data</li>
+<li class=""><strong>DELETE /sessions/<!-- -->:id</strong>: Delete session</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="parameter-extraction-and-binding">Parameter Extraction and Binding<a href="#parameter-extraction-and-binding" class="hash-link" aria-label="Direct link to Parameter Extraction and Binding" title="Direct link to Parameter Extraction and Binding" translate="no">​</a></h4>
+<ul>
+<li class=""><strong>Path Parameters</strong>: Extract through c.Param(&quot;id&quot;), c.Param(&quot;key&quot;).</li>
+<li class=""><strong>JSON Binding</strong>: Use ShouldBindJSON for structured validation of payload.</li>
+<li class=""><strong>Query Parameters</strong>: Use ShouldBindQuery for structured validation of query parameters.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="middleware-chain">Middleware Chain<a href="#middleware-chain" class="hash-link" aria-label="Direct link to Middleware Chain" title="Direct link to Middleware Chain" translate="no">​</a></h4>
+<ul>
+<li class=""><strong>JWT Middleware</strong>: Ensures request carries valid token and injects user principal.</li>
+<li class=""><strong>RBAC Middleware</strong>: Performs permission check on session-related resources.</li>
+<li class=""><strong>RSA Middleware</strong>: Performs signature verification on requests from specific clients (optional).</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="handler-responsibilities-1">Handler Responsibilities<a href="#handler-responsibilities-1" class="hash-link" aria-label="Direct link to Handler Responsibilities" title="Direct link to Handler Responsibilities" translate="no">​</a></h4>
+<ul>
+<li class="">Calls session use case service, handles business exceptions and returns standardized response.</li>
+</ul>
+<!-- -->
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="task-route-reserved">Task Route (Reserved)<a href="#task-route-reserved" class="hash-link" aria-label="Direct link to Task Route (Reserved)" title="Direct link to Task Route (Reserved)" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="current-status">Current Status<a href="#current-status" class="hash-link" aria-label="Direct link to Current Status" title="Direct link to Current Status" translate="no">​</a></h4>
+<ul>
+<li class="">Route registration and handler code are in commented state, not enabled.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="design-recommendations">Design Recommendations<a href="#design-recommendations" class="hash-link" aria-label="Direct link to Design Recommendations" title="Direct link to Design Recommendations" translate="no">​</a></h4>
+<ul>
+<li class="">Can refer to session route&#x27;s RESTful design style, use plural nouns and path variables.</li>
+<li class="">For asynchronous execution scenarios, provide synchronous/asynchronous two execution modes, and return appropriate HTTP status codes and response body.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="middleware-chain-and-parameter-passing">Middleware Chain and Parameter Passing<a href="#middleware-chain-and-parameter-passing" class="hash-link" aria-label="Direct link to Middleware Chain and Parameter Passing" title="Direct link to Middleware Chain and Parameter Passing" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="execution-order">Execution Order<a href="#execution-order" class="hash-link" aria-label="Direct link to Execution Order" title="Direct link to Execution Order" translate="no">​</a></h4>
+<ul>
+<li class="">During App initialization, Authorization aggregates middleware and mounts to Gin engine in order.</li>
+<li class="">Typical order: JWT → RBAC → RSA (optional), finally reaches handler.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="parameter-passing">Parameter Passing<a href="#parameter-passing" class="hash-link" aria-label="Direct link to Parameter Passing" title="Direct link to Parameter Passing" translate="no">​</a></h4>
+<ul>
+<li class="">JWT middleware injects user principal to request context, for subsequent middleware and handler use.</li>
+<li class="">RBAC middleware reads username from context, combines request path and method for authorization.</li>
+<li class="">RSA middleware writes client identifier to context, convenient for audit and tracking.</li>
+</ul>
+<!-- -->
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="parameter-extraction-and-binding-1">Parameter Extraction and Binding<a href="#parameter-extraction-and-binding-1" class="hash-link" aria-label="Direct link to Parameter Extraction and Binding" title="Direct link to Parameter Extraction and Binding" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="path-parameters">Path Parameters<a href="#path-parameters" class="hash-link" aria-label="Direct link to Path Parameters" title="Direct link to Path Parameters" translate="no">​</a></h4>
+<ul>
+<li class="">Use c.Param(&quot;id&quot;) to extract path variables, ensure route definition matches handler.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="json-binding">JSON Binding<a href="#json-binding" class="hash-link" aria-label="Direct link to JSON Binding" title="Direct link to JSON Binding" translate="no">​</a></h4>
+<ul>
+<li class="">Use ShouldBindJSON for structured validation of request body, combine with struct tags (such as binding:&quot;required&quot;) to improve robustness.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="query-parameters">Query Parameters<a href="#query-parameters" class="hash-link" aria-label="Direct link to Query Parameters" title="Direct link to Query Parameters" translate="no">​</a></h4>
+<ul>
+<li class="">Use ShouldBindQuery for structured validation of query parameters, supports default values and type conversion.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="error-handling">Error Handling<a href="#error-handling" class="hash-link" aria-label="Direct link to Error Handling" title="Direct link to Error Handling" translate="no">​</a></h4>
+<ul>
+<li class="">Returns 400 for binding errors, returns 4xx/5xx for business errors and includes clear error information.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="route-prefix-and-version-control">Route Prefix and Version Control<a href="#route-prefix-and-version-control" class="hash-link" aria-label="Direct link to Route Prefix and Version Control" title="Direct link to Route Prefix and Version Control" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="recommendations">Recommendations<a href="#recommendations" class="hash-link" aria-label="Direct link to Recommendations" title="Direct link to Recommendations" translate="no">​</a></h4>
+<ul>
+<li class="">Use Gin grouping (Group) to add prefix to routes, such as /api/v1.</li>
+<li class="">Handle version number parsing and compatibility strategy uniformly in middleware layer.</li>
+<li class="">For major changes, add new version prefix and keep old version for a period of time to ensure compatibility.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="current-project-status">Current Project Status<a href="#current-project-status" class="hash-link" aria-label="Direct link to Current Project Status" title="Direct link to Current Project Status" translate="no">​</a></h4>
+<ul>
+<li class="">Current routes do not use version prefix, recommend introducing version prefix during startup phase and handling uniformly in middleware.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="restful-design-principles">RESTful Design Principles<a href="#restful-design-principles" class="hash-link" aria-label="Direct link to RESTful Design Principles" title="Direct link to RESTful Design Principles" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="resource-naming">Resource Naming<a href="#resource-naming" class="hash-link" aria-label="Direct link to Resource Naming" title="Direct link to Resource Naming" translate="no">​</a></h4>
+<ul>
+<li class="">Use noun plural form (such as /sessions), avoid verbs and complex paths.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="action-mapping">Action Mapping<a href="#action-mapping" class="hash-link" aria-label="Direct link to Action Mapping" title="Direct link to Action Mapping" translate="no">​</a></h4>
+<ul>
+<li class=""><strong>POST</strong>: Create resource</li>
+<li class=""><strong>GET</strong>: Read resource or list</li>
+<li class=""><strong>PUT</strong>: Update resource</li>
+<li class=""><strong>DELETE</strong>: Delete resource</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="status-codes">Status Codes<a href="#status-codes" class="hash-link" aria-label="Direct link to Status Codes" title="Direct link to Status Codes" translate="no">​</a></h4>
+<ul>
+<li class=""><strong>Success</strong>: 200/201/204</li>
+<li class=""><strong>Client Error</strong>: 400/401/403/404</li>
+<li class=""><strong>Server Error</strong>: 500</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="response-body">Response Body<a href="#response-body" class="hash-link" aria-label="Direct link to Response Body" title="Direct link to Response Body" translate="no">​</a></h4>
+<ul>
+<li class="">Unified structure, contains status, message and data fields, convenient for frontend consumption.</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="dependency-analysis">Dependency Analysis<a href="#dependency-analysis" class="hash-link" aria-label="Direct link to Dependency Analysis" title="Direct link to Dependency Analysis" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="component-coupling">Component Coupling<a href="#component-coupling" class="hash-link" aria-label="Direct link to Component Coupling" title="Direct link to Component Coupling" translate="no">​</a></h3>
+<ul>
+<li class="">Route registrar only depends on handlers and configuration/use case services, maintains low coupling.</li>
+<li class="">Handlers depend on use case services and Gin context, clear responsibilities.</li>
+<li class="">Middleware depends on authentication and authorization libraries, strong independence.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="external-dependencies">External Dependencies<a href="#external-dependencies" class="hash-link" aria-label="Direct link to External Dependencies" title="Direct link to External Dependencies" translate="no">​</a></h3>
+<ul>
+<li class=""><strong>Gin</strong>: Routing and middleware framework.</li>
+<li class=""><strong>JWT</strong>: Token parsing and validation.</li>
+<li class=""><strong>Casbin</strong>: RBAC authorization.</li>
+<li class=""><strong>RSA/PSS</strong>: Client signature verification and anti-replay.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="potential-circular-dependencies">Potential Circular Dependencies<a href="#potential-circular-dependencies" class="hash-link" aria-label="Direct link to Potential Circular Dependencies" title="Direct link to Potential Circular Dependencies" translate="no">​</a></h3>
+<ul>
+<li class="">No direct circular dependencies found; middleware and handlers are decoupled through interfaces.</li>
+</ul>
+<!-- -->
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="performance-considerations">Performance Considerations<a href="#performance-considerations" class="hash-link" aria-label="Direct link to Performance Considerations" title="Direct link to Performance Considerations" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="middleware-order">Middleware Order<a href="#middleware-order" class="hash-link" aria-label="Direct link to Middleware Order" title="Direct link to Middleware Order" translate="no">​</a></h3>
+<ul>
+<li class="">Place lightweight and failure-prone middleware (such as JWT/RBAC) first, reject illegal requests early, reduce subsequent overhead.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="cache-and-deduplication">Cache and Deduplication<a href="#cache-and-deduplication" class="hash-link" aria-label="Direct link to Cache and Deduplication" title="Direct link to Cache and Deduplication" translate="no">​</a></h3>
+<ul>
+<li class="">RSA middleware has built-in signature cache, can significantly reduce verification cost for duplicate requests.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="logging-and-observability">Logging and Observability<a href="#logging-and-observability" class="hash-link" aria-label="Direct link to Logging and Observability" title="Direct link to Logging and Observability" translate="no">​</a></h3>
+<ul>
+<li class="">Uniformly record request ID, user information and latency in middleware and handlers, convenient for problem diagnosis.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="timeout-and-concurrency">Timeout and Concurrency<a href="#timeout-and-concurrency" class="hash-link" aria-label="Direct link to Timeout and Concurrency" title="Direct link to Timeout and Concurrency" translate="no">​</a></h3>
+<ul>
+<li class="">Reasonably set Gin read/write timeout and connection pool size, avoid slow requests dragging down system.</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="troubleshooting-guide">Troubleshooting Guide<a href="#troubleshooting-guide" class="hash-link" aria-label="Direct link to Troubleshooting Guide" title="Direct link to Troubleshooting Guide" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="401-unauthorized">401 Unauthorized<a href="#401-unauthorized" class="hash-link" aria-label="Direct link to 401 Unauthorized" title="Direct link to 401 Unauthorized" translate="no">​</a></h3>
+<ul>
+<li class="">Check if Authorization header is Bearer token format, confirm secret key and signature are valid.</li>
+<li class="">Pay attention to JWT middleware&#x27;s classification handling of token expiration, signature invalid and other errors.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="403-forbidden">403 Forbidden<a href="#403-forbidden" class="hash-link" aria-label="Direct link to 403 Forbidden" title="Direct link to 403 Forbidden" translate="no">​</a></h3>
+<ul>
+<li class="">Confirm if user principal and resource path/method satisfy Casbin policy.</li>
+<li class="">Check if policy file and model configuration are correctly loaded.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="400-parameter-error">400 Parameter Error<a href="#400-parameter-error" class="hash-link" aria-label="Direct link to 400 Parameter Error" title="Direct link to 400 Parameter Error" translate="no">​</a></h3>
+<ul>
+<li class="">Check if request body JSON structure and query parameters satisfy binding rules.</li>
+<li class="">Pay attention to error information from ShouldBindJSON/ShouldBindQuery.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="5xx-server-error">5xx Server Error<a href="#5xx-server-error" class="hash-link" aria-label="Direct link to 5xx Server Error" title="Direct link to 5xx Server Error" translate="no">​</a></h3>
+<ul>
+<li class="">View handler&#x27;s handling of business exceptions and return codes.</li>
+<li class="">Combine with logs to locate specific link.</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="conclusion">Conclusion<a href="#conclusion" class="hash-link" aria-label="Direct link to Conclusion" title="Direct link to Conclusion" translate="no">​</a></h2>
+<p>This routing system uses Gin as core, adopts &quot;route registrar + handler + middleware&quot; clear layering, combined with JWT, RBAC, RSA client signature to form secure and reliable request chain. Health check and session management two main routes reflect best practices of RESTful design and parameter binding. Recommend introducing version prefix and unified error response specification on existing basis, and continuously improving task management routing and monitoring alerting system to support more complex business scenarios.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="appendix">Appendix<a href="#appendix" class="hash-link" aria-label="Direct link to Appendix" title="Direct link to Appendix" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="configuration-overview">Configuration Overview<a href="#configuration-overview" class="hash-link" aria-label="Direct link to Configuration Overview" title="Direct link to Configuration Overview" translate="no">​</a></h3>
+<ul>
+<li class=""><strong>Application Name and Version</strong>: Used for health check response.</li>
+<li class=""><strong>Server Listen Address and Port</strong>: Used to start HTTP service.</li>
+<li class=""><strong>Log Level and Output</strong>: Used for runtime observation.</li>
+<li class=""><strong>CASBIN Model and Policy File Path</strong>: Used for permission control.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="authentication-and-authorization-points">Authentication and Authorization Points<a href="#authentication-and-authorization-points" class="hash-link" aria-label="Direct link to Authentication and Authorization Points" title="Direct link to Authentication and Authorization Points" translate="no">​</a></h3>
+<ul>
+<li class="">JWT token contains user ID and role information, convenient for RBAC and business side use.</li>
+<li class="">RSA middleware supports time window, nonce and signature cache, balances security and performance.</li>
+</ul></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages navigation"><a class="pagination-nav__link pagination-nav__link--prev" href="/docs/interface-adapters/http-adapter/"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">HTTP Adapter</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/docs/interface-adapters/http-adapter/handler-layer"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Handler Layer</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#table-of-contents" class="table-of-contents__link toc-highlight">Table of Contents</a></li><li><a href="#introduction" class="table-of-contents__link toc-highlight">Introduction</a></li><li><a href="#project-structure" class="table-of-contents__link toc-highlight">Project Structure</a></li><li><a href="#core-components" class="table-of-contents__link toc-highlight">Core Components</a><ul><li><a href="#route-registrars" class="table-of-contents__link toc-highlight">Route Registrars</a></li><li><a href="#handlers" class="table-of-contents__link toc-highlight">Handlers</a></li><li><a href="#middleware" class="table-of-contents__link toc-highlight">Middleware</a></li><li><a href="#engine-and-startup" class="table-of-contents__link toc-highlight">Engine and Startup</a></li></ul></li><li><a href="#architecture-overview" class="table-of-contents__link toc-highlight">Architecture Overview</a></li><li><a href="#detailed-component-analysis" class="table-of-contents__link toc-highlight">Detailed Component Analysis</a><ul><li><a href="#health-check-route" class="table-of-contents__link toc-highlight">Health Check Route</a></li><li><a href="#session-route" class="table-of-contents__link toc-highlight">Session Route</a></li><li><a href="#task-route-reserved" class="table-of-contents__link toc-highlight">Task Route (Reserved)</a></li><li><a href="#middleware-chain-and-parameter-passing" class="table-of-contents__link toc-highlight">Middleware Chain and Parameter Passing</a></li><li><a href="#parameter-extraction-and-binding-1" class="table-of-contents__link toc-highlight">Parameter Extraction and Binding</a></li><li><a href="#route-prefix-and-version-control" class="table-of-contents__link toc-highlight">Route Prefix and Version Control</a></li><li><a href="#restful-design-principles" class="table-of-contents__link toc-highlight">RESTful Design Principles</a></li></ul></li><li><a href="#dependency-analysis" class="table-of-contents__link toc-highlight">Dependency Analysis</a><ul><li><a href="#component-coupling" class="table-of-contents__link toc-highlight">Component Coupling</a></li><li><a href="#external-dependencies" class="table-of-contents__link toc-highlight">External Dependencies</a></li><li><a href="#potential-circular-dependencies" class="table-of-contents__link toc-highlight">Potential Circular Dependencies</a></li></ul></li><li><a href="#performance-considerations" class="table-of-contents__link toc-highlight">Performance Considerations</a><ul><li><a href="#middleware-order" class="table-of-contents__link toc-highlight">Middleware Order</a></li><li><a href="#cache-and-deduplication" class="table-of-contents__link toc-highlight">Cache and Deduplication</a></li><li><a href="#logging-and-observability" class="table-of-contents__link toc-highlight">Logging and Observability</a></li><li><a href="#timeout-and-concurrency" class="table-of-contents__link toc-highlight">Timeout and Concurrency</a></li></ul></li><li><a href="#troubleshooting-guide" class="table-of-contents__link toc-highlight">Troubleshooting Guide</a><ul><li><a href="#401-unauthorized" class="table-of-contents__link toc-highlight">401 Unauthorized</a></li><li><a href="#403-forbidden" class="table-of-contents__link toc-highlight">403 Forbidden</a></li><li><a href="#400-parameter-error" class="table-of-contents__link toc-highlight">400 Parameter Error</a></li><li><a href="#5xx-server-error" class="table-of-contents__link toc-highlight">5xx Server Error</a></li></ul></li><li><a href="#conclusion" class="table-of-contents__link toc-highlight">Conclusion</a></li><li><a href="#appendix" class="table-of-contents__link toc-highlight">Appendix</a><ul><li><a href="#configuration-overview" class="table-of-contents__link toc-highlight">Configuration Overview</a></li><li><a href="#authentication-and-authorization-points" class="table-of-contents__link toc-highlight">Authentication and Authorization Points</a></li></ul></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Guangzhou Ruiya Information Technology Co., Ltd. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>

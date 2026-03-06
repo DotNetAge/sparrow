@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-application-framework/configuration-management/application-configuration" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">Application Configuration | Sparrow</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://sparrow.rayainfo.cn/img/sparrow-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://sparrow.rayainfo.cn/img/sparrow-social-card.jpg"><meta data-rh="true" property="og:url" content="https://sparrow.rayainfo.cn/docs/application-framework/configuration-management/application-configuration"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" property="og:locale:alternate" content="zh"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Application Configuration | Sparrow"><meta data-rh="true" name="description" content="Table of Contents"><meta data-rh="true" property="og:description" content="Table of Contents"><link data-rh="true" rel="icon" href="/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://sparrow.rayainfo.cn/docs/application-framework/configuration-management/application-configuration"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/application-framework/configuration-management/application-configuration" hreflang="en"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/zh/docs/application-framework/configuration-management/application-configuration" hreflang="zh"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/application-framework/configuration-management/application-configuration" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Application Configuration","item":"https://sparrow.rayainfo.cn/docs/application-framework/configuration-management/application-configuration"}]}</script><link rel="stylesheet" href="/assets/css/styles.63623602.css">
+<script src="/assets/js/runtime~main.12b7ca60.js" defer="defer"></script>
+<script src="/assets/js/main.c8504be0.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/"><div class="navbar__logo"><img src="/img/logo.png" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/img/logo.png" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">Sparrow</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/getting-started">Docs</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="iconLanguage_nlXk"><path fill="currentColor" d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"></path></svg>English</a><ul class="dropdown__menu"><li><a href="/docs/application-framework/configuration-management/application-configuration" target="_self" rel="noopener noreferrer" class="dropdown__link dropdown__link--active" lang="en">English</a></li><li><a href="/zh/docs/application-framework/configuration-management/application-configuration" target="_self" rel="noopener noreferrer" class="dropdown__link" lang="zh">简体中文</a></li></ul></div><a href="https://github.com/DotNetAge/sparrow" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/getting-started"><span title="Getting Started" class="linkLabel_WmDU">Getting Started</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/example-project"><span title="Example Project" class="linkLabel_WmDU">Example Project</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/development-guide"><span title="Development Guide" class="linkLabel_WmDU">Development Guide</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/testing-strategy"><span title="Testing Strategy" class="linkLabel_WmDU">Testing Strategy</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/logging-monitoring"><span title="Logging and Monitoring" class="linkLabel_WmDU">Logging and Monitoring</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/utility-functions"><span title="Utility Functions Library" class="linkLabel_WmDU">Utility Functions Library</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/deployment-operations"><span title="Deployment and Operations" class="linkLabel_WmDU">Deployment and Operations</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/project-overview/"><span title="Project Overview" class="categoryLinkLabel_W154">Project Overview</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/architecture-design/architecture-overview"><span title="Architecture Design" class="categoryLinkLabel_W154">Architecture Design</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/docs/application-framework/"><span title="Application Framework" class="categoryLinkLabel_W154">Application Framework</span></a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/application-framework/"><span title="Application Framework" class="linkLabel_WmDU">Application Framework</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/application-framework/application-startup-process"><span title="Application Startup Process" class="linkLabel_WmDU">Application Startup Process</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/application-framework/service-lifecycle-management"><span title="Service Lifecycle Management" class="linkLabel_WmDU">Service Lifecycle Management</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/application-framework/dependency-injection-container"><span title="Dependency Injection Container" class="linkLabel_WmDU">Dependency Injection Container</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" tabindex="0" href="/docs/application-framework/configuration-management/configuration-management-system"><span title="Configuration Management System" class="categoryLinkLabel_W154">Configuration Management System</span></a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/application-framework/configuration-management/configuration-management-system"><span title="Configuration Management System" class="linkLabel_WmDU">Configuration Management System</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/docs/application-framework/configuration-management/application-configuration"><span title="Application Configuration" class="linkLabel_WmDU">Application Configuration</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/application-framework/configuration-management/database-configuration"><span title="Database Configuration" class="linkLabel_WmDU">Database Configuration</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/application-framework/configuration-management/http-server-configuration"><span title="HTTP Server Configuration" class="linkLabel_WmDU">HTTP Server Configuration</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/application-framework/configuration-management/message-queue-configuration"><span title="Message Queue Configuration" class="linkLabel_WmDU">Message Queue Configuration</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/application-framework/configuration-management/logging-configuration"><span title="Logging Configuration" class="linkLabel_WmDU">Logging Configuration</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/application-framework/configuration-management/security-configuration"><span title="Security Configuration" class="linkLabel_WmDU">Security Configuration</span></a></li></ul></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/interface-adapters/"><span title="Interface Adapters" class="categoryLinkLabel_W154">Interface Adapters</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/data-persistence/"><span title="Data Persistence" class="categoryLinkLabel_W154">Data Persistence</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/event-driven-system/"><span title="Event-Driven System" class="categoryLinkLabel_W154">Event-Driven System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/task-scheduling-system/"><span title="Task Scheduling System" class="categoryLinkLabel_W154">Task Scheduling System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/domain-model/"><span title="Domain Model" class="categoryLinkLabel_W154">Domain Model</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/authentication-authorization-system/"><span title="Authentication and Authorization System" class="categoryLinkLabel_W154">Authentication and Authorization System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/message-passing/"><span title="Message Passing" class="categoryLinkLabel_W154">Message Passing</span></a></div></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Application Framework</span></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Configuration Management System</span></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">Application Configuration</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>Application Configuration</h1></header>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="table-of-contents">Table of Contents<a href="#table-of-contents" class="hash-link" aria-label="Direct link to Table of Contents" title="Direct link to Table of Contents" translate="no">​</a></h2>
+<ol>
+<li class=""><a href="#introduction" class="">Introduction</a></li>
+<li class=""><a href="#project-structure" class="">Project Structure</a></li>
+<li class=""><a href="#core-components" class="">Core Components</a></li>
+<li class=""><a href="#architecture-overview" class="">Architecture Overview</a></li>
+<li class=""><a href="#detailed-component-analysis" class="">Detailed Component Analysis</a></li>
+<li class=""><a href="#dependency-analysis" class="">Dependency Analysis</a></li>
+<li class=""><a href="#performance-considerations" class="">Performance Considerations</a></li>
+<li class=""><a href="#troubleshooting-guide" class="">Troubleshooting Guide</a></li>
+<li class=""><a href="#conclusion" class="">Conclusion</a></li>
+<li class=""><a href="#appendix" class="">Appendix</a></li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="introduction">Introduction<a href="#introduction" class="hash-link" aria-label="Direct link to Introduction" title="Direct link to Introduction" translate="no">​</a></h2>
+<p>This document systematically explains the design and implementation of the application configuration module, focusing on the following aspects:</p>
+<ul>
+<li class="">Application basic information configuration: Application name, version number, secret key and key file path, etc.</li>
+<li class="">Secret key generation and usage: Symmetric key (HS256) for JWT token generation, RSA public key for signature verification</li>
+<li class="">Configuration loading mechanism: Supports multi-format configuration files, environment variable override, default value setting and validation</li>
+<li class="">Permissions and authentication: Casbin model and policy path configuration, combined with middleware to implement RBAC</li>
+<li class="">Development and production differences: Configuration points and best practices in different environments</li>
+<li class="">Configuration priority and override rules: Priority order of files, environment variables, default values</li>
+<li class="">Sensitive information security management: Secure storage and minimum exposure principle of secret keys and certificates</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="project-structure">Project Structure<a href="#project-structure" class="hash-link" aria-label="Direct link to Project Structure" title="Direct link to Project Structure" translate="no">​</a></h2>
+<p>The configuration module is located in pkg/config, centered around Viper&#x27;s configuration loading and deserialization; application startup entry pkg/bootstrap loads configuration and injects globally during initialization phase.</p>
+<!-- -->
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="core-components">Core Components<a href="#core-components" class="hash-link" aria-label="Direct link to Core Components" title="Direct link to Core Components" translate="no">​</a></h2>
+<ul>
+<li class="">
+<p><strong>Application Basic Information Configuration (AppConfig)</strong></p>
+<ul>
+<li class="">Fields: Application name, version number, secret key, key file path</li>
+<li class="">Purpose: Used for application identification, JWT signing, permission control file path, etc.</li>
+</ul>
+</li>
+<li class="">
+<p><strong>Aggregated Configuration (Config)</strong></p>
+<ul>
+<li class="">Contains HTTP, logging, database, cache, event bus, permissions and other sub-configurations</li>
+</ul>
+</li>
+<li class="">
+<p><strong>Loader (loader.Load)</strong></p>
+<ul>
+<li class="">Multi-format configuration file support, automatic environment variable injection, default value setting, validation</li>
+</ul>
+</li>
+<li class="">
+<p><strong>Application Startup (bootstrap.NewApp)</strong></p>
+<ul>
+<li class="">Initializes configuration, logging, routing, container, etc.</li>
+</ul>
+</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="architecture-overview">Architecture Overview<a href="#architecture-overview" class="hash-link" aria-label="Direct link to Architecture Overview" title="Direct link to Architecture Overview" translate="no">​</a></h2>
+<p>Configuration loading process follows the priority of &quot;default values → configuration file → environment variables&quot;, finally deserializes into strongly-typed Config object, used by application layers.</p>
+<!-- -->
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="detailed-component-analysis">Detailed Component Analysis<a href="#detailed-component-analysis" class="hash-link" aria-label="Direct link to Detailed Component Analysis" title="Direct link to Detailed Component Analysis" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="application-basic-information-configuration-appconfig">Application Basic Information Configuration (AppConfig)<a href="#application-basic-information-configuration-appconfig" class="hash-link" aria-label="Direct link to Application Basic Information Configuration (AppConfig)" title="Direct link to Application Basic Information Configuration (AppConfig)" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="field-description">Field Description<a href="#field-description" class="hash-link" aria-label="Direct link to Field Description" title="Direct link to Field Description" translate="no">​</a></h4>
+<ul>
+<li class=""><strong>Name</strong>: Used for application identification and event bus namespace</li>
+<li class=""><strong>Version</strong>: Used for health checks and observability reporting</li>
+<li class=""><strong>Secret</strong>: Symmetric key for HS256 signature</li>
+<li class=""><strong>Key Path</strong>: Path for permission control (such as Casbin) model and policy files</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="default-values-and-override">Default Values and Override<a href="#default-values-and-override" class="hash-link" aria-label="Direct link to Default Values and Override" title="Direct link to Default Values and Override" translate="no">​</a></h4>
+<ul>
+<li class="">Default name, version, secret key, key file path provided by default values</li>
+<li class="">Can be overridden through configuration file and environment variables</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="usage-scenarios">Usage Scenarios<a href="#usage-scenarios" class="hash-link" aria-label="Direct link to Usage Scenarios" title="Direct link to Usage Scenarios" translate="no">​</a></h4>
+<ul>
+<li class="">JWT token generation and verification</li>
+<li class="">Event bus naming and permission file location</li>
+</ul>
+<!-- -->
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="configuration-loading-and-validation">Configuration Loading and Validation<a href="#configuration-loading-and-validation" class="hash-link" aria-label="Direct link to Configuration Loading and Validation" title="Direct link to Configuration Loading and Validation" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="configuration-file-search-paths">Configuration File Search Paths<a href="#configuration-file-search-paths" class="hash-link" aria-label="Direct link to Configuration File Search Paths" title="Direct link to Configuration File Search Paths" translate="no">​</a></h4>
+<ul>
+<li class="">Current directory, configs directory</li>
+<li class="">If appName provided, extends to <code>/etc/&lt;snake_case&gt;/</code> and <code>$HOME/.&lt;snake_case&gt;/</code> below</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="default-values">Default Values<a href="#default-values" class="hash-link" aria-label="Direct link to Default Values" title="Direct link to Default Values" translate="no">​</a></h4>
+<ul>
+<li class="">Provides application, server, CORS, logging, event bus, cache, database, permissions and other default values</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="environment-variables">Environment Variables<a href="#environment-variables" class="hash-link" aria-label="Direct link to Environment Variables" title="Direct link to Environment Variables" translate="no">​</a></h4>
+<ul>
+<li class="">Automatic injection, dot to underscore mapping</li>
+<li class="">.env file can be loaded first, then overridden by system environment</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="validation">Validation<a href="#validation" class="hash-link" aria-label="Direct link to Validation" title="Direct link to Validation" translate="no">​</a></h4>
+<ul>
+<li class="">Basic validation: Application name non-empty, port range legal</li>
+</ul>
+<!-- -->
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="jwt-token-generation-and-usage">JWT Token Generation and Usage<a href="#jwt-token-generation-and-usage" class="hash-link" aria-label="Direct link to JWT Token Generation and Usage" title="Direct link to JWT Token Generation and Usage" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="secret-key-source">Secret Key Source<a href="#secret-key-source" class="hash-link" aria-label="Direct link to Secret Key Source" title="Direct link to Secret Key Source" translate="no">​</a></h4>
+<ul>
+<li class="">AppConfig.Secret as HS256 signature key</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="token-generation">Token Generation<a href="#token-generation" class="hash-link" aria-label="Direct link to Token Generation" title="Direct link to Token Generation" translate="no">​</a></h4>
+<ul>
+<li class="">Generate access token and refresh token, set different expiration times respectively</li>
+<li class="">Use HS256 signature, key from configuration</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="refresh-process">Refresh Process<a href="#refresh-process" class="hash-link" aria-label="Direct link to Refresh Process" title="Direct link to Refresh Process" translate="no">​</a></h4>
+<ul>
+<li class="">Parse old token, verify signature and validity</li>
+<li class="">Update issue time, regenerate new token</li>
+</ul>
+<!-- -->
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="rsa-authentication-configuration">RSA Authentication Configuration<a href="#rsa-authentication-configuration" class="hash-link" aria-label="Direct link to RSA Authentication Configuration" title="Direct link to RSA Authentication Configuration" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="configuration-items">Configuration Items<a href="#configuration-items" class="hash-link" aria-label="Direct link to Configuration Items" title="Direct link to Configuration Items" translate="no">​</a></h4>
+<ul>
+<li class="">Request header fields: Client ID, signature, nonce, timestamp</li>
+<li class="">Time window: Allowed time deviation (seconds)</li>
+<li class="">Storage and cache: NonceStore, SignatureCache, PublicKeyProvider</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="implementation">Implementation<a href="#implementation" class="hash-link" aria-label="Direct link to Implementation" title="Direct link to Implementation" translate="no">​</a></h4>
+<ul>
+<li class="">Memory implementation: MemoryNonceStore, MemorySignatureCache, MemoryPublicKeyProvider</li>
+<li class="">Supports concurrency safety and periodic cleanup</li>
+</ul>
+<!-- -->
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="permission-control-configuration">Permission Control Configuration<a href="#permission-control-configuration" class="hash-link" aria-label="Direct link to Permission Control Configuration" title="Direct link to Permission Control Configuration" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="configuration-items-1">Configuration Items<a href="#configuration-items-1" class="hash-link" aria-label="Direct link to Configuration Items" title="Direct link to Configuration Items" translate="no">​</a></h4>
+<ul>
+<li class="">Model file path, policy file path</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="usage">Usage<a href="#usage" class="hash-link" aria-label="Direct link to Usage" title="Direct link to Usage" translate="no">​</a></h4>
+<ul>
+<li class="">Combine with middleware to implement RBAC control</li>
+<li class="">Middleware needs to read above paths at runtime</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="other-related-configurations">Other Related Configurations<a href="#other-related-configurations" class="hash-link" aria-label="Direct link to Other Related Configurations" title="Direct link to Other Related Configurations" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="http-server">HTTP Server<a href="#http-server" class="hash-link" aria-label="Direct link to HTTP Server" title="Direct link to HTTP Server" translate="no">​</a></h4>
+<ul>
+<li class="">Server address and port</li>
+<li class="">CORS allowed origins, methods, headers, credentials and cache duration</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="logging-and-database">Logging and Database<a href="#logging-and-database" class="hash-link" aria-label="Direct link to Logging and Database" title="Direct link to Logging and Database" translate="no">​</a></h4>
+<ul>
+<li class=""><strong>Logging</strong>: Mode, level, format, output, filename</li>
+<li class=""><strong>Database</strong>: Driver, host, port, user, password, database name, event store database name</li>
+<li class=""><strong>Cache</strong>: Host, port, password, DB index, event store DB index</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="dependency-analysis">Dependency Analysis<a href="#dependency-analysis" class="hash-link" aria-label="Direct link to Dependency Analysis" title="Direct link to Dependency Analysis" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="configuration-loading-chain">Configuration Loading Chain<a href="#configuration-loading-chain" class="hash-link" aria-label="Direct link to Configuration Loading Chain" title="Direct link to Configuration Loading Chain" translate="no">​</a></h3>
+<ul>
+<li class="">bootstrap.NewApp -&gt; config.Load -&gt; viper deserialization -&gt; Config</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="key-coupling-points">Key Coupling Points<a href="#key-coupling-points" class="hash-link" aria-label="Direct link to Key Coupling Points" title="Direct link to Key Coupling Points" translate="no">​</a></h3>
+<ul>
+<li class="">AppConfig.Secret strongly associated with auth token generation</li>
+<li class="">AppConfig.KeyPath strongly associated with permission file path (Casbin)</li>
+<li class="">ServerConfig associated with HTTP server binding</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="possible-circular-dependencies">Possible Circular Dependencies<a href="#possible-circular-dependencies" class="hash-link" aria-label="Direct link to Possible Circular Dependencies" title="Direct link to Possible Circular Dependencies" translate="no">​</a></h3>
+<ul>
+<li class="">Configuration module only depends downward (loader -&gt; viper), no upward dependencies, avoids circular dependencies</li>
+</ul>
+<!-- -->
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="performance-considerations">Performance Considerations<a href="#performance-considerations" class="hash-link" aria-label="Direct link to Performance Considerations" title="Direct link to Performance Considerations" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="configuration-loading">Configuration Loading<a href="#configuration-loading" class="hash-link" aria-label="Direct link to Configuration Loading" title="Direct link to Configuration Loading" translate="no">​</a></h3>
+<ul>
+<li class="">Multi-format attempts and environment variable injection cost is low, suitable for one-time completion during startup phase</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="logging">Logging<a href="#logging" class="hash-link" aria-label="Direct link to Logging" title="Direct link to Logging" translate="no">​</a></h3>
+<ul>
+<li class="">JSON output and file writing in high concurrency suggest combining with asynchronous writing and rotation strategy</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="database-and-cache">Database and Cache<a href="#database-and-cache" class="hash-link" aria-label="Direct link to Database and Cache" title="Direct link to Database and Cache" translate="no">​</a></h3>
+<ul>
+<li class="">Connection pool size, timeout settings need tuning combined with business peak</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="token-generation-1">Token Generation<a href="#token-generation-1" class="hash-link" aria-label="Direct link to Token Generation" title="Direct link to Token Generation" translate="no">​</a></h3>
+<ul>
+<li class="">HS256 is symmetric algorithm, excellent performance; pay attention to key length and security balance</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="troubleshooting-guide">Troubleshooting Guide<a href="#troubleshooting-guide" class="hash-link" aria-label="Direct link to Troubleshooting Guide" title="Direct link to Troubleshooting Guide" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="configuration-not-taking-effect">Configuration Not Taking Effect<a href="#configuration-not-taking-effect" class="hash-link" aria-label="Direct link to Configuration Not Taking Effect" title="Direct link to Configuration Not Taking Effect" translate="no">​</a></h3>
+<ul>
+<li class="">Check if configuration file format and path are correct</li>
+<li class="">Confirm if environment variable key names use underscore replacement rule (dot -&gt; underscore)</li>
+<li class="">Verify if .env file is overridden by system environment</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="port-conflict-or-illegal">Port Conflict or Illegal<a href="#port-conflict-or-illegal" class="hash-link" aria-label="Direct link to Port Conflict or Illegal" title="Direct link to Port Conflict or Illegal" translate="no">​</a></h3>
+<ul>
+<li class="">Port should be in range 1-65535</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="application-name-empty">Application Name Empty<a href="#application-name-empty" class="hash-link" aria-label="Direct link to Application Name Empty" title="Direct link to Application Name Empty" translate="no">​</a></h3>
+<ul>
+<li class="">Ensure configuration file or environment variable provides valid name</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="secret-key-issues">Secret Key Issues<a href="#secret-key-issues" class="hash-link" aria-label="Direct link to Secret Key Issues" title="Direct link to Secret Key Issues" translate="no">​</a></h3>
+<ul>
+<li class="">HS256 key should be sufficiently random and confidential, avoid hard-coding in source code</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="permission-control-exception">Permission Control Exception<a href="#permission-control-exception" class="hash-link" aria-label="Direct link to Permission Control Exception" title="Direct link to Permission Control Exception" translate="no">​</a></h3>
+<ul>
+<li class="">Check if model and policy file paths are correct, files exist and are readable</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="conclusion">Conclusion<a href="#conclusion" class="hash-link" aria-label="Direct link to Conclusion" title="Direct link to Conclusion" translate="no">​</a></h2>
+<p>This configuration module provides flexible and extensible configuration loading capability through Viper, combined with default values, environment variables and strict validation, ensures consistent behavior of application in different environments. Application basic information (name, version, secret key, key file path) is tightly coupled with authentication and permission control, recommend adopting secure key management and minimum exposure principle in production environment, combined with strict permission file access control, ensures system security and stability.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="appendix">Appendix<a href="#appendix" class="hash-link" aria-label="Direct link to Appendix" title="Direct link to Appendix" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="configuration-item-priority-and-override-rules">Configuration Item Priority and Override Rules<a href="#configuration-item-priority-and-override-rules" class="hash-link" aria-label="Direct link to Configuration Item Priority and Override Rules" title="Direct link to Configuration Item Priority and Override Rules" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="priority-from-high-to-low">Priority (from high to low)<a href="#priority-from-high-to-low" class="hash-link" aria-label="Direct link to Priority (from high to low)" title="Direct link to Priority (from high to low)" translate="no">​</a></h4>
+<ol>
+<li class="">System environment variables (automatic injection)</li>
+<li class="">.env file (loaded first)</li>
+<li class="">Configuration file (tried by format)</li>
+<li class="">Default values (SetDefaults)</li>
+</ol>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="key-name-mapping">Key Name Mapping<a href="#key-name-mapping" class="hash-link" aria-label="Direct link to Key Name Mapping" title="Direct link to Key Name Mapping" translate="no">​</a></h4>
+<ul>
+<li class="">Dots in configuration key names will be replaced with underscores to match environment variables</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="environment-specific-configuration-recommendations">Environment-specific Configuration Recommendations<a href="#environment-specific-configuration-recommendations" class="hash-link" aria-label="Direct link to Environment-specific Configuration Recommendations" title="Direct link to Environment-specific Configuration Recommendations" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="development-environment">Development Environment<a href="#development-environment" class="hash-link" aria-label="Direct link to Development Environment" title="Direct link to Development Environment" translate="no">​</a></h4>
+<ul>
+<li class="">Use shorter key expiration times, convenient for debugging</li>
+<li class="">Set log level to debug or info, output to console</li>
+<li class="">Database and cache use local default values</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="production-environment">Production Environment<a href="#production-environment" class="hash-link" aria-label="Direct link to Production Environment" title="Direct link to Production Environment" translate="no">​</a></h4>
+<ul>
+<li class="">Keys and certificates centrally managed (such as KMS or key management service)</li>
+<li class="">Log output to file and enable rotation</li>
+<li class="">Disable debug mode, strictly control CORS and cross-origin sources</li>
+<li class="">Permission model and policy files placed in controlled directory, only grant necessary access permissions</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-management-best-practices">Security Management Best Practices<a href="#security-management-best-practices" class="hash-link" aria-label="Direct link to Security Management Best Practices" title="Direct link to Security Management Best Practices" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="secret-keys-and-certificates">Secret Keys and Certificates<a href="#secret-keys-and-certificates" class="hash-link" aria-label="Direct link to Secret Keys and Certificates" title="Direct link to Secret Keys and Certificates" translate="no">​</a></h4>
+<ul>
+<li class="">Do not write keys into code repository; use environment variables or key management service to inject</li>
+<li class="">Regularly rotate keys, retain old key transition period</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="permission-files">Permission Files<a href="#permission-files" class="hash-link" aria-label="Direct link to Permission Files" title="Direct link to Permission Files" translate="no">​</a></h4>
+<ul>
+<li class="">Strictly control file permissions, avoid leaking model and policy</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="environment-isolation">Environment Isolation<a href="#environment-isolation" class="hash-link" aria-label="Direct link to Environment Isolation" title="Direct link to Environment Isolation" translate="no">​</a></h4>
+<ul>
+<li class="">Use independent configuration files and environment variables for different environments</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="configuration-audit">Configuration Audit<a href="#configuration-audit" class="hash-link" aria-label="Direct link to Configuration Audit" title="Direct link to Configuration Audit" translate="no">​</a></h4>
+<ul>
+<li class="">Record key configuration changes, establish approval and rollback mechanism</li>
+</ul></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages navigation"><a class="pagination-nav__link pagination-nav__link--prev" href="/docs/application-framework/configuration-management/configuration-management-system"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Configuration Management System</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/docs/application-framework/configuration-management/database-configuration"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Database Configuration</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#table-of-contents" class="table-of-contents__link toc-highlight">Table of Contents</a></li><li><a href="#introduction" class="table-of-contents__link toc-highlight">Introduction</a></li><li><a href="#project-structure" class="table-of-contents__link toc-highlight">Project Structure</a></li><li><a href="#core-components" class="table-of-contents__link toc-highlight">Core Components</a></li><li><a href="#architecture-overview" class="table-of-contents__link toc-highlight">Architecture Overview</a></li><li><a href="#detailed-component-analysis" class="table-of-contents__link toc-highlight">Detailed Component Analysis</a><ul><li><a href="#application-basic-information-configuration-appconfig" class="table-of-contents__link toc-highlight">Application Basic Information Configuration (AppConfig)</a></li><li><a href="#configuration-loading-and-validation" class="table-of-contents__link toc-highlight">Configuration Loading and Validation</a></li><li><a href="#jwt-token-generation-and-usage" class="table-of-contents__link toc-highlight">JWT Token Generation and Usage</a></li><li><a href="#rsa-authentication-configuration" class="table-of-contents__link toc-highlight">RSA Authentication Configuration</a></li><li><a href="#permission-control-configuration" class="table-of-contents__link toc-highlight">Permission Control Configuration</a></li><li><a href="#other-related-configurations" class="table-of-contents__link toc-highlight">Other Related Configurations</a></li></ul></li><li><a href="#dependency-analysis" class="table-of-contents__link toc-highlight">Dependency Analysis</a><ul><li><a href="#configuration-loading-chain" class="table-of-contents__link toc-highlight">Configuration Loading Chain</a></li><li><a href="#key-coupling-points" class="table-of-contents__link toc-highlight">Key Coupling Points</a></li><li><a href="#possible-circular-dependencies" class="table-of-contents__link toc-highlight">Possible Circular Dependencies</a></li></ul></li><li><a href="#performance-considerations" class="table-of-contents__link toc-highlight">Performance Considerations</a><ul><li><a href="#configuration-loading" class="table-of-contents__link toc-highlight">Configuration Loading</a></li><li><a href="#logging" class="table-of-contents__link toc-highlight">Logging</a></li><li><a href="#database-and-cache" class="table-of-contents__link toc-highlight">Database and Cache</a></li><li><a href="#token-generation-1" class="table-of-contents__link toc-highlight">Token Generation</a></li></ul></li><li><a href="#troubleshooting-guide" class="table-of-contents__link toc-highlight">Troubleshooting Guide</a><ul><li><a href="#configuration-not-taking-effect" class="table-of-contents__link toc-highlight">Configuration Not Taking Effect</a></li><li><a href="#port-conflict-or-illegal" class="table-of-contents__link toc-highlight">Port Conflict or Illegal</a></li><li><a href="#application-name-empty" class="table-of-contents__link toc-highlight">Application Name Empty</a></li><li><a href="#secret-key-issues" class="table-of-contents__link toc-highlight">Secret Key Issues</a></li><li><a href="#permission-control-exception" class="table-of-contents__link toc-highlight">Permission Control Exception</a></li></ul></li><li><a href="#conclusion" class="table-of-contents__link toc-highlight">Conclusion</a></li><li><a href="#appendix" class="table-of-contents__link toc-highlight">Appendix</a><ul><li><a href="#configuration-item-priority-and-override-rules" class="table-of-contents__link toc-highlight">Configuration Item Priority and Override Rules</a></li><li><a href="#environment-specific-configuration-recommendations" class="table-of-contents__link toc-highlight">Environment-specific Configuration Recommendations</a></li><li><a href="#security-management-best-practices" class="table-of-contents__link toc-highlight">Security Management Best Practices</a></li></ul></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Guangzhou Ruiya Information Technology Co., Ltd. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>

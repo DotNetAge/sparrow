@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="zh" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-data-persistence/redis-repository" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">Redis 仓储 | Sparrow</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://sparrow.rayainfo.cn/zh/img/sparrow-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://sparrow.rayainfo.cn/zh/img/sparrow-social-card.jpg"><meta data-rh="true" property="og:url" content="https://sparrow.rayainfo.cn/zh/docs/data-persistence/redis-repository"><meta data-rh="true" property="og:locale" content="zh"><meta data-rh="true" property="og:locale:alternate" content="en"><meta data-rh="true" name="docusaurus_locale" content="zh"><meta data-rh="true" name="docsearch:language" content="zh"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Redis 仓储 | Sparrow"><meta data-rh="true" name="description" content="目录"><meta data-rh="true" property="og:description" content="目录"><link data-rh="true" rel="icon" href="/zh/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://sparrow.rayainfo.cn/zh/docs/data-persistence/redis-repository"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/data-persistence/redis-repository" hreflang="en"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/zh/docs/data-persistence/redis-repository" hreflang="zh"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/data-persistence/redis-repository" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Redis 仓储","item":"https://sparrow.rayainfo.cn/zh/docs/data-persistence/redis-repository"}]}</script><link rel="stylesheet" href="/zh/assets/css/styles.63623602.css">
+<script src="/zh/assets/js/runtime~main.38d0fea1.js" defer="defer"></script>
+<script src="/zh/assets/js/main.fd56c047.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="跳到主要内容"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">跳到主要内容</a></div><nav aria-label="主导航" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="切换导航栏" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/zh/"><div class="navbar__logo"><img src="/zh/img/logo.png" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/zh/img/logo.png" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">Sparrow</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/zh/docs/getting-started">Docs</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="iconLanguage_nlXk"><path fill="currentColor" d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"></path></svg>简体中文</a><ul class="dropdown__menu"><li><a href="/docs/data-persistence/redis-repository" target="_self" rel="noopener noreferrer" class="dropdown__link" lang="en">English</a></li><li><a href="/zh/docs/data-persistence/redis-repository" target="_self" rel="noopener noreferrer" class="dropdown__link dropdown__link--active" lang="zh">简体中文</a></li></ul></div><a href="https://github.com/DotNetAge/sparrow" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="切换深色和浅色模式（当前为system mode）"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="回到顶部" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="文档侧边栏" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/getting-started"><span title="快速开始" class="linkLabel_WmDU">快速开始</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/example-project"><span title="示例项目" class="linkLabel_WmDU">示例项目</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/development-guide"><span title="开发指南" class="linkLabel_WmDU">开发指南</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/testing-strategy"><span title="测试策略" class="linkLabel_WmDU">测试策略</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/logging-monitoring"><span title="日志监控" class="linkLabel_WmDU">日志监控</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/utility-functions"><span title="工具函数库" class="linkLabel_WmDU">工具函数库</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/deployment-operations"><span title="部署运维" class="linkLabel_WmDU">部署运维</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/project-overview/"><span title="Project Overview" class="categoryLinkLabel_W154">Project Overview</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/architecture-design/architecture-overview"><span title="Architecture Design" class="categoryLinkLabel_W154">Architecture Design</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/application-framework/"><span title="Application Framework" class="categoryLinkLabel_W154">Application Framework</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/interface-adapters/"><span title="Interface Adapters" class="categoryLinkLabel_W154">Interface Adapters</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/zh/docs/data-persistence/"><span title="Data Persistence" class="categoryLinkLabel_W154">Data Persistence</span></a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/data-persistence/"><span title="数据持久化" class="linkLabel_WmDU">数据持久化</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/data-persistence/repository-pattern-implementation"><span title="仓储模式实现" class="linkLabel_WmDU">仓储模式实现</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/data-persistence/memory-repository"><span title="内存仓储" class="linkLabel_WmDU">内存仓储</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/data-persistence/badgerdb-repository"><span title="BadgerDB 仓储" class="linkLabel_WmDU">BadgerDB 仓储</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/data-persistence/mongodb-repository"><span title="MongoDB 仓储" class="linkLabel_WmDU">MongoDB 仓储</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/data-persistence/postgresql-repository"><span title="PostgreSQL 仓储" class="linkLabel_WmDU">PostgreSQL 仓储</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/zh/docs/data-persistence/redis-repository"><span title="Redis 仓储" class="linkLabel_WmDU">Redis 仓储</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/data-persistence/general-sql-database-repository"><span title="通用 SQL 数据库仓储" class="linkLabel_WmDU">通用 SQL 数据库仓储</span></a></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/event-driven-system/"><span title="Event-Driven System" class="categoryLinkLabel_W154">Event-Driven System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/task-scheduling-system/"><span title="Task Scheduling System" class="categoryLinkLabel_W154">Task Scheduling System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/domain-model/"><span title="Domain Model" class="categoryLinkLabel_W154">Domain Model</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/authentication-authorization-system/"><span title="Authentication and Authorization System" class="categoryLinkLabel_W154">Authentication and Authorization System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/message-passing/"><span title="Message Passing" class="categoryLinkLabel_W154">Message Passing</span></a></div></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="页面路径"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="主页面" class="breadcrumbs__link" href="/zh/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Data Persistence</span></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">Redis 仓储</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">本页目录</button></div><div class="theme-doc-markdown markdown"><header><h1>Redis 仓储</h1></header>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="目录">目录<a href="#目录" class="hash-link" aria-label="直接链接到 目录" title="直接链接到 目录" translate="no">​</a></h2>
+<ol>
+<li class=""><a href="#%E7%AE%80%E4%BB%8B" class="">简介</a></li>
+<li class=""><a href="#%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84" class="">项目结构</a></li>
+<li class=""><a href="#%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6" class="">核心组件</a></li>
+<li class=""><a href="#%E6%9E%B6%E6%9E%84%E6%A6%82%E8%A7%88" class="">架构概览</a></li>
+<li class=""><a href="#%E8%AF%A6%E7%BB%86%E7%BB%84%E4%BB%B6%E5%88%86%E6%9E%90" class="">详细组件分析</a></li>
+<li class=""><a href="#%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E5%88%86%E6%9E%90" class="">依赖关系分析</a></li>
+<li class=""><a href="#%E6%80%A7%E8%83%BD%E8%80%83%E8%99%91" class="">性能考虑</a></li>
+<li class=""><a href="#%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5%E6%8C%87%E5%8D%97" class="">故障排查指南</a></li>
+<li class=""><a href="#%E7%BB%93%E8%AE%BA" class="">结论</a></li>
+<li class=""><a href="#%E9%99%84%E5%BD%95" class="">附录</a></li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="简介">简介<a href="#简介" class="hash-link" aria-label="直接链接到 简介" title="直接链接到 简介" translate="no">​</a></h2>
+<p>本文件系统性阐述 Sparrow 中基于 Redis 的仓储实现，覆盖设计原理、数据结构  选择、键空间设计、序列化策略、过期策略、集合/有序集合/哈希等 Redis 特有操作支持、管道执行优化、事务处理、连接配置、集群与哨兵模式配置、性能调优、内存监控与故障恢复机制。目标是为运维与开发团队提供一份可直接落地的 Redis 仓储使用指南。</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="项目结构">项目结构<a href="#项目结构" class="hash-link" aria-label="直接链接到 项目结构" title="直接链接到 项目结构" translate="no">​</a></h2>
+<p>围绕 Redis 仓储的关键模块分布如下：</p>
+<ul>
+<li class="">仓储实现：pkg/persistence/repo/redis.go</li>
+<li class="">事件总线（Redis Pub/Sub）：pkg/eventbus/redis/redis.go</li>
+<li class="">Redis 配置模型：pkg/config/redis.go</li>
+<li class="">应用层数据库聚合：pkg/bootstrap/db.go</li>
+<li class="">应用启动与容器：pkg/bootstrap/app.go、pkg/bootstrap/container.go</li>
+<li class="">测试用例：pkg/persistence/repo/redis_test.go</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">RedisRepository[T]：泛型仓储实现，封装实体的 CRUD、批量操作、分页、条件查询、随机取样、TTL 管理等。</li>
+<li class="">redisBus：基于 Redis Pub/Sub 的事件总线，负责事件发布与订阅。</li>
+<li class="">RedisConfig：Redis 连接配置模型（主机、端口、密码、DB、事件存储专用 DB）。</li>
+<li class="">Database：应用层聚合数据库客户端（Redis、SQL、Badger）。</li>
+<li class="">Container：简单 IoC 容器，支持具名与匿名依赖解析。</li>
+</ul>
+<p>Redis 仓储在应用启动阶段通过配置与容器注入 Redis 客户端，仓储实例持有客户端并以“键前缀:实体ID”的键空间组织数据；事件总线同样使用 Redis 客户端进行发布/订阅。仓储与事件总线均依赖统一的 Redis 配置模型。</p>
+<!-- -->
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="redisrepositoryt-设计与实现">RedisRepository[T] 设计与实现<a href="#redisrepositoryt-设计与实现" class="hash-link" aria-label="直接链接到 RedisRepository[T] 设计与实现" title="直接链接到 RedisRepository[T] 设计与实现" translate="no">​</a></h3>
+<ul>
+<li class="">泛型与接口契合：实现 usecase.Repository[T]，通过 BaseRepository[T] 扩展能力。</li>
+<li class="">键空间设计：键格式为“prefix<!-- -->:id<!-- -->”，prefix 由构造函数传入，确保不同实体类型隔离。</li>
+<li class="">序列化策略：统一采用 JSON 序列化/反序列化，便于跨语言与人类可读。</li>
+<li class="">过期策略：<!-- -->
+<ul>
+<li class="">构造时可设置全局 TTL；若 &gt;0，则 Set 操作携带 TTL。</li>
+<li class="">支持对特定键设置/查询 TTL（SetTTLForKey、GetTTLForKey），以及全局 TTL 查询与设置。</li>
+</ul>
+</li>
+<li class="">数据结构选择：<!-- -->
+<ul>
+<li class="">字符串存储：键值对存储完整实体 JSON。</li>
+<li class="">批量读写：MGET、DEL、EXISTS、KEYS 等命令组合实现高效批量操作。</li>
+</ul>
+</li>
+<li class="">管道执行优化：SaveBatch 内部使用 Pipeline，减少 RTT，提升吞吐。</li>
+<li class="">条件查询与分页：FindWithConditions/FindByFieldWithPagination/CountWithConditions 基于内存过滤与排序，适用于中小规模数据集。</li>
+<li class="">随机取样：Random 通过 Keys + 随机打散 + MGET 实现近似随机取样。</li>
+<li class="">错误处理：统一包装 RepositoryError，明确实体类型、操作、ID 与错误信息。</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">发布：将事件 JSON 序列化后发布到频道（事件类型作为主题）。</li>
+<li class="">订阅：为每个事件类型维护一个 PubSub 列表，启动协程异步处理消息。</li>
+<li class="">生命周期：Close 时关闭所有订阅与 Redis 连接，保证优雅关停。</li>
+<li class="">错误处理：订阅失败、消息解析失败、处理器异常均有日志记录与错误返回。</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">
+<p>键空间：prefix<!-- -->:id<!-- -->，prefix 由构造函数传入，确保不同实体类型隔离；内部自动补全末尾冒号。</p>
+</li>
+<li class="">
+<p>序列化：统一 JSON；反序列化失败返回错误，避免脏数据。</p>
+</li>
+<li class="">
+<p>TTL：支持全局 TTL 与单键 TTL；GetTTLForKey 返回 -2 表示键不存在（Go-Redis 行为）。</p>
+</li>
+<li class="">
+<p>管道执行：SaveBatch 使用 Pipeline，一次性提交多条 Set 指令，显著降低网络往返。</p>
+</li>
+<li class="">
+<p>事务处理：当前仓储未显式使用 Multi/Exec；事件总线亦未使用事务。如需强一致性场景，可在上层业务封装 Multi/Exec。</p>
+</li>
+</ul>
+<p>仓储在 Redis 上实现“全表扫描 + 内存过滤/排序/分页”，适用于中小规模数据集。流程如下：</p>
+<!-- -->
+<ul>
+<li class="">
+<p>当前实现：使用 redis.NewClient 与基本选项（地址、密码、DB）创建客户端。</p>
+</li>
+<li class="">
+<p>集群/哨兵：代码中未显式使用 go-redis 的 ClusterOptions/SentinelOptions。若需集群/哨兵，请在应用初始化处替换客户端创建逻辑，传入相应 Options。</p>
+</li>
+<li class="">
+<p>Database 聚合 RedisClient，供仓储与事件总线使用。</p>
+</li>
+<li class="">
+<p>App 启动时创建 Database 并注入容器，仓储通过容器解析获得 RedisClient。</p>
+</li>
+<li class="">
+<p>容器支持具名与匿名依赖解析，便于多仓库/多客户端场景。</p>
+</li>
+<li class="">
+<p>仓储依赖 Redis 客户端与配置模型，提供统一的实体操作接口。</p>
+</li>
+<li class="">
+<p>事件总线依赖 Redis 客户端与配置模型，提供发布/订阅能力。</p>
+</li>
+<li class="">
+<p>应用层通过容器注入 Database，仓储与事件总线共享同一 RedisClient。</p>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">
+<p>管道优化：SaveBatch 使用 Pipeline，减少 RTT，适合批量写入。</p>
+</li>
+<li class="">
+<p>批量读取：FindAll/FindByIDs 使用 MGET，减少多次网络往返。</p>
+</li>
+<li class="">
+<p>键空间隔离：通过前缀隔离不同实体类型，避免键冲突。</p>
+</li>
+<li class="">
+<p>TTL 策略：合理设置全局 TTL 与单键 TTL，结合业务生命周期控制内存占用。</p>
+</li>
+<li class="">
+<p>条件查询：当前为内存过滤，建议在大规模数据场景下引入索引或外部搜索引擎。</p>
+</li>
+<li class="">
+<p>连接复用：仓储与事件总线共享同一 RedisClient，避免重复连接。</p>
+</li>
+<li class="">
+<p>连接失败：检查 RedisConfig 的 Host/Port/Password/DB；事件总线在创建时会 Ping 校验连接。</p>
+</li>
+<li class="">
+<p>键不存在：FindByID 返回 RepositoryError，message 指明实体未找到；GetTTLForKey 返回 -2 表示键不存在。</p>
+</li>
+<li class="">
+<p>批量操作异常：SaveBatch/SaveBatch/DeleteBatch 会在任一实体失败时返回错误；检查实体 ID 与 JSON 序列化。</p>
+</li>
+<li class="">
+<p>条件查询无结果：确认字段名与 JSON 标签一致；Operator 支持 EQ/NEQ/GT/GTE/LT/LTE/LIKE/IN/IS_NULL/IS_NOT_NULL。</p>
+</li>
+<li class="">
+<p>随机取样：当实体数量小于取样数时，返回全部实体；注意 Keys/随机打散的开销。</p>
+</li>
+</ul>
+<p>Sparrow 的 Redis 仓储以简洁的键空间设计与 JSON 序列化为核心，结合管道优化与批量读写，满足常见实体持久化需求。事件总线基于 Redis Pub/Sub 提供轻量级解耦通信。对于大规模数据与强一致性场景，建议引入索引/搜索引擎与事务封装；对于高可用与弹性扩展，建议在应用层替换为集群/哨兵客户端。</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="附录">附录<a href="#附录" class="hash-link" aria-label="直接链接到 附录" title="直接链接到 附录" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="redis-特有操作支持现状">Redis 特有操作支持现状<a href="#redis-特有操作支持现  状" class="hash-link" aria-label="直接链接到 Redis 特有操作支持现状" title="直接链接到 Redis 特有操作支持现状" translate="no">​</a></h3>
+<ul>
+<li class="">
+<p>集合/有序集合/哈希：当前仓储未直接使用这些数据结构；如需使用，可在上层业务封装相应命令。</p>
+</li>
+<li class="">
+<p>管道执行：已使用 Pipeline 优化批量写入。</p>
+</li>
+<li class="">
+<p>事务处理：未显式使用 Multi/Exec；如需强一致，可在业务层封装。</p>
+</li>
+<li class="">
+<p>当前配置模型仅包含基础字段；如需集群/哨兵，应在应用初始化处创建相应 Options 并注入仓储与事件总线。</p>
+</li>
+<li class="">
+<p>建议在生产环境启用连接池参数（如最小空闲连接、最大空闲连接、连接超时等）以提升稳定性。</p>
+</li>
+<li class="">
+<p>使用 testcontainers 启动 Redis 容器，确保测试环境一致性。</p>
+</li>
+<li class="">
+<p>覆盖 Save/Find/Delete/批量操作/分页/条件查询/TTL/随机取样等关键路径。</p>
+</li>
+<li class="">
+<p>验证错误场景（空 ID、不存在键、反序列化失败等）。</p>
+</li>
+</ul></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="文档页面导航"><a class="pagination-nav__link pagination-nav__link--prev" href="/zh/docs/data-persistence/postgresql-repository"><div class="pagination-nav__sublabel">上一页</div><div class="pagination-nav__label">PostgreSQL 仓储</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/zh/docs/data-persistence/general-sql-database-repository"><div class="pagination-nav__sublabel">下一页</div><div class="pagination-nav__label">通用 SQL 数据库仓储</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#目录" class="table-of-contents__link toc-highlight">目录</a></li><li><a href="#简介" class="table-of-contents__link toc-highlight">简介</a></li><li><a href="#项目结构" class="table-of-contents__link toc-highlight">项目结构</a><ul><li><a href="#redisrepositoryt-设计与实现" class="table-of-contents__link toc-highlight">RedisRepository[T] 设计与实现</a></li></ul></li><li><a href="#附录" class="table-of-contents__link toc-highlight">附录</a><ul><li><a href="#redis-特有操作支持现状" class="table-of-contents__link toc-highlight">Redis 特有操作支持现状</a></li></ul></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Guangzhou Ruiya Information Technology Co., Ltd. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>

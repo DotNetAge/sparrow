@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="zh" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-event-driven-system/message-pub-sub" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">消息发布订阅 | Sparrow</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://sparrow.rayainfo.cn/zh/img/sparrow-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://sparrow.rayainfo.cn/zh/img/sparrow-social-card.jpg"><meta data-rh="true" property="og:url" content="https://sparrow.rayainfo.cn/zh/docs/event-driven-system/message-pub-sub"><meta data-rh="true" property="og:locale" content="zh"><meta data-rh="true" property="og:locale:alternate" content="en"><meta data-rh="true" name="docusaurus_locale" content="zh"><meta data-rh="true" name="docsearch:language" content="zh"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="消息发布订阅 | Sparrow"><meta data-rh="true" name="description" content="目录"><meta data-rh="true" property="og:description" content="目录"><link data-rh="true" rel="icon" href="/zh/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://sparrow.rayainfo.cn/zh/docs/event-driven-system/message-pub-sub"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/event-driven-system/message-pub-sub" hreflang="en"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/zh/docs/event-driven-system/message-pub-sub" hreflang="zh"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/event-driven-system/message-pub-sub" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"消息发布订阅","item":"https://sparrow.rayainfo.cn/zh/docs/event-driven-system/message-pub-sub"}]}</script><link rel="stylesheet" href="/zh/assets/css/styles.63623602.css">
+<script src="/zh/assets/js/runtime~main.38d0fea1.js" defer="defer"></script>
+<script src="/zh/assets/js/main.fd56c047.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="跳到主要内容"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">跳到主要内容</a></div><nav aria-label="主导航" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="切换导航栏" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/zh/"><div class="navbar__logo"><img src="/zh/img/logo.png" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/zh/img/logo.png" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">Sparrow</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/zh/docs/getting-started">Docs</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="iconLanguage_nlXk"><path fill="currentColor" d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"></path></svg>简体中文</a><ul class="dropdown__menu"><li><a href="/docs/event-driven-system/message-pub-sub" target="_self" rel="noopener noreferrer" class="dropdown__link" lang="en">English</a></li><li><a href="/zh/docs/event-driven-system/message-pub-sub" target="_self" rel="noopener noreferrer" class="dropdown__link dropdown__link--active" lang="zh">简体中文</a></li></ul></div><a href="https://github.com/DotNetAge/sparrow" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="切换深色和浅色模式（当前为system mode）"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="回到顶部" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="文档侧边栏" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/getting-started"><span title="快速开始" class="linkLabel_WmDU">快速开始</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/example-project"><span title="示例项目" class="linkLabel_WmDU">示例项目</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/development-guide"><span title="开发指南" class="linkLabel_WmDU">开发指南</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/testing-strategy"><span title="测试策略" class="linkLabel_WmDU">测试策略</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/logging-monitoring"><span title="日志监控" class="linkLabel_WmDU">日志监控</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/utility-functions"><span title="工具函数库" class="linkLabel_WmDU">工具函数库</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/deployment-operations"><span title="部署运维" class="linkLabel_WmDU">部署运维</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/project-overview/"><span title="Project Overview" class="categoryLinkLabel_W154">Project Overview</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/architecture-design/architecture-overview"><span title="Architecture Design" class="categoryLinkLabel_W154">Architecture Design</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/application-framework/"><span title="Application Framework" class="categoryLinkLabel_W154">Application Framework</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/interface-adapters/"><span title="Interface Adapters" class="categoryLinkLabel_W154">Interface Adapters</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/data-persistence/"><span title="Data Persistence" class="categoryLinkLabel_W154">Data Persistence</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/zh/docs/event-driven-system/"><span title="Event-Driven System" class="categoryLinkLabel_W154">Event-Driven System</span></a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/event-driven-system/"><span title="事件驱动系统" class="linkLabel_WmDU">事件驱动系统</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/event-driven-system/event-bus-design"><span title="事件总线设计" class="linkLabel_WmDU">事件总线设计</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/zh/docs/event-driven-system/message-pub-sub"><span title="消息发布订阅" class="linkLabel_WmDU">消息发布订阅</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/event-driven-system/event-projection-system"><span title="事件投影系统" class="linkLabel_WmDU">事件投影系统</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/event-driven-system/saga-coordinator"><span title="Saga 协调器" class="linkLabel_WmDU">Saga 协调器</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/event-driven-system/nats-integration"><span title="NATS 集成" class="linkLabel_WmDU">NATS 集成</span></a></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/task-scheduling-system/"><span title="Task Scheduling System" class="categoryLinkLabel_W154">Task Scheduling System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/domain-model/"><span title="Domain Model" class="categoryLinkLabel_W154">Domain Model</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/authentication-authorization-system/"><span title="Authentication and Authorization System" class="categoryLinkLabel_W154">Authentication and Authorization System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/message-passing/"><span title="Message Passing" class="categoryLinkLabel_W154">Message Passing</span></a></div></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="页面路径"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="主页面" class="breadcrumbs__link" href="/zh/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Event-Driven System</span></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">消息发布订阅</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">本页目录</button></div><div class="theme-doc-markdown markdown"><header><h1>消息发布订阅</h1></header>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="目录">目录<a href="#目录" class="hash-link" aria-label="直接链接到 目录" title="直接链接到 目录" translate="no">​</a></h2>
+<ol>
+<li class=""><a href="#%E7%AE%80%E4%BB%8B" class="">简介</a></li>
+<li class=""><a href="#%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84" class="">项目结构</a></li>
+<li class=""><a href="#%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6" class="">核心组件</a></li>
+<li class=""><a href="#%E6%9E%B6%E6%9E%84%E6%80%BB%E8%A7%88" class="">架构总览</a></li>
+<li class=""><a href="#%E7%BB%84%E4%BB%B6%E8%AF%A6%E8%A7%A3" class="">组件详解</a></li>
+<li class=""><a href="#%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E5%88%86%E6%9E%90" class="">依赖关系分析</a></li>
+<li class=""><a href="#%E6%80%A7%E8%83%BD%E4%B8%8E%E4%BC%98%E5%8C%96" class="">性能与优化</a></li>
+<li class=""><a href="#%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5%E6%8C%87%E5%8D%97" class="">故障排查指南</a></li>
+<li class=""><a href="#%E7%BB%93%E8%AE%BA" class="">结论</a></li>
+<li class=""><a href="#%E9%99%84%E5%BD%95" class="">附录</a></li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="简介">简介<a href="#简介" class="hash-link" aria-label="直接链接到 简介" title="直接链接到 简介" translate="no">​</a></h2>
+<p>本技术文档围绕消息发布订阅机制展开，覆盖发布者与订阅者的实现原理、消息路由规则、过滤器机制；详细说明消息的序列化与反序列化流程、消息格式标准与版本兼容策略；展示点对点通信、发布订阅模式与请求-响应模式的实现思路；并提供消息确认机制、重试策略与死信队列处理建议。文档同时给出性能优化技巧、批量处理策略与内存管理建议，面向消息中间件开发者提供发布订阅系统的完整实现指南。</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="项目结构">项目结构<a href="#项目结构" class="hash-link" aria-label="直接链接到 项目结构" title="直接链接到 项目结构" translate="no">​</a></h2>
+<p>本仓库的消息子系统主要位于 pkg/messaging 与 pkg/eventbus 目录，分别提供事件流（JetStream/NATS）与通用事件总线（内存/其他实现）两类能力：</p>
+<ul>
+<li class="">事件流（JetStream/NATS）：提供高吞吐、持久化、重放能力，适合事件驱动架构中的事件存储与分发。</li>
+<li class="">通用事件总线：提供内存事件总线实现，便于测试与本地开发。</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">发布器接口与实现<!-- -->
+<ul>
+<li class="">StreamPublisher：统一的事件流发布接口，定义 Publish 与 PublishEvents。</li>
+<li class="">JetStreamPublisher：基于 NATS JetStream 的事件流发布器，负责确保流存在、主题映射与事件发布。</li>
+<li class="">EventPublisher：将领域事件转换为通用事件并发布到通用事件总线（用于与投影/事件存储集成）。</li>
+</ul>
+</li>
+<li class="">订阅器接口与实现<!-- -->
+<ul>
+<li class="">StreamSubscriber：统一的事件流订阅接口，定义 Start、Stop。</li>
+<li class="">JetStreamSubscriber：泛型订阅器，支持优雅关闭、显式确认、错误处理与重试。</li>
+<li class="">EventSubscriber：通用事件订阅器，支持服务名、聚合类型与事件类型的过滤。</li>
+</ul>
+</li>
+<li class="">事件流读取器<!-- -->
+<ul>
+<li class="">JetStreamReader：基于 JetStream 的事件读取器，支持按聚合ID、版本、偏移量重放，以及过滤函数。</li>
+</ul>
+</li>
+<li class="">事件总线<!-- -->
+<ul>
+<li class="">EventBus 接口与 MemoryEventBus：提供内存事件总线实现，便于测试与本地开发。</li>
+</ul>
+</li>
+</ul>
+<p>下图展示了发布者、订阅者、事件流与事件总线之间的交互关系，以及消息在系统中的流转路径。</p>
+<!-- -->
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="发布者jetstreampublisher">发布者：JetStreamPublisher<a href="#发布者jetstreampublisher" class="hash-link" aria-label="直接链接到 发布者：JetStreamPublisher" title="直接链接到 发布者：JetStreamPublisher" translate="no">​</a></h3>
+<ul>
+<li class="">角色与职责<!-- -->
+<ul>
+<li class="">确保事件流存在（按服务名作为流名），自动创建流与主题。</li>
+<li class="">将领域事件序列化为 JSON，并以聚合类型.聚合ID.事件类型为主题发布到 JetStream。</li>
+<li class="">提供 Publish 与 PublishEvents 批量发布能力。</li>
+</ul>
+</li>
+<li class="">主题命名与路由<!-- -->
+<ul>
+<li class="">主题格式：聚合类型.聚合ID.事件类型，便于 JetStream Consumer 按主题过滤。</li>
+<li class="">聚合类型集合通过选项注入，确保流的主题集合覆盖服务内全部聚合类型。</li>
+</ul>
+</li>
+<li class="">序列化与负载<!-- -->
+<ul>
+<li class="">事件对象 JSON 序列化后写入 BaseEvent.Payload 字段，使用 Base64 编码以兼容二进制负载。</li>
+</ul>
+</li>
+<li class="">错误处理与日志<!-- -->
+<ul>
+<li class="">发布失败记录错误日志并返回错误；创建流失败时记录致命日志并终止。</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">角色与职责<!-- -->
+<ul>
+<li class="">泛型订阅器，绑定单一事件类型，支持优雅启动与停止。</li>
+<li class="">显式确认（Ack）保证可靠性；处理失败时 NAK 触发重试。</li>
+<li class="">生命周期精确控制：通过 WaitGroup 与上下文取消确保优雅关闭。</li>
+</ul>
+</li>
+<li class="">消费与反序列化<!-- -->
+<ul>
+<li class="">消费回调中先反序列化为 BaseEvent，再通过实体层的反序列化函数还原为具体事件类型。</li>
+<li class="">消息处理失败时记录错误并 NAK，交由 JetStream 重试。</li>
+</ul>
+</li>
+<li class="">过滤与重放<!-- -->
+<ul>
+<li class="">Consumer 配置使用 FilterSubject 限定事件类型，支持 DeliverAllPolicy 与 ReplayInstantPolicy。</li>
+<li class="">通过 OptStartSeq 支持按偏移量重放，结合事件版本进行有序应用。</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">角色与职责<!-- -->
+<ul>
+<li class="">基于 JetStream 的事件读取器，支持按聚合ID、版本范围、偏移量重放。</li>
+<li class="">采用临时消费者（ephemeral）模式，避免持久化消费者带来的状态复杂性。</li>
+</ul>
+</li>
+<li class="">读取与过滤<!-- -->
+<ul>
+<li class="">使用 FilterSubject 限定聚合类型与聚合ID，结合过滤函数进一步筛选事件。</li>
+<li class="">支持按版本升序排序后应用到聚合根，保证事件应用顺序。</li>
+</ul>
+</li>
+<li class="">错误处理<!-- -->
+<ul>
+<li class="">反序列化失败或应用失败时记录错误并跳过或返回错误。</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">通用事件总线（MemoryEventBus）<!-- -->
+<ul>
+<li class="">提供 Pub/Sub/Unsub/Close 能力，内部以 map 存储处理器列表，支持异步调用。</li>
+<li class="">适用于测试与本地开发，便于验证事件分发与处理器行为。</li>
+</ul>
+</li>
+<li class="">通用事件订阅器（EventSubscriber）<!-- -->
+<ul>
+<li class="">支持服务名、聚合类型与事件类型的过滤，格式为 服务名.聚合类型.事件类型。</li>
+<li class="">对从事件总线接收到的通用事件进行 Base64 解码与 JSON 反序列化，再调用领域事件处理器。</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">角色与职责<!-- -->
+<ul>
+<li class="">将事件存储中的领域事件转换为通用事件（包含完整主题：服务名.聚合类型.事件类型），并发布到通用事件总线。</li>
+<li class="">支持发布聚合的全部事件与未提交事件。</li>
+</ul>
+</li>
+<li class="">序列化与主题命名<!-- -->
+<ul>
+<li class="">使用 JSON 序列化领域事件，Base64 编码后放入通用事件的 Payload 字段。</li>
+<li class="">主题命名遵循服务名.聚合类型.事件类型，便于跨服务事件分发与过滤。</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">接口与实现<!-- -->
+<ul>
+<li class="">StreamPublisher/StreamSubscriber 为事件流发布与订阅的抽象接口，JetStreamPublisher/JetStreamSubscriber 为其具体实现。</li>
+<li class="">EventBus 为通用事件总线接口，MemoryEventBus 为其内存实现。</li>
+</ul>
+</li>
+<li class="">组件耦合<!-- -->
+<ul>
+<li class="">JetStreamPublisher 依赖 NATS JetStream 客户端，负责流与主题管理。</li>
+<li class="">JetStreamSubscriber 依赖 NATS JetStream Consumer，负责消费与确认。</li>
+<li class="">EventPublisher 依赖事件存储与通用事件总线，负责领域事件到通用事件的转换。</li>
+<li class="">EventSubscriber 依赖通用事件总线，负责通用事件到领域事件的反序列化与过滤。</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">
+<p>发布侧优化</p>
+<ul>
+<li class="">批量发布：使用 PublishEvents 一次发布多个事件，减少网络往返与 JetStream 调用开销。</li>
+<li class="">主题设计：聚合类型.聚合ID.事件类型主题具备良好分区与过滤能力，有助于消费者并行处理。</li>
+<li class="">负载压缩：若事件负载较大，可在业务层引入压缩后再 Base64 编码，降低传输体积。</li>
+</ul>
+</li>
+<li class="">
+<p>订阅侧优化</p>
+<ul>
+<li class="">并发处理：通过多个 JetStreamSubscriber 实例并行消费不同事件类型，提高吞吐。</li>
+<li class="">分区与重放：利用 OptStartSeq 与版本重放，避免全量重放带来的压力。</li>
+<li class="">背压与限流：在处理器中增加限速与背压控制，防止瞬时高峰导致内存与 CPU 峰值。</li>
+</ul>
+</li>
+<li class="">
+<p>内存管理</p>
+<ul>
+<li class="">事件反序列化尽量复用对象池或缓冲区，减少 GC 压力。</li>
+<li class="">处理器中避免持有大对象引用，及时释放不再使用的资源。</li>
+</ul>
+</li>
+<li class="">
+<p>事件流配置</p>
+<ul>
+<li class="">JetStream 流配置（最大消息年龄、大小、消息大小）可根据业务需求调整，避免无限增长导致磁盘与内存压力。</li>
+</ul>
+</li>
+<li class="">
+<p>发布失败</p>
+<ul>
+<li class="">检查 JetStream 客户端连接与权限；查看日志中“创建流失败/发布事件失败”的错误信息。</li>
+<li class="">确认主题格式与聚合类型集合是否正确配置。</li>
+</ul>
+</li>
+<li class="">
+<p>订阅失败或无消息</p>
+<ul>
+<li class="">检查 Consumer 配置（FilterSubject/Durable/AckPolicy）与 JetStream 流是否存在。</li>
+<li class="">确认事件负载是否正确序列化与 Base64 编码。</li>
+</ul>
+</li>
+<li class="">
+<p>处理失败与重试</p>
+<ul>
+<li class="">订阅器在处理器返回错误时会 NAK，触发 JetStream 重试；检查日志中的“事件处理失败/消息确认失败”。</li>
+<li class="">若持续失败，考虑引入死信队列（DLQ）策略：将多次失败的消息转移到专用主题，后续人工干预。</li>
+</ul>
+</li>
+<li class="">
+<p>优雅关闭</p>
+<ul>
+<li class="">使用 Stop(ctx) 并传入超时上下文，确保处理完成或超时后强制退出；检查 WaitGroup 是否正确等待。</li>
+</ul>
+</li>
+</ul>
+<p>本消息发布订阅系统通过统一的接口抽象与 JetStream/NATS 的事件流能力，提供了高可靠、可扩展的事件驱动架构支撑。发布者与订阅者均具备明确的生命周期控制与错误处理机制；事件序列化与主题命名规范保证了跨服务的可发现性与可维护性。结合批处理、并行消费与内存管理等优化手段，可在高并发场景下获得稳定性能。建议在生产环境中配合死信队列与监控告警体系，进一步提升系统的可观测性与可运维性。</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="附录">附录<a href="#附录" class="hash-link" aria-label="直接链接到 附录" title="直接链接到 附录" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="消息格式与版本兼容">消息格式与版本兼容<a href="#消息格式与版本兼容" class="hash-link" aria-label="直接链接到 消息格式与版本兼容" title="直接链接到 消息格式与版本兼容" translate="no">​</a></h3>
+<ul>
+<li class="">
+<p>消息格式</p>
+<ul>
+<li class="">事件负载采用 JSON 序列化，Base64 编码后放入 Payload 字段。</li>
+<li class="">主题格式：聚合类型.聚合ID.事件类型；通用事件格式包含 id、event_type、timestamp、payload。</li>
+</ul>
+</li>
+<li class="">
+<p>版本兼容</p>
+<ul>
+<li class="">事件版本字段可用于重放与排序，确保事件应用顺序。</li>
+<li class="">建议在事件结构中引入版本号字段，以便在升级时进行向后兼容处理。</li>
+</ul>
+</li>
+<li class="">
+<p>JetStream 发布订阅多聚合与多事件类型测试</p>
+<ul>
+<li class="">启动 NATS JetStream 容器，创建发布器与总线，注册多个处理器，发布多种事件并验证接收。</li>
+</ul>
+</li>
+<li class="">
+<p>事件流读取与重放测试</p>
+<ul>
+<li class="">使用 JetStreamReader 按聚合ID、版本范围与偏移量读取事件并应用到聚合根。</li>
+</ul>
+</li>
+</ul></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="文档页面导航"><a class="pagination-nav__link pagination-nav__link--prev" href="/zh/docs/event-driven-system/event-bus-design"><div class="pagination-nav__sublabel">上一页</div><div class="pagination-nav__label">事件总线设计</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/zh/docs/event-driven-system/event-projection-system"><div class="pagination-nav__sublabel">下一页</div><div class="pagination-nav__label">事件投影系统</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#目录" class="table-of-contents__link toc-highlight">目录</a></li><li><a href="#简介" class="table-of-contents__link toc-highlight">简介</a></li><li><a href="#项目结构" class="table-of-contents__link toc-highlight">项目结构</a><ul><li><a href="#发布者jetstreampublisher" class="table-of-contents__link toc-highlight">发布者：JetStreamPublisher</a></li></ul></li><li><a href="#附录" class="table-of-contents__link toc-highlight">附录</a><ul><li><a href="#消息格式与版本兼容" class="table-of-contents__link toc-highlight">消息格式与版本兼容</a></li></ul></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Guangzhou Ruiya Information Technology Co., Ltd. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>

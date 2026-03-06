@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="zh" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-application-framework/configuration-management/database-configuration" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">数据库配置 | Sparrow</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://sparrow.rayainfo.cn/zh/img/sparrow-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://sparrow.rayainfo.cn/zh/img/sparrow-social-card.jpg"><meta data-rh="true" property="og:url" content="https://sparrow.rayainfo.cn/zh/docs/application-framework/configuration-management/database-configuration"><meta data-rh="true" property="og:locale" content="zh"><meta data-rh="true" property="og:locale:alternate" content="en"><meta data-rh="true" name="docusaurus_locale" content="zh"><meta data-rh="true" name="docsearch:language" content="zh"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="数据库配置 | Sparrow"><meta data-rh="true" name="description" content="目录"><meta data-rh="true" property="og:description" content="目录"><link data-rh="true" rel="icon" href="/zh/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://sparrow.rayainfo.cn/zh/docs/application-framework/configuration-management/database-configuration"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/application-framework/configuration-management/database-configuration" hreflang="en"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/zh/docs/application-framework/configuration-management/database-configuration" hreflang="zh"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/application-framework/configuration-management/database-configuration" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"数据库配置","item":"https://sparrow.rayainfo.cn/zh/docs/application-framework/configuration-management/database-configuration"}]}</script><link rel="stylesheet" href="/zh/assets/css/styles.63623602.css">
+<script src="/zh/assets/js/runtime~main.38d0fea1.js" defer="defer"></script>
+<script src="/zh/assets/js/main.fd56c047.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="跳到主要内容"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">跳到主要内容</a></div><nav aria-label="主导航" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="切换导航栏" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/zh/"><div class="navbar__logo"><img src="/zh/img/logo.png" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/zh/img/logo.png" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">Sparrow</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/zh/docs/getting-started">Docs</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="iconLanguage_nlXk"><path fill="currentColor" d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"></path></svg>简体中文</a><ul class="dropdown__menu"><li><a href="/docs/application-framework/configuration-management/database-configuration" target="_self" rel="noopener noreferrer" class="dropdown__link" lang="en">English</a></li><li><a href="/zh/docs/application-framework/configuration-management/database-configuration" target="_self" rel="noopener noreferrer" class="dropdown__link dropdown__link--active" lang="zh">简体中文</a></li></ul></div><a href="https://github.com/DotNetAge/sparrow" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="切换深色和浅色模式（当前为system mode）"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="回到顶部" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="文档侧边栏" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/getting-started"><span title="快速开始" class="linkLabel_WmDU">快速开始</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/example-project"><span title="示例项目" class="linkLabel_WmDU">示例项目</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/development-guide"><span title="开发指南" class="linkLabel_WmDU">开发指南</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/testing-strategy"><span title="测试策略" class="linkLabel_WmDU">测试策略</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/logging-monitoring"><span title="日志监控" class="linkLabel_WmDU">日志监控</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/utility-functions"><span title="工具函数库" class="linkLabel_WmDU">工具函数库</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/deployment-operations"><span title="部署运维" class="linkLabel_WmDU">部署运维</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/project-overview/"><span title="Project Overview" class="categoryLinkLabel_W154">Project Overview</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/architecture-design/architecture-overview"><span title="Architecture Design" class="categoryLinkLabel_W154">Architecture Design</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/zh/docs/application-framework/"><span title="Application Framework" class="categoryLinkLabel_W154">Application Framework</span></a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/application-framework/"><span title="应用框架" class="linkLabel_WmDU">应用框架</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/application-framework/application-startup-process"><span title="应用启动流程" class="linkLabel_WmDU">应用启动流程</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/application-framework/service-lifecycle-management"><span title="服务生命周期管理" class="linkLabel_WmDU">服务生命周期管理</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/application-framework/dependency-injection-container"><span title="依赖注入容器" class="linkLabel_WmDU">依赖注入容器</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" tabindex="0" href="/zh/docs/application-framework/configuration-management/configuration-management-system"><span title="Configuration Management System" class="categoryLinkLabel_W154">Configuration Management System</span></a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/application-framework/configuration-management/configuration-management-system"><span title="配置管理系统" class="linkLabel_WmDU">配置管理系统</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/application-framework/configuration-management/application-configuration"><span title="应用配置" class="linkLabel_WmDU">应用配置</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/zh/docs/application-framework/configuration-management/database-configuration"><span title="数据库配置" class="linkLabel_WmDU">数据库配置</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/application-framework/configuration-management/http-server-configuration"><span title="HTTP服务器配置" class="linkLabel_WmDU">HTTP服务器配置</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/application-framework/configuration-management/message-queue-configuration"><span title="消息队列配置" class="linkLabel_WmDU">消息队列配置</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/application-framework/configuration-management/logging-configuration"><span title="日志配置" class="linkLabel_WmDU">日志配置</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/application-framework/configuration-management/security-configuration"><span title="安全配置" class="linkLabel_WmDU">安全配置</span></a></li></ul></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/interface-adapters/"><span title="Interface Adapters" class="categoryLinkLabel_W154">Interface Adapters</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/data-persistence/"><span title="Data Persistence" class="categoryLinkLabel_W154">Data Persistence</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/event-driven-system/"><span title="Event-Driven System" class="categoryLinkLabel_W154">Event-Driven System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/task-scheduling-system/"><span title="Task Scheduling System" class="categoryLinkLabel_W154">Task Scheduling System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/domain-model/"><span title="Domain Model" class="categoryLinkLabel_W154">Domain Model</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/authentication-authorization-system/"><span title="Authentication and Authorization System" class="categoryLinkLabel_W154">Authentication and Authorization System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/message-passing/"><span title="Message Passing" class="categoryLinkLabel_W154">Message Passing</span></a></div></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="页面路径"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="主页面" class="breadcrumbs__link" href="/zh/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Application Framework</span></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Configuration Management System</span></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">数据库配置</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">本页目录</button></div><div class="theme-doc-markdown markdown"><header><h1>数据库配置</h1></header>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="目录">目录<a href="#目录" class="hash-link" aria-label="直接链接到 目录" title="直接链接到 目录" translate="no">​</a></h2>
+<ol>
+<li class=""><a href="#%E7%AE%80%E4%BB%8B" class="">简介</a></li>
+<li class=""><a href="#%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84" class="">项目结构</a></li>
+<li class=""><a href="#%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6" class="">核心组件</a></li>
+<li class=""><a href="#%E6%9E%B6%E6%9E%84%E6%A6%82%E8%A7%88" class="">架构概览</a></li>
+<li class=""><a href="#%E8%AF%A6%E7%BB%86%E7%BB%84%E4%BB%B6%E5%88%86%E6%9E%90" class="">详细组件分析</a></li>
+<li class=""><a href="#%E4%BE%9D%E8%B5%96%E5%88%86%E6%9E%90" class="">依赖分析</a></li>
+<li class=""><a href="#%E6%80%A7%E8%83%BD%E8%80%83%E8%99%91" class="">性能考虑</a></li>
+<li class=""><a href="#%E6%95%85%E9%9A%9C%E6%8E%92%E9%99%A4%E6%8C%87%E5%8D%97" class="">故障排除指南</a></li>
+<li class=""><a href="#%E7%BB%93%E8%AE%BA" class="">结论</a></li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="简介">简介<a href="#简介" class="hash-link" aria-label="直接链接到 简介" title="直接链接到 简介" translate="no">​</a></h2>
+<p>本文件面向数据库配置的综合说明，涵盖关系型数据库（PostgreSQL、MySQL、SQLite）、Redis 以及 BadgerDB 的配置要点、连接参数、驱动选择与连接池设置，并提供性能优化建议与故障排除指南。文档基于仓库中的配置模型与启动流程进行整理，帮助开发者快速理解与部署。</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="项目结构">项目结构<a href="#项目结构" class="hash-link" aria-label="直接链接 到 项目结构" title="直接链接到 项目结构" translate="no">​</a></h2>
+<p>数据库配置主要分布在以下模块：</p>
+<ul>
+<li class="">配置层：定义各类数据库配置结构体与默认值加载</li>
+<li class="">启动层：根据配置创建数据库连接与仓储实例</li>
+<li class="">仓储层：提供通用的 CRUD 与查询能力封装</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">配置结构体<!-- -->
+<ul>
+<li class="">SQLConfig：驱动、主机、端口、用户名、密码、数据库名、事件存储专用库名</li>
+<li class="">RedisConfig：主机、端口、密码、数据库编号、事件存储专用数据库编号</li>
+<li class="">BadgerConfig：数据目录、事件存储目录、值阈值、压缩器、紧凑器数量</li>
+</ul>
+</li>
+<li class="">默认值与加载<!-- -->
+<ul>
+<li class="">SetDefaults：为各配置项设置默认值（如 Redis/SQL/Badger 的默认主机、端口、路径等）</li>
+<li class="">Load：加载配置文件、环境变量、校验配置有效性</li>
+</ul>
+</li>
+<li class="">启动与连接<!-- -->
+<ul>
+<li class="">Database：统一持有 Redis、SQL、Badger 客户端</li>
+<li class="">启动选项：注册 SQL/Redis/Badger 实例，构建仓储</li>
+</ul>
+</li>
+</ul>
+<p>数据库配置与启动的整体流程如下：</p>
+<!-- -->
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="关系型数据库配置postgresqlmysqlsqlite">关系型数据库配置（PostgreSQL、MySQL、SQLite）<a href="#关系型数据库配置postgresqlmysqlsqlite" class="hash-link" aria-label="直接链接到 关系型数据库配置（PostgreSQL、MySQL、SQLite）" title="直接链接到 关系型数据库配置（PostgreSQL、MySQL、SQLite）" translate="no">​</a></h3>
+<ul>
+<li class="">驱动与连接参数<!-- -->
+<ul>
+<li class="">驱动：通过 SQLConfig.Driver 指定（默认 postgres）</li>
+<li class="">连接参数：Host、Port、User、Password、Dbname、ESDbname（事件存储专用库名）</li>
+<li class="">DSN 构造：SQLConfig.Dsn()/ESDsn() 提供标准 DSN 格式</li>
+</ul>
+</li>
+<li class="">连接池设置<!-- -->
+<ul>
+<li class="">代码中未直接暴露连接池参数（如最大连接数、空闲数、生命周期），但可通过数据库驱动的扩展接口在启动阶段进行配置</li>
+<li class="">示例：SQLiteDB 启动选项中对 sqlite3 进行了 PRAGMA 配置（WAL、同步级别、缓存大小、busy_timeout、外键约束）</li>
+</ul>
+</li>
+<li class="">事件存储专用库<!-- -->
+<ul>
+<li class="">ESDsn 与 ESDbname 用于事件存储场景下的独立数据库</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">连接信息与认证<!-- -->
+<ul>
+<li class="">主机与端口：Host、Port</li>
+<li class="">密码认证：Password</li>
+<li class="">数据库选择：DB（默认 0）</li>
+<li class="">事件存储专用数据库：ESDB（默认 1）</li>
+</ul>
+</li>
+<li class="">客户端创建<!-- -->
+<ul>
+<li class="">newRedis 根据配置构造 redis.Client，包含 Addr、Password、DB</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">数据目录与事件存储目录<!-- -->
+<ul>
+<li class="">DataDir：普通视图存储目录</li>
+<li class="">EventStoreDir：事件存储目录</li>
+</ul>
+</li>
+<li class="">性能参数<!-- -->
+<ul>
+<li class="">ValueThreshold：阈值，决定小值是否进入 LSM 树</li>
+<li class="">NumCompactors：紧凑器数量</li>
+<li class="">压缩器：默认 ZSTD（可在启动选项中设置）</li>
+</ul>
+</li>
+<li class="">内存与文件大小<!-- -->
+<ul>
+<li class="">启动选项中设置了内存表大小、值日志文件大小等参数，用于平衡吞吐与资源占用</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">SQL 仓储<!-- -->
+<ul>
+<li class="">泛型实现，支持事务、软删除检测、分页、条件查询、批量操作</li>
+<li class="">通过底层 sql.DB 执行 SQL 操作</li>
+</ul>
+</li>
+<li class="">Redis 仓储<!-- -->
+<ul>
+<li class="">基于键前缀命名空间，支持 TTL、批量 Pipeline、全表扫描条件查询</li>
+</ul>
+</li>
+<li class="">Badger 仓储<!-- -->
+<ul>
+<li class="">基于键前缀与迭代器，支持事务读写、批量更新、分页与条件过滤</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">配置到启动的依赖<!-- -->
+<ul>
+<li class="">Config 聚合 SQL/Redis/Badger 配置</li>
+<li class="">Load 负责默认值注入与校验</li>
+<li class="">启动选项根据配置创建具体客户端并注册到容器</li>
+</ul>
+</li>
+<li class="">仓储到数据库的依赖<!-- -->
+<ul>
+<li class="">仓储通过底层数据库客户端执行操作</li>
+<li class="">不同数据库的特性（如软删除、事务）在仓储层体现</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">关系型数据库（PostgreSQL/MySQL/SQLite）<!-- -->
+<ul>
+<li class="">连接池参数未在配置中直接暴露，可在启动阶段通过驱动扩展接口设置（如 sqlite3 的 PRAGMA 已示例）</li>
+<li class="">建议结合业务并发与查询特征调整最大连接数、空闲连接数、连接生命周期</li>
+</ul>
+</li>
+<li class="">Redis<!-- -->
+<ul>
+<li class="">使用 Pipeline 批量操作减少 RTT</li>
+<li class="">合理设置 TTL 与键空间前缀，避免全表扫描</li>
+<li class="">根据数据规模选择合适的数据库编号，隔离事件存储</li>
+</ul>
+</li>
+<li class="">BadgerDB<!-- -->
+<ul>
+<li class="">通过启动选项设置内存表大小、值日志文件大小与压缩器，平衡吞吐与资源</li>
+<li class="">ValueThreshold 控制小值与大值的存储策略，影响 LSM 树结构与读写性能</li>
+<li class="">NumCompactors 影响后台压缩负载，需按数据增长速率调优</li>
+</ul>
+</li>
+</ul>
+<p>[本节为通用性能建议，不直接分析具体文件]</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="故障排除指南">故障排除指南<a href="#故障排除指南" class="hash-link" aria-label="直接链接到 故障排除指南" title="直接链接到 故障排除指南" translate="no">​</a></h2>
+<ul>
+<li class="">配置加载失败<!-- -->
+<ul>
+<li class="">检查配置文件格式与路径，确认默认值是否正确设置</li>
+<li class="">确认环境变量键名替换规则与实际环境变量一致</li>
+</ul>
+</li>
+<li class="">连接失败<!-- -->
+<ul>
+<li class="">校验主机、端口、密码、数据库名是否正确</li>
+<li class="">对 Redis：确认密码与数据库编号；对 SQL：确认 DSN 格式与驱动可用性</li>
+</ul>
+</li>
+<li class="">运行时错误<!-- -->
+<ul>
+<li class="">SQL：关注事务开启、回滚与提交时机，确保实体 ID 与软删除字段存在</li>
+<li class="">Redis：注意键前缀与 TTL 设置，避免误删或过期导致的数据丢失</li>
+<li class="">Badger：注意键前缀与迭代器使用，避免并发读写冲突</li>
+</ul>
+</li>
+</ul>
+<p>本项目提供了清晰的数据库配置模型与启动流程，支持关系型数据库、Redis 与 BadgerDB 的基础配置与运行时访问。对于连接池与更细粒度的性能参数，可在启动阶段通过驱动扩展接口进行补充配置。建议结合业务场景对连接池、压缩策略与键空间设计进行针对性优化，并在生产环境中加强配置校验与监控告警。</p></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="文档页面导航"><a class="pagination-nav__link pagination-nav__link--prev" href="/zh/docs/application-framework/configuration-management/application-configuration"><div class="pagination-nav__sublabel">上一页</div><div class="pagination-nav__label">应用配置</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/zh/docs/application-framework/configuration-management/http-server-configuration"><div class="pagination-nav__sublabel">下一页</div><div class="pagination-nav__label">HTTP服务器配置</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#目录" class="table-of-contents__link toc-highlight">目录</a></li><li><a href="#简介" class="table-of-contents__link toc-highlight">简介</a></li><li><a href="#项目结构" class="table-of-contents__link toc-highlight">项目结构</a><ul><li><a href="#关系型数据库配置postgresqlmysqlsqlite" class="table-of-contents__link toc-highlight">关系型数据库配置（PostgreSQL、MySQL、SQLite）</a></li></ul></li><li><a href="#故障排除指南" class="table-of-contents__link toc-highlight">故障排除指南</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Guangzhou Ruiya Information Technology Co., Ltd. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>

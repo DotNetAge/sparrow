@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-message-passing/pub-sub-mechanism" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">Pub/Sub Mechanism | Sparrow</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://sparrow.rayainfo.cn/img/sparrow-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://sparrow.rayainfo.cn/img/sparrow-social-card.jpg"><meta data-rh="true" property="og:url" content="https://sparrow.rayainfo.cn/docs/message-passing/pub-sub-mechanism"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" property="og:locale:alternate" content="zh"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Pub/Sub Mechanism | Sparrow"><meta data-rh="true" name="description" content="Table of Contents"><meta data-rh="true" property="og:description" content="Table of Contents"><link data-rh="true" rel="icon" href="/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://sparrow.rayainfo.cn/docs/message-passing/pub-sub-mechanism"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/message-passing/pub-sub-mechanism" hreflang="en"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/zh/docs/message-passing/pub-sub-mechanism" hreflang="zh"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/message-passing/pub-sub-mechanism" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Pub/Sub Mechanism","item":"https://sparrow.rayainfo.cn/docs/message-passing/pub-sub-mechanism"}]}</script><link rel="stylesheet" href="/assets/css/styles.63623602.css">
+<script src="/assets/js/runtime~main.12b7ca60.js" defer="defer"></script>
+<script src="/assets/js/main.c8504be0.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/"><div class="navbar__logo"><img src="/img/logo.png" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/img/logo.png" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">Sparrow</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/getting-started">Docs</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="iconLanguage_nlXk"><path fill="currentColor" d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"></path></svg>English</a><ul class="dropdown__menu"><li><a href="/docs/message-passing/pub-sub-mechanism" target="_self" rel="noopener noreferrer" class="dropdown__link dropdown__link--active" lang="en">English</a></li><li><a href="/zh/docs/message-passing/pub-sub-mechanism" target="_self" rel="noopener noreferrer" class="dropdown__link" lang="zh">简体中文</a></li></ul></div><a href="https://github.com/DotNetAge/sparrow" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/getting-started"><span title="Getting Started" class="linkLabel_WmDU">Getting Started</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/example-project"><span title="Example Project" class="linkLabel_WmDU">Example Project</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/development-guide"><span title="Development Guide" class="linkLabel_WmDU">Development Guide</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/testing-strategy"><span title="Testing Strategy" class="linkLabel_WmDU">Testing Strategy</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/logging-monitoring"><span title="Logging and Monitoring" class="linkLabel_WmDU">Logging and Monitoring</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/utility-functions"><span title="Utility Functions Library" class="linkLabel_WmDU">Utility Functions Library</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/deployment-operations"><span title="Deployment and Operations" class="linkLabel_WmDU">Deployment and Operations</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/project-overview/"><span title="Project Overview" class="categoryLinkLabel_W154">Project Overview</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/architecture-design/architecture-overview"><span title="Architecture Design" class="categoryLinkLabel_W154">Architecture Design</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/application-framework/"><span title="Application Framework" class="categoryLinkLabel_W154">Application Framework</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/interface-adapters/"><span title="Interface Adapters" class="categoryLinkLabel_W154">Interface Adapters</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/data-persistence/"><span title="Data Persistence" class="categoryLinkLabel_W154">Data Persistence</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/event-driven-system/"><span title="Event-Driven System" class="categoryLinkLabel_W154">Event-Driven System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/task-scheduling-system/"><span title="Task Scheduling System" class="categoryLinkLabel_W154">Task Scheduling System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/domain-model/"><span title="Domain Model" class="categoryLinkLabel_W154">Domain Model</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/authentication-authorization-system/"><span title="Authentication and Authorization System" class="categoryLinkLabel_W154">Authentication and Authorization System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/docs/message-passing/"><span title="Message Passing" class="categoryLinkLabel_W154">Message Passing</span></a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/message-passing/"><span title="Message Passing" class="linkLabel_WmDU">Message Passing</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/message-passing/message-bus-architecture"><span title="Message Bus Architecture" class="linkLabel_WmDU">Message Bus Architecture</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/docs/message-passing/pub-sub-mechanism"><span title="Pub/Sub Mechanism" class="linkLabel_WmDU">Pub/Sub Mechanism</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/message-passing/multi-protocol-support"><span title="Multi-Protocol Support" class="linkLabel_WmDU">Multi-Protocol Support</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/message-passing/nats-integration"><span title="NATS Integration" class="linkLabel_WmDU">NATS Integration</span></a></li></ul></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Message Passing</span></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">Pub/Sub Mechanism</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>Pub/Sub Mechanism</h1></header>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="table-of-contents">Table of Contents<a href="#table-of-contents" class="hash-link" aria-label="Direct link to Table of Contents" title="Direct link to Table of Contents" translate="no">​</a></h2>
+<ol>
+<li class=""><a href="#introduction" class="">Introduction</a></li>
+<li class=""><a href="#project-structure" class="">Project Structure</a></li>
+<li class=""><a href="#core-components" class="">Core Components</a></li>
+<li class=""><a href="#architecture-overview" class="">Architecture Overview</a></li>
+<li class=""><a href="#detailed-component-analysis" class="">Detailed Component Analysis</a></li>
+<li class=""><a href="#dependency-analysis" class="">Dependency Analysis</a></li>
+<li class=""><a href="#performance-considerations" class="">Performance Considerations</a></li>
+<li class=""><a href="#troubleshooting-guide" class="">Troubleshooting Guide</a></li>
+<li class=""><a href="#conclusion" class="">Conclusion</a></li>
+<li class=""><a href="#appendix" class="">Appendix</a></li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="introduction">Introduction<a href="#introduction" class="hash-link" aria-label="Direct link to Introduction" title="Direct link to Introduction" translate="no">​</a></h2>
+<p>This document systematically describes the pub/sub mechanism in this repository, covering the following aspects:</p>
+<ul>
+<li class="">Publisher and subscriber design patterns and responsibility boundaries</li>
+<li class="">Topic naming and routing strategies, message distribution algorithms</li>
+<li class="">Publish acknowledgment and subscribe acknowledgment processes, receipt handling</li>
+<li class="">Configuration items and performance tuning parameters</li>
+<li class="">Custom publisher and subscriber implementation example paths</li>
+<li class="">Message loss and duplicate processing strategies</li>
+<li class="">Best practices and common pitfalls</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="project-structure">Project Structure<a href="#project-structure" class="hash-link" aria-label="Direct link to Project Structure" title="Direct link to Project Structure" translate="no">​</a></h2>
+<p>Around pub/sub, related modules are mainly located under pkg/messaging, divided into three layers:</p>
+<ul>
+<li class="">Interface and Abstraction Layer: Defines publish/subscribe, event reading and other interfaces and generic constraints</li>
+<li class="">Adapter Layer: NATS JetStream-based publisher, subscriber and event reader implementations</li>
+<li class="">Business Integration Layer: Event publisher (publishes aggregate events to event bus), event subscriber (subscribes from event bus and distributes)</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">StreamPublisher: Unified event publishing interface, supports single event and batch event publishing</li>
+<li class="">StreamSubscriber: Unified event subscription interface, supports Start/Stop/Close lifecycle</li>
+<li class="">StreamReader: Event stream reading and replay interface, supports replay by aggregate ID, version, offset</li>
+<li class="">EventPublisher: Publishes aggregate uncommitted events to event bus (generic event model)</li>
+<li class="">EventSubscriber[T]: Subscribes from event bus and filters by topic, deserializes to strongly-typed events and hands over to handler for processing</li>
+<li class="">JetStreamPublisher: NATS JetStream-based event publisher, automatically ensures stream exists, topic is aggregateType.aggregateID.eventType</li>
+<li class="">JetStreamSubscriber[T]: NATS JetStream-based event subscriber, explicit acknowledgment, graceful shutdown, ephemeral consumer mode</li>
+<li class="">JetStreamReader: NATS JetStream-based event reader, supports ephemeral consumer, batch pulling, replay by version/offset</li>
+</ul>
+<p>The overall pub/sub flow is as follows:</p>
+<ul>
+<li class="">Aggregate produces events → Event publisher publishes events to event bus (or directly publishes to JetStream)</li>
+<li class="">Subscriber registers handler → Subscribes to event topic → Consumer pulls messages from JetStream → Deserializes to strongly-typed events → Calls domain handler</li>
+<li class="">Event reader is used for offline replay and aggregate reconstruction</li>
+</ul>
+<!-- -->
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="publisher-design-and-responsibilities">Publisher Design and Responsibilities<a href="#publisher-design-and-responsibilities" class="hash-link" aria-label="Direct link to Publisher Design and Responsibilities" title="Direct link to Publisher Design and Responsibilities" translate="no">​</a></h3>
+<ul>
+<li class="">EventPublisher<!-- -->
+<ul>
+<li class="">Responsibility: Reads events from event store, constructs complete topic (serviceName.aggregateType.eventType), serializes domain events and publishes to event bus</li>
+<li class="">Key Points: Topic naming, Base64 payload, publish one by one</li>
+</ul>
+</li>
+<li class="">JetStreamPublisher<!-- -->
+<ul>
+<li class="">Responsibility: Ensures JetStream stream exists, publishes events by aggregateType.aggregateID.eventType topic</li>
+<li class="">Key Points: Stream configuration Subjects, Retention policy, explicit acknowledgment, batch publishing</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">EventSubscriber[T]<!-- -->
+<ul>
+<li class="">Responsibility: Validates parameters during initialization, encodes topic by serviceName/aggregateType/eventType, registers to event bus; decodes Base64 in callback, deserializes to strongly-typed events, calls handler</li>
+<li class="">Key Points: Topic encoding, serviceName/aggregateType filtering, handler registration and concurrency safety</li>
+</ul>
+</li>
+<li class="">JetStreamSubscriber[T]<!-- -->
+<ul>
+<li class="">Responsibility: Creates persistent consumer, Consume loop processes messages; explicit acknowledgment; graceful shutdown (context control, WaitGroup wait)</li>
+<li class="">Key Points: AckPolicy explicit acknowledgment, FilterSubject precise subscription, ReplayPolicy instant replay, panic recover, state lock</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">Event Bus (EventPublisher/EventSubscriber)<!-- -->
+<ul>
+<li class="">Topic Naming: serviceName.aggregateType.eventType</li>
+<li class="">Subscription Filtering: Supports serviceName, aggregateType filtering; event payload Base64 encoded, decoded after arrival then deserialized</li>
+</ul>
+</li>
+<li class="">JetStream (JetStreamPublisher/JetStreamSubscriber)<!-- -->
+<ul>
+<li class="">Topic Naming: aggregateType.aggregateID.eventType</li>
+<li class="">Subscription Filtering: FilterSubject aggregateType.*.eventType, consumer configuration AckPolicy explicit acknowledgment, DeliverAllPolicy, ReplayInstantPolicy</li>
+<li class="">Event Reading: Ephemeral consumer filters by aggregate ID, supports replay by version/offset</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">Event Bus Distribution: Subscriber generates topic during registration, after event arrives matches by topic, executes wrapper handler for filtering and deserialization, then calls user handler</li>
+<li class="">JetStream Distribution: Consumer subscribes by FilterSubject, in Consume callback deserializes BaseEvent and converts to strongly-typed event, calls handler, finally explicit acknowledgment</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">
+<p>Publish Acknowledgment</p>
+<ul>
+<li class="">JetStreamPublisher: Uses jetstream.Publish, underlying reliability guarantee provided by NATS JetStream (depends on server configuration)</li>
+<li class="">Event Bus: EventPublisher publishes generic events, depends on event bus implementation reliability</li>
+</ul>
+</li>
+<li class="">
+<p>Subscribe Acknowledgment</p>
+<ul>
+<li class="">JetStreamSubscriber: AckPolicy explicit acknowledgment; NAK on processing failure, triggers retry; waits for processing completion during graceful shutdown</li>
+<li class="">Event Bus: EventSubscriber manages subscriptions through event bus Sub/Unsub, confirmed by upper layer bus after successful processing</li>
+</ul>
+</li>
+<li class="">
+<p>JetStream: Explicit Ack after successful message processing; Nak on processing failure, triggers retry; quick Ack and return when context cancelled</p>
+</li>
+<li class="">
+<p>Event Bus: Confirmation semantics determined by event bus implementation (here determined by specific event bus implementation)</p>
+</li>
+<li class="">
+<p>JetStreamPublisher Options</p>
+<ul>
+<li class="">WithTopics: Sets aggregate type list, as stream topic prefix</li>
+<li class="">WithMaxAge/WithMaxSize/WithMaxMsgSize: Stream and message size limits</li>
+<li class="">Debug: Memory storage debug switch</li>
+</ul>
+</li>
+<li class="">
+<p>JetStreamSubscriber Subscriber</p>
+<ul>
+<li class="">Consumer Configuration: Durable, AckPolicy explicit acknowledgment, FilterSubject, DeliverAllPolicy, ReplayInstantPolicy</li>
+<li class="">Graceful Shutdown: Stop(ctx) supports timeout, WaitGroup waits for processing completion</li>
+</ul>
+</li>
+<li class="">
+<p>Event Reader</p>
+<ul>
+<li class="">Ephemeral Consumer: ephemeral, avoids control plane pressure from persistent consumers</li>
+<li class="">Batch Pulling: FetchNoWait(1000), applies to aggregate after sorting by version</li>
+</ul>
+</li>
+<li class="">
+<p>Custom Publisher</p>
+<ul>
+<li class="">Implement StreamPublisher interface: Reference JetStreamPublisher&#x27;s Publish/PublishEvents and ensureStream stream creation logic</li>
+<li class="">Example paths: <a href="file://pkg/messaging/jspub.go#L66-L107" target="_blank" rel="noopener noreferrer" class="">JetStreamPublisher</a>, <a href="file://pkg/messaging/jspub.go#L109-L150" target="_blank" rel="noopener noreferrer" class="">JetStreamPublisher.ensureStream</a>, <a href="file://pkg/messaging/jspub.go#L152-L184" target="_blank" rel="noopener noreferrer" class="">JetStreamPublisher.Publish</a></li>
+</ul>
+</li>
+<li class="">
+<p>Custom Subscriber</p>
+<ul>
+<li class="">Implement StreamSubscriber interface: Reference JetStreamSubscriber&#x27;s Start/Stop/Close and runConsumer/handleMessage</li>
+<li class="">Example paths: <a href="file://pkg/messaging/jssub.go#L94-L146" target="_blank" rel="noopener noreferrer" class="">JetStreamSubscriber.Start</a>, <a href="file://pkg/messaging/jssub.go#L182-L224" target="_blank" rel="noopener noreferrer" class="">JetStreamSubscriber.Stop</a>, <a href="file://pkg/messaging/jssub.go#L242-L293" target="_blank" rel="noopener noreferrer" class="">JetStreamSubscriber.handleMessage</a></li>
+</ul>
+</li>
+<li class="">
+<p>Event Bus Bridge</p>
+<ul>
+<li class="">EventPublisher: Reference <a href="file://pkg/messaging/publisher.go#L14-L31" target="_blank" rel="noopener noreferrer" class="">EventPublisher</a>, <a href="file://pkg/messaging/publisher.go#L69-L99" target="_blank" rel="noopener noreferrer" class="">EventPublisher.publishEvent</a></li>
+<li class="">EventSubscriber[T]: Reference <a href="file://pkg/messaging/subscriber.go#L16-L27" target="_blank" rel="noopener noreferrer" class="">EventSubscriber[T]</a>, <a href="file://pkg/messaging/subscriber.go#L84-L147" target="_blank" rel="noopener noreferrer" class="">EventSubscriber[T].AddServiceHandler</a></li>
+</ul>
+</li>
+<li class="">
+<p>Loss Handling</p>
+<ul>
+<li class="">JetStream: Uses explicit acknowledgment (AckPolicy explicit acknowledgment), NAK on processing failure triggers retry; waits for processing completion during graceful shutdown</li>
+<li class="">Event Bus: Depends on event bus implementation reliability semantics</li>
+</ul>
+</li>
+<li class="">
+<p>Duplicate Handling</p>
+<ul>
+<li class="">Subscriber should have idempotency design; event reader supports replay by version, facilitating idempotent application</li>
+<li class="">Event Bus Bridge: EventPublisher can combine with event store sequentiality before publishing to reduce duplicate probability</li>
+</ul>
+</li>
+<li class="">
+<p>Best Practices</p>
+<ul>
+<li class="">One service only maintains one JetStreamPublisher instance, stream name is service name, topic is aggregateType.&gt;</li>
+<li class="">Subscriber uses explicit acknowledgment, processing logic should be short and idempotent</li>
+<li class="">Use ephemeral consumer for event reading, avoids control plane pressure from persistent consumers</li>
+<li class="">Unified topic naming specification when bridging event bus, facilitates cross-service decoupling</li>
+</ul>
+</li>
+<li class="">
+<p>Common Pitfalls</p>
+<ul>
+<li class="">Multiple subscribers running in parallel causing event processing disorder and inconsistency</li>
+<li class="">Forgetting Ack causing message accumulation and duplicate retry</li>
+<li class="">Inconsistent topic naming causing events to be unable to route correctly</li>
+</ul>
+</li>
+</ul>
+<p>Dependency relationships between pub/sub components are as follows:</p>
+<!-- -->
+<ul>
+<li class="">
+<p>Consumer Batching: Event reader uses FetchNoWait(1000) for batch pulling, reduces control plane overhead</p>
+</li>
+<li class="">
+<p>Ephemeral Consumer: Avoids control plane pressure from persistent consumers</p>
+</li>
+<li class="">
+<p>Acknowledgment Strategy: Explicit acknowledgment avoids duplicate processing, reasonably set retry strategy</p>
+</li>
+<li class="">
+<p>Topic Design: aggregateType.&gt; as topic prefix, facilitates extension and isolation</p>
+</li>
+<li class="">
+<p>Publish Failure</p>
+<ul>
+<li class="">Check if JetStream stream exists and configuration is correct</li>
+<li class="">View log output, locate serialization/publish errors</li>
+</ul>
+</li>
+<li class="">
+<p>Subscribe No Response</p>
+<ul>
+<li class="">Confirm if topic naming matches FilterSubject</li>
+<li class="">Check if consumer is created successfully and is in running state</li>
+</ul>
+</li>
+<li class="">
+<p>Processing Failure Retry</p>
+<ul>
+<li class="">Check Nak and retry strategy; ensure handler idempotency</li>
+</ul>
+</li>
+<li class="">
+<p>Graceful Shutdown Timeout</p>
+<ul>
+<li class="">Check if WaitGroup is blocked; confirm context cancellation propagation</li>
+</ul>
+</li>
+</ul>
+<p>This pub/sub system provides high-reliability, scalable message publishing and subscription capabilities through unified interface abstraction and JetStream adapter. Combined with event bus bridge and event reader, it can meet event publishing, subscription, replay and aggregate reconstruction needs in event-driven architecture. Following topic naming specifications, explicit acknowledgment and idempotent processing are key to ensuring system stability.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="appendix">Appendix<a href="#appendix" class="hash-link" aria-label="Direct link to Appendix" title="Direct link to Appendix" translate="no">​</a></h2>
+<ul>
+<li class="">Test Case References<!-- -->
+<ul>
+<li class="">Event Bus Bridge Communication Test: <a href="file://pkg/messaging/publisher_subscriber_test.go#L61-L233" target="_blank" rel="noopener noreferrer" class="">publisher_subscriber_test.go</a></li>
+<li class="">JetStream Multi-aggregate and Pub/Sub Test: <a href="file://pkg/messaging/js_test.go#L94-L517" target="_blank" rel="noopener noreferrer" class="">js_test.go</a></li>
+</ul>
+</li>
+</ul></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages navigation"><a class="pagination-nav__link pagination-nav__link--prev" href="/docs/message-passing/message-bus-architecture"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Message Bus Architecture</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/docs/message-passing/multi-protocol-support"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Multi-Protocol Support</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#table-of-contents" class="table-of-contents__link toc-highlight">Table of Contents</a></li><li><a href="#introduction" class="table-of-contents__link toc-highlight">Introduction</a></li><li><a href="#project-structure" class="table-of-contents__link toc-highlight">Project Structure</a><ul><li><a href="#publisher-design-and-responsibilities" class="table-of-contents__link toc-highlight">Publisher Design and Responsibilities</a></li></ul></li><li><a href="#appendix" class="table-of-contents__link toc-highlight">Appendix</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Guangzhou Ruiya Information Technology Co., Ltd. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>

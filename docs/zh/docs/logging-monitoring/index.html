@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="zh" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-logging-monitoring" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">日志监控 | Sparrow</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://sparrow.rayainfo.cn/zh/img/sparrow-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://sparrow.rayainfo.cn/zh/img/sparrow-social-card.jpg"><meta data-rh="true" property="og:url" content="https://sparrow.rayainfo.cn/zh/docs/logging-monitoring"><meta data-rh="true" property="og:locale" content="zh"><meta data-rh="true" property="og:locale:alternate" content="en"><meta data-rh="true" name="docusaurus_locale" content="zh"><meta data-rh="true" name="docsearch:language" content="zh"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="日志监控 | Sparrow"><meta data-rh="true" name="description" content="目录"><meta data-rh="true" property="og:description" content="目录"><link data-rh="true" rel="icon" href="/zh/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://sparrow.rayainfo.cn/zh/docs/logging-monitoring"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/logging-monitoring" hreflang="en"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/zh/docs/logging-monitoring" hreflang="zh"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/logging-monitoring" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"日志监控","item":"https://sparrow.rayainfo.cn/zh/docs/logging-monitoring"}]}</script><link rel="stylesheet" href="/zh/assets/css/styles.63623602.css">
+<script src="/zh/assets/js/runtime~main.38d0fea1.js" defer="defer"></script>
+<script src="/zh/assets/js/main.fd56c047.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="跳到主要内容"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">跳到主要内容</a></div><nav aria-label="主导航" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="切换导航栏" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/zh/"><div class="navbar__logo"><img src="/zh/img/logo.png" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/zh/img/logo.png" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">Sparrow</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/zh/docs/getting-started">Docs</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="iconLanguage_nlXk"><path fill="currentColor" d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"></path></svg>简体中文</a><ul class="dropdown__menu"><li><a href="/docs/logging-monitoring" target="_self" rel="noopener noreferrer" class="dropdown__link" lang="en">English</a></li><li><a href="/zh/docs/logging-monitoring" target="_self" rel="noopener noreferrer" class="dropdown__link dropdown__link--active" lang="zh">简体中文</a></li></ul></div><a href="https://github.com/DotNetAge/sparrow" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="切换深色和浅色模式（当前为system mode）"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="回到顶部" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="文档侧边栏" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/getting-started"><span title="快速开始" class="linkLabel_WmDU">快速开始</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/example-project"><span title="示例项目" class="linkLabel_WmDU">示例项目</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/development-guide"><span title="开发指南" class="linkLabel_WmDU">开发指南</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/testing-strategy"><span title="测试策略" class="linkLabel_WmDU">测试策略</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" href="/zh/docs/logging-monitoring"><span title="日志监控" class="linkLabel_WmDU">日志监控</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/utility-functions"><span title="工具函数库" class="linkLabel_WmDU">工具函数库</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/deployment-operations"><span title="部署运维" class="linkLabel_WmDU">部署运维</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/project-overview/"><span title="Project Overview" class="categoryLinkLabel_W154">Project Overview</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/architecture-design/architecture-overview"><span title="Architecture Design" class="categoryLinkLabel_W154">Architecture Design</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/application-framework/"><span title="Application Framework" class="categoryLinkLabel_W154">Application Framework</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/interface-adapters/"><span title="Interface Adapters" class="categoryLinkLabel_W154">Interface Adapters</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/data-persistence/"><span title="Data Persistence" class="categoryLinkLabel_W154">Data Persistence</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/event-driven-system/"><span title="Event-Driven System" class="categoryLinkLabel_W154">Event-Driven System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/task-scheduling-system/"><span title="Task Scheduling System" class="categoryLinkLabel_W154">Task Scheduling System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/domain-model/"><span title="Domain Model" class="categoryLinkLabel_W154">Domain Model</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/authentication-authorization-system/"><span title="Authentication and Authorization System" class="categoryLinkLabel_W154">Authentication and Authorization System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/message-passing/"><span title="Message Passing" class="categoryLinkLabel_W154">Message Passing</span></a></div></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="页面路径"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="主页面" class="breadcrumbs__link" href="/zh/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">日志监控</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">本页目录</button></div><div class="theme-doc-markdown markdown"><header><h1>日志监控</h1></header>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="目录">目录<a href="#目录" class="hash-link" aria-label="直接链接到 目录" title="直接链接到 目录" translate="no">​</a></h2>
+<ol>
+<li class=""><a href="#%E7%AE%80%E4%BB%8B" class="">简介</a></li>
+<li class=""><a href="#%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84" class="">项目结构</a></li>
+<li class=""><a href="#%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6" class="">核心组件</a></li>
+<li class=""><a href="#%E6%9E%B6%E6%9E%84%E6%80%BB%E8%A7%88" class="">架构总览</a></li>
+<li class=""><a href="#%E7%BB%84%E4%BB%B6%E8%AF%A6%E8%A7%A3" class="">组件详解</a></li>
+<li class=""><a href="#%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E5%88%86%E6%9E%90" class="">依赖关系分析</a></li>
+<li class=""><a href="#%E6%80%A7%E8%83%BD%E8%80%83%E9%87%8F" class="">性能考量</a></li>
+<li class=""><a href="#%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5%E6%8C%87%E5%8D%97" class="">故障排查指南</a></li>
+<li class=""><a href="#%E7%BB%93%E8%AE%BA" class="">结论</a></li>
+<li class=""><a href="#%E9%99%84%E5%BD%95" class="">附录</a></li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="简介">简介<a href="#简介" class="hash-link" aria-label="直接链接到 简介" title="直接链接到 简介" translate="no">​</a></h2>
+<p>本文件为 Sparrow 日志监控系统的技术文档，聚焦以下主题：</p>
+<ul>
+<li class="">设计架构与职责边界</li>
+<li class="">日志级别管理与运行模式切换</li>
+<li class="">日志轮转机制与归档策略</li>
+<li class="">结构化日志与统一格式</li>
+<li class="">日志采样  与性能优化</li>
+<li class="">配置最佳实践与部署建议</li>
+<li class="">与第三方监控系统的集成思路</li>
+<li class="">安全与隐私保护、合规性要求</li>
+<li class="">面向运维与开发的实操指引</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="项目结构">项目结构<a href="#项目结构" class="hash-link" aria-label="直接链接到 项目结构" title="直接链接到 项目结构" translate="no">​</a></h2>
+<p>日志模块位于 pkg/logger，围绕 zap 与 lumberjack 实现高性能、可轮转的日志能力；配置由 pkg/config 提供，bootstrap 在应用启动阶段装配全局 Logger。</p>
+<!-- -->
+<p><strong>图示来源</strong></p>
+<ul>
+<li class="">
+<p><a href="file://pkg/logger/logger.go#L1-L82" target="_blank" rel="noopener noreferrer" class="">pkg/logger/logger.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/logger/rotating.go#L1-L74" target="_blank" rel="noopener noreferrer" class="">pkg/logger/rotating.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/logger/debug.go#L1-L47" target="_blank" rel="noopener noreferrer" class="">pkg/logger/debug.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/config/config.go#L1-L90" target="_blank" rel="noopener noreferrer" class="">pkg/config/config.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/config/logger.go#L1-L10" target="_blank" rel="noopener noreferrer" class="">pkg/config/logger.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/config/loader.go#L1-L93" target="_blank" rel="noopener noreferrer" class="">pkg/config/loader.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/bootstrap/app.go#L1-L333" target="_blank" rel="noopener noreferrer" class="">pkg/bootstrap/app.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/bootstrap/opts.go#L1-L374" target="_blank" rel="noopener noreferrer" class="">pkg/bootstrap/opts.go</a></p>
+</li>
+<li class="">
+<p>Logger 包装器：对 zap.Logger 进行轻量封装，提供 Info/Error/Fatal/Panic/Debug/Warn 及其格式化变体 ，统一字段风格。</p>
+</li>
+<li class="">
+<p>开发模式日志器：控制台输出，彩色级别，短调用者路径，便于本地调试。</p>
+</li>
+<li class="">
+<p>生产模式日志器：基于 lumberjack 的文件轮转，JSON 编码，多目标输出（文件+控制台），支持调用者与堆栈追踪。</p>
+</li>
+<li class="">
+<p>配置体系：LogConfig 定义 mode/level/format/output/filename；全局 Config 提供默认值与环境变量覆盖；loader 支持多格式配置文件与 .env 加载。</p>
+</li>
+<li class="">
+<p>应用装配：App 在启动时加载配置并创建 Logger，贯穿整个生命周期；各子系统通过注入的 Logger 输出状态、错误与告警。</p>
+</li>
+</ul>
+<p>日志系统采用“配置驱动 + 模式切换 + 多编码器”的架构，确保开发与生产环境的一致体验与高可靠输出。</p>
+<!-- -->
+<p><strong>图示来源</strong></p>
+<ul>
+<li class=""><a href="file://pkg/config/logger.go#L1-L10" target="_blank" rel="noopener noreferrer" class="">pkg/config/logger.go</a></li>
+<li class=""><a href="file://pkg/bootstrap/app.go#L1-L333" target="_blank" rel="noopener noreferrer" class="">pkg/bootstrap/app.go</a></li>
+<li class=""><a href="file://pkg/logger/debug.go#L1-L47" target="_blank" rel="noopener noreferrer" class="">pkg/logger/debug.go</a></li>
+<li class=""><a href="file://pkg/logger/rotating.go#L1-L74" target="_blank" rel="noopener noreferrer" class="">pkg/logger/rotating.go</a></li>
+<li class=""><a href="file://pkg/logger/logger.go#L1-L82" target="_blank" rel="noopener noreferrer" class="">pkg/logger/logger.go</a></li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="组件详解">组件详解<a href="#组件详解" class="hash-link" aria-label="直接链接到 组件详解" title="直接链接到 组件详解" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="logger-包装器与级别管理">Logger 包装器与级别管理<a href="#logger-包装器与级别管理" class="hash-link" aria-label="直接链接到 Logger 包装器与级别管理" title="直接链接到 Logger 包装器与级别管理" translate="no">​</a></h3>
+<ul>
+<li class="">提供 Info/Error/Fatal/Panic/Debug/Warn 及其格式化方法，统一字段键名（如 timestamp、level、caller、message、stacktrace）。</li>
+<li class="">级别映射：开发模式按 LogConfig.Level 映射到 Debug/Info/Warn/Error/Fatal；生产模式按相同规则设置最终级别。</li>
+<li class="">运行模式：当 mode=prod|production 时启用生产模式日志器；否则使用开发模式日志器。</li>
+</ul>
+<!-- -->
+<p><strong>图示来源</strong></p>
+<ul>
+<li class="">
+<p><a href="file://pkg/logger/logger.go#L1-L82" target="_blank" rel="noopener noreferrer" class="">pkg/logger/logger.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/logger/debug.go#L1-L47" target="_blank" rel="noopener noreferrer" class="">pkg/logger/debug.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/logger/rotating.go#L1-L74" target="_blank" rel="noopener noreferrer" class="">pkg/logger/rotating.go</a></p>
+</li>
+<li class="">
+<p>lumberjack 配置：文件大小阈值、备份数量、最大保存天数、是否压缩、使用本地时间命名。</p>
+</li>
+<li class="">
+<p>编码器：JSON 格式，字段键名标准化；时间、级别、调用者、耗时等均采用统一编码器。</p>
+</li>
+<li class="">
+<p>输出目标：文件与控制台双写，便于生产与审计。</p>
+</li>
+<li class="">
+<p>调用者与堆栈：启用 caller 与错误级别堆栈输出，便于问题定位。</p>
+</li>
+</ul>
+<!-- -->
+<p><strong>图示来源</strong></p>
+<ul>
+<li class="">
+<p><a href="file://pkg/logger/rotating.go#L1-L74" target="_blank" rel="noopener noreferrer" class="">pkg/logger/rotating.go</a></p>
+</li>
+<li class="">
+<p>控制台编码器：彩色级别、短调用者路径、ISO 时间格式。</p>
+</li>
+<li class="">
+<p>日志级别：依据 LogConfig.Level 动态映射。</p>
+</li>
+<li class="">
+<p>适用场景：本地开发、快速调试、CI 环境。</p>
+</li>
+<li class="">
+<p>LogConfig 字段：mode、level、format、output、filename。</p>
+</li>
+<li class="">
+<p>全局 Config 默认值：log.level、log.format、log.output、log.filename、log.mode 等。</p>
+</li>
+<li class="">
+<p>loader：支持多格式配置文件、.env 加载、环境变量覆盖、Snake 命名空间替换。</p>
+</li>
+</ul>
+<!-- -->
+<p><strong>图示来源</strong></p>
+<ul>
+<li class="">
+<p><a href="file://pkg/config/loader.go#L1-L93" target="_blank" rel="noopener noreferrer" class="">pkg/config/loader.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/config/config.go#L1-L90" target="_blank" rel="noopener noreferrer" class="">pkg/config/config.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/config/logger.go#L1-L10" target="_blank" rel="noopener noreferrer" class="">pkg/config/logger.go</a></p>
+</li>
+<li class="">
+<p>App.NewApp：加载配置、创建 Logger 并注入到全局 App。</p>
+</li>
+<li class="">
+<p>各子系统（数据库、消息总线、任务调度等）在初始化过程中使用 Logger 记录状态与错误，形成统一的可观测性基线。</p>
+</li>
+</ul>
+<!-- -->
+<p><strong>图示来源</strong></p>
+<ul>
+<li class="">
+<p><a href="file://pkg/bootstrap/app.go#L1-L333" target="_blank" rel="noopener noreferrer" class="">pkg/bootstrap/app.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/config/loader.go#L1-L93" target="_blank" rel="noopener noreferrer" class="">pkg/config/loader.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/logger/logger.go#L1-L82" target="_blank" rel="noopener noreferrer" class="">pkg/logger/logger.go</a></p>
+</li>
+<li class="">
+<p>zap 与 lumberjack：生产模式日志器依赖 lumberjack 实现文件轮转，依赖 zap 提供高性能编码与多目标输出。</p>
+</li>
+<li class="">
+<p>配置解析：viper 与 gotenv 提供配置加载与环境变量覆盖。</p>
+</li>
+<li class="">
+<p>应用装配：App 在启动阶段统一创建 Logger，避免各模块重复初始化。</p>
+</li>
+</ul>
+<!-- -->
+<p><strong>图示来源</strong></p>
+<ul>
+<li class="">
+<p><a href="file://go.mod#L1-L141" target="_blank" rel="noopener noreferrer" class="">go.mod</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/logger/rotating.go#L1-L74" target="_blank" rel="noopener noreferrer" class="">pkg/logger/rotating.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/config/loader.go#L1-L93" target="_blank" rel="noopener noreferrer" class="">pkg/config/loader.go</a></p>
+</li>
+<li class="">
+<p>编码与输出</p>
+<ul>
+<li class="">生产模式使用 JSON 编码，便于下游日志收集与检索；控制台仅在开发模式启用，避免生产环境冗余输出。</li>
+<li class="">lumberjack 轮转参数建议结合磁盘容量与 IO 能力调整：单文件大小、备份数量、最大保存天数、压缩开关。</li>
+</ul>
+</li>
+<li class="">
+<p>日志级别</p>
+<ul>
+<li class="">严格区分 Debug/Info/Warn/Error/Fatal，避免在生产环境输出过多 Debug 信息。</li>
+<li class="">对高频路径使用 Info/Warn 记录关键状态，Error 记录异常，Fatal 用于不可恢复错误。</li>
+</ul>
+</li>
+<li class="">
+<p>调用者与堆栈</p>
+<ul>
+<li class="">caller 与 stacktrace 有助于定位问题，但会带来额外开销；仅在错误级别启用堆栈，减少常规日志的性能影响。</li>
+</ul>
+</li>
+<li class="">
+<p>多目标输出</p>
+<ul>
+<li class="">文件与控制台双写在生产环境可能增加 IO 压力；建议仅在必要时开启控制台输出，或通过外部日志代理集中采集。</li>
+</ul>
+</li>
+</ul>
+<p>[本节为通用性能建议，无需特定文件引用]</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="故障排查指南">故障排查指南<a href="#故障排查指南" class="hash-link" aria-label="直接链接到 故障排查指南" title="直接链接到 故障排查指南" translate="no">​</a></h2>
+<ul>
+<li class="">启动失败<!-- -->
+<ul>
+<li class="">若配置加载失败或校验失败，App.NewApp 会抛出错误；检查配置文件格式、键名与默认 值。</li>
+<li class="">关注日志器创建失败的情况，确认 LogConfig.mode/level/filename 是否合理。</li>
+</ul>
+</li>
+<li class="">运行期错误<!-- -->
+<ul>
+<li class="">各组件初始化失败时会通过 Logger 输出错误字段，例如数据库连接失败、NATS 连接失败等；结合错误字段与堆栈定位问题。</li>
+</ul>
+</li>
+<li class="">服务器关闭与清理<!-- -->
+<ul>
+<li class="">App 在优雅关闭时会记录关闭状态与清理结果；若清理失败，查看错误字段并确认资源释放顺序。</li>
+</ul>
+</li>
+</ul>
+<p>Sparrow 的日志系统以配置驱动为核心，通过开发/生产两种模式适配不同环境需求；借助 zap 与 lumberjack 实现高性能、可维护的日志输出。配合统一的结构化字段与多目标输出，既满足本地开发的便捷性，也满足生产环境的审计与分析需求。建议在生产环境中启用文件轮转与 JSON 编码，合理设置日志级别与采样策略，并结合外部监控平台实现告警与可视化。</p>
+<p>[本节为总结性内容，无需特定文件引用]</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="附录">附录<a href="#附录" class="hash-link" aria-label="直接链接到 附录" title="直接链接到 附录" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="日志级别与运行模式对照">日志级别与运行模式对照<a href="#日志级别与运行模式对照" class="hash-link" aria-label="直接链接到 日志级别与运行模式对照" title="直接链接到 日志级别与运行模式对照" translate="no">​</a></h3>
+<ul>
+<li class="">
+<p>开发模式：按 LogConfig.Level 映射 Debug/Info/Warn/Error/Fatal。</p>
+</li>
+<li class="">
+<p>生产模式：按相同规则设置最终级别，启用文件轮转与 JSON 编码。</p>
+</li>
+<li class="">
+<p>标准字段键名：timestamp、level、caller、message、stacktrace。</p>
+</li>
+<li class="">
+<p>编码器统一：生产模式使用 JSON 编码器，开 发模式使用控制台编码器。</p>
+</li>
+<li class="">
+<p>开发环境</p>
+<ul>
+<li class="">mode=dev，level=debug/info，format=console，output=stdout，filename 可选。</li>
+</ul>
+</li>
+<li class="">
+<p>生产环境</p>
+<ul>
+<li class="">mode=prod|production，level=info/warn/error，format=json，output=file，filename 指向持久化目录。</li>
+<li class="">合理设置轮转参数：单文件大小、备份数量、最大保存天数、压缩开关。</li>
+</ul>
+</li>
+<li class="">
+<p>环境变量</p>
+<ul>
+<li class="">使用 .env 与 AutomaticEnv，确保敏感信息与运行时参数可控。</li>
+</ul>
+</li>
+<li class="">
+<p>日志采集</p>
+<ul>
+<li class="">将生产模式日志输出到文件，使用日志代理（如 Fluent Bit/Filebeat）采集并转发至 ELK/OTLP 等平台。</li>
+</ul>
+</li>
+<li class="">
+<p>告警</p>
+<ul>
+<li class="">在日志平台中基于 level=message/caller 等字段建立告警规则，结合业务指标与链路追踪进行联动。</li>
+</ul>
+</li>
+<li class="">
+<p>可视化</p>
+<ul>
+<li class="">利用日志平台的仪表板对错误趋势、响应时间分布、调用者热点进行可视化分析。</li>
+</ul>
+</li>
+</ul>
+<p>[本节为概念性内容，无需特定文件引用]</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="安全与隐私合规">安全与隐私、合规<a href="#安全与隐私合规" class="hash-link" aria-label="直接链接到 安全与隐私、合规" title="直接链接到 安全与隐私、合规" translate="no">​</a></h3>
+<ul>
+<li class="">敏感信息脱敏<!-- -->
+<ul>
+<li class="">避免在 message/caller 中直接记录明文密码、Token、身份证等敏感数据；必要时进行脱敏或哈希处理。</li>
+</ul>
+</li>
+<li class="">日志访问控制<!-- -->
+<ul>
+<li class="">限制日志文件读取权限，仅允许运维与审计人员访问；生产日志应加密存储与传输。</li>
+</ul>
+</li>
+<li class="">合规要求<!-- -->
+<ul>
+<li class="">满足 GDPR、网络安全等级保护等要求，明 确日志保留期限与销毁流程；定期进行合规审计。</li>
+</ul>
+</li>
+</ul>
+<p>[本节为通用安全与合规建议，无需特定文件引用]</p></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="文档页面导航"><a class="pagination-nav__link pagination-nav__link--prev" href="/zh/docs/testing-strategy"><div class="pagination-nav__sublabel">上一页</div><div class="pagination-nav__label">测试策略</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/zh/docs/utility-functions"><div class="pagination-nav__sublabel">下一页</div><div class="pagination-nav__label">工具函数库</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#目录" class="table-of-contents__link toc-highlight">目录</a></li><li><a href="#简介" class="table-of-contents__link toc-highlight">简介</a></li><li><a href="#项目结构" class="table-of-contents__link toc-highlight">项目结构</a></li><li><a href="#组件详解" class="table-of-contents__link toc-highlight">组件详解</a><ul><li><a href="#logger-包装器与级别管理" class="table-of-contents__link toc-highlight">Logger 包装器与级别管理</a></li></ul></li><li><a href="#故障排查指南" class="table-of-contents__link toc-highlight">故障排查指南</a></li><li><a href="#附录" class="table-of-contents__link toc-highlight">附录</a><ul><li><a href="#日志级别与运行模式对照" class="table-of-contents__link toc-highlight">日志级别与运行模式对照</a></li><li><a href="#安全与隐私合规" class="table-of-contents__link toc-highlight">安全与隐私、合规</a></li></ul></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Guangzhou Ruiya Information Technology Co., Ltd. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>

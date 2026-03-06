@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-domain-model/entity-design" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">Entity Design | Sparrow</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://sparrow.rayainfo.cn/img/sparrow-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://sparrow.rayainfo.cn/img/sparrow-social-card.jpg"><meta data-rh="true" property="og:url" content="https://sparrow.rayainfo.cn/docs/domain-model/entity-design"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" property="og:locale:alternate" content="zh"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Entity Design | Sparrow"><meta data-rh="true" name="description" content="Table of Contents"><meta data-rh="true" property="og:description" content="Table of Contents"><link data-rh="true" rel="icon" href="/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://sparrow.rayainfo.cn/docs/domain-model/entity-design"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/domain-model/entity-design" hreflang="en"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/zh/docs/domain-model/entity-design" hreflang="zh"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/domain-model/entity-design" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Entity Design","item":"https://sparrow.rayainfo.cn/docs/domain-model/entity-design"}]}</script><link rel="stylesheet" href="/assets/css/styles.63623602.css">
+<script src="/assets/js/runtime~main.12b7ca60.js" defer="defer"></script>
+<script src="/assets/js/main.c8504be0.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/"><div class="navbar__logo"><img src="/img/logo.png" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/img/logo.png" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">Sparrow</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/getting-started">Docs</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="iconLanguage_nlXk"><path fill="currentColor" d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"></path></svg>English</a><ul class="dropdown__menu"><li><a href="/docs/domain-model/entity-design" target="_self" rel="noopener noreferrer" class="dropdown__link dropdown__link--active" lang="en">English</a></li><li><a href="/zh/docs/domain-model/entity-design" target="_self" rel="noopener noreferrer" class="dropdown__link" lang="zh">简体中文</a></li></ul></div><a href="https://github.com/DotNetAge/sparrow" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/getting-started"><span title="Getting Started" class="linkLabel_WmDU">Getting Started</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/example-project"><span title="Example Project" class="linkLabel_WmDU">Example Project</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/development-guide"><span title="Development Guide" class="linkLabel_WmDU">Development Guide</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/testing-strategy"><span title="Testing Strategy" class="linkLabel_WmDU">Testing Strategy</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/logging-monitoring"><span title="Logging and Monitoring" class="linkLabel_WmDU">Logging and Monitoring</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/utility-functions"><span title="Utility Functions Library" class="linkLabel_WmDU">Utility Functions Library</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/deployment-operations"><span title="Deployment and Operations" class="linkLabel_WmDU">Deployment and Operations</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/project-overview/"><span title="Project Overview" class="categoryLinkLabel_W154">Project Overview</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/architecture-design/architecture-overview"><span title="Architecture Design" class="categoryLinkLabel_W154">Architecture Design</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/application-framework/"><span title="Application Framework" class="categoryLinkLabel_W154">Application Framework</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/interface-adapters/"><span title="Interface Adapters" class="categoryLinkLabel_W154">Interface Adapters</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/data-persistence/"><span title="Data Persistence" class="categoryLinkLabel_W154">Data Persistence</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/event-driven-system/"><span title="Event-Driven System" class="categoryLinkLabel_W154">Event-Driven System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/task-scheduling-system/"><span title="Task Scheduling System" class="categoryLinkLabel_W154">Task Scheduling System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/docs/domain-model/"><span title="Domain Model" class="categoryLinkLabel_W154">Domain Model</span></a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/domain-model/"><span title="Domain Model" class="linkLabel_WmDU">Domain Model</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/docs/domain-model/entity-design"><span title="Entity Design" class="linkLabel_WmDU">Entity Design</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/domain-model/value-objects"><span title="Value Objects" class="linkLabel_WmDU">Value Objects</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/domain-model/aggregate-root-design"><span title="Aggregate Root Design" class="linkLabel_WmDU">Aggregate Root Design</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/domain-model/domain-events"><span title="Domain Events" class="linkLabel_WmDU">Domain Events</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/domain-model/business-rules"><span title="Business Rules" class="linkLabel_WmDU">Business Rules</span></a></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/authentication-authorization-system/"><span title="Authentication and Authorization System" class="categoryLinkLabel_W154">Authentication and Authorization System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/message-passing/"><span title="Message Passing" class="categoryLinkLabel_W154">Message Passing</span></a></div></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Domain Model</span></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">Entity Design</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>Entity Design</h1></header>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="table-of-contents">Table of Contents<a href="#table-of-contents" class="hash-link" aria-label="Direct link to Table of Contents" title="Direct link to Table of Contents" translate="no">​</a></h2>
+<ol>
+<li class=""><a href="#introduction" class="">Introduction</a></li>
+<li class=""><a href="#project-structure" class="">Project Structure</a></li>
+<li class=""><a href="#core-components" class="">Core Components</a></li>
+<li class=""><a href="#architecture-overview" class="">Architecture Overview</a></li>
+<li class=""><a href="#detailed-component-analysis" class="">Detailed Component Analysis</a></li>
+<li class=""><a href="#dependency-analysis" class="">Dependency Analysis</a></li>
+<li class=""><a href="#performance-considerations" class="">Performance Considerations</a></li>
+<li class=""><a href="#troubleshooting-guide" class="">Troubleshooting Guide</a></li>
+<li class=""><a href="#conclusion" class="">Conclusion</a></li>
+<li class=""><a href="#appendix" class="">Appendix</a></li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="introduction">Introduction<a href="#introduction" class="hash-link" aria-label="Direct link to Introduction" title="Direct link to Introduction" translate="no">​</a></h2>
+<p>This document systematically explains entity design in the Sparrow framework, focusing on:</p>
+<ul>
+<li class="">Design concepts and responsibilities of the BaseEntity base class</li>
+<li class="">Constraints and contracts of the Entity interface</li>
+<li class="">Entity identifier generation mechanism</li>
+<li class="">Entity lifecycle management, state change methods, and timestamp handling</li>
+<li class="">Complete implementation examples and best practices for Task entities</li>
+<li class="">Validation rules, data integrity guarantees, and performance optimization suggestions</li>
+<li class="">Extended capabilities for event sourcing and aggregate roots</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="project-structure">Project Structure<a href="#project-structure" class="hash-link" aria-label="Direct link to Project Structure" title="Direct link to Project Structure" translate="no">​</a></h2>
+<p>Entity-related code is concentrated in the pkg/entity directory, adopting a layered design of &quot;interface + base class + specific entity&quot;, combined with commands, domain events, and aggregate root interfaces, forming a clear DDD/CQRS and event sourcing architecture.</p>
+<!-- -->
+<ul>
+<li class="">Entity Interface: Unifies constraints on entity identity, timestamp access, and update capabilities, ensuring consistent contracts for repositories and persistence layers.</li>
+<li class="">BaseEntity Base Class: Provides standard fields and accessors for Id, CreatedAt, and UpdatedAt, unifying entity lifecycle management.</li>
+<li class="">Task Entity: Takes tasks as the core business entity, demonstrating state machines, retry strategies, execution duration calculation, and expiration judgment business logic.</li>
+<li class="">Aggregate Root Interface and Base Class: Provides version control, event collection and application, snapshot loading, and other event sourcing capabilities.</li>
+<li class="">Domain Event and Base Event: Standardizes event metadata and payload processing.</li>
+<li class="">Command and Base Command: Standardizes command identity and aggregate root binding.</li>
+</ul>
+<p>Entity design follows the &quot;core layer&quot; concept of clean architecture, placing business entities in the innermost layer, providing stable contracts upward through interfaces and base classes, and implementing business rules downward through specific entities. In the event sourcing pattern, aggregate roots assume responsibilities for state changes and event management; commands drive aggregate roots to generate domain events; repositories are responsible for entity persistence; event storage and snapshots are used for state reconstruction and optimization.</p>
+<!-- -->
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="baseentity-base-class-and-entity-interface">BaseEntity Base Class and Entity Interface<a href="#baseentity-base-class-and-entity-interface" class="hash-link" aria-label="Direct link to BaseEntity Base Class and Entity Interface" title="Direct link to BaseEntity Base Class and Entity Interface" translate="no">​</a></h3>
+<ul>
+<li class="">Design Concepts<!-- -->
+<ul>
+<li class="">Unify entity identity and timestamp management to avoid duplicate implementations.</li>
+<li class="">Initialize creation and update times through NewBaseEntity to ensure consistency.</li>
+</ul>
+</li>
+<li class="">Key Methods<!-- -->
+<ul>
+<li class="">Get/SetID: Read and write entity identity</li>
+<li class="">Get/SetCreatedAt: Read-only creation time</li>
+<li class="">Get/SetUpdatedAt: Update time synchronized with business changes</li>
+</ul>
+</li>
+<li class="">Lifecycle<!-- -->
+<ul>
+<li class="">Set CreatedAt and UpdatedAt when creating</li>
+<li class="">Any state change should call SetUpdatedAt to maintain audit consistency</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">Status Enumeration: pending, running, completed, failed, cancelled</li>
+<li class="">Key Methods<!-- -->
+<ul>
+<li class="">Start/Complete/Fail/Cancel: Drive state machine and timestamp updates</li>
+<li class="">CanRetry: Retry determination based on Retries and MaxRetry</li>
+<li class="">GetExecutionTime: Calculate execution duration (requires both times to exist)</li>
+<li class="">IsExpired: Expiration check based on CreatedAt</li>
+</ul>
+</li>
+<li class="">Identifier Generation<!-- -->
+<ul>
+<li class="">NewTask internally calls generateTaskID, combining nanoseconds and milliseconds to ensure uniqueness under high concurrency</li>
+</ul>
+</li>
+<li class="">Timestamp Handling<!-- -->
+<ul>
+<li class="">All state changes update UpdatedAt, and Retries are increased on Fail</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">AggregateRoot Interface<!-- -->
+<ul>
+<li class="">Inherits Entity, extending aggregate type, aggregate ID, version control, and event sourcing capabilities</li>
+<li class="">Provides reserved methods such as HandleCommand, ApplyEvent, LoadFromEvents, LoadFromSnapshot, Validate</li>
+</ul>
+</li>
+<li class="">BaseAggregateRoot Base Class<!-- -->
+<ul>
+<li class="">Embeds BaseEntity, maintains Version and uncommittedEvents list</li>
+<li class="">AddEvent: Validates event ID/type/aggregate ID consistency, increments version, and updates UpdatedAt</li>
+<li class="">MarkEventsAsCommitted: Clears uncommitted event list</li>
+<li class="">HasUncommittedEvents: Helper judgment</li>
+</ul>
+</li>
+<li class="">Event and Snapshot<!-- -->
+<ul>
+<li class="">DomainEvent interface defines event metadata</li>
+<li class="">BaseEvent provides common event structure and payload decoding tools</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">
+<p>Command Interface and BaseCommand: Standardizes command ID and aggregate root ID binding</p>
+</li>
+<li class="">
+<p>BaseEvent: Standardizes event metadata, provides payload decoding tool UnmarshalEvent</p>
+</li>
+<li class="">
+<p>Session: Based on BaseEntity, provides expiration check, data reading/writing, and TTL update</p>
+</li>
+<li class="">
+<p>Transaction: Implements Entity interface, used for Saga-coordinated transaction orchestration</p>
+</li>
+<li class="">
+<p>Component Coupling</p>
+<ul>
+<li class="">Entity layer depends on Entity interface and BaseEntity base class to ensure consistency</li>
+<li class="">Aggregate root layer depends on DomainEvent interface and BaseEvent base class in event sourcing mode</li>
+<li class="">Command layer interacts with aggregate roots, implementing non-intrusive state changes through events</li>
+</ul>
+</li>
+<li class="">
+<p>External Dependencies</p>
+<ul>
+<li class="">UUID tools for generating globally unique identifiers</li>
+<li class="">JSON encoding/decoding for event payload transmission</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">Identifier Generation<!-- -->
+<ul>
+<li class="">Task uses nanosecond + millisecond combination to generate IDs, with high concurrency uniqueness; to further reduce conflict probability, a distributed ID generator (e.g., snowflake algorithm) or database auto-increment primary key strategy can be introduced at the upper layer</li>
+</ul>
+</li>
+<li class="">Timestamp Update<!-- -->
+<ul>
+<li class="">All state changes call SetUpdatedAt to ensure audit consistency; batch updates can be merged into a single update to reduce multiple writes</li>
+</ul>
+</li>
+<li class="">Event Sourcing<!-- -->
+<ul>
+<li class="">Use BaseAggregateRoot&#x27;s AddEvent to automatically increment version and update timestamp; it is recommended to batch commit uncommitted events to reduce event storage pressure</li>
+</ul>
+</li>
+<li class="">Query and Sorting<!-- -->
+<ul>
+<li class="">Entity implementation of GetCreatedAt can be used for sorting and pagination; it is recommended to establish indexes for common queries in the repository layer to avoid full table scans</li>
+</ul>
+</li>
+<li class="">Memory and Serialization<!-- -->
+<ul>
+<li class="">Domain event payloads should use binary or compressed encoding to reduce network transmission and storage overhead</li>
+</ul>
+</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="troubleshooting-guide">Troubleshooting Guide<a href="#troubleshooting-guide" class="hash-link" aria-label="Direct link to Troubleshooting Guide" title="Direct link to Troubleshooting Guide" translate="no">​</a></h2>
+<ul>
+<li class="">Event ID/Type/Aggregate ID Validation Failure<!-- -->
+<ul>
+<li class="">AddEvent performs strict validation on event ID, type, and aggregate ID; if a panic occurs, check if event construction and aggregate root ID are consistent</li>
+</ul>
+</li>
+<li class="">Duplicate Event ID<!-- -->
+<ul>
+<li class="">AddEvent detects duplicate event IDs to avoid event stream contamination; ensure event IDs are unique</li>
+</ul>
+</li>
+<li class="">State Change Abnormality<!-- -->
+<ul>
+<li class="">Task&#x27;s Fail increases Retries, and no automatic retry occurs when MaxRetry is reached; check CanRetry conditions and business processes</li>
+</ul>
+</li>
+<li class="">Expiration and Execution Duration<!-- -->
+<ul>
+<li class="">IsExpired is based on CreatedAt; GetExecutionTime requires both times to exist, otherwise returns empty</li>
+</ul>
+</li>
+</ul>
+<p>The entity design of the Sparrow framework is centered around interfaces and base classes, providing highly cohesive, low-coupling domain modeling capabilities through unified timestamp management, strict event sourcing, and aggregate root version control. The Task entity demonstrates a typical implementation of state machines and retry strategies, while Session and Transaction reflect different levels of business abstraction. Combined with templated aggregate root generation and event storage/snapshot mechanisms, developers can quickly build evolvable, observable domain models.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="appendix">Appendix<a href="#appendix" class="hash-link" aria-label="Direct link to Appendix" title="Direct link to Appendix" translate="no">​</a></h2>
+<ul>
+<li class="">Validation Rules and Templated Generation<!-- -->
+<ul>
+<li class="">README provides usage guidelines for aggregate root templates, supporting field-level validation rules and snapshot functionality, facilitating the generation of aggregate root code that meets business specifications</li>
+</ul>
+</li>
+<li class="">Best Practice Checklist<!-- -->
+<ul>
+<li class="">Clearly define entity responsibility boundaries, avoid mixing infrastructure code in entities</li>
+<li class="">Use BaseEntity to unify timestamps, ensuring audit consistency</li>
+<li class="">Implement business traceability through aggregate root&#x27;s ApplyEvent and event storage</li>
+<li class="">Establish indexes for high-frequency queries, and introduce snapshots to accelerate reconstruction when necessary</li>
+<li class="">Use commands to drive aggregate roots, maintaining idempotent and traceable state changes</li>
+</ul>
+</li>
+</ul></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages navigation"><a class="pagination-nav__link pagination-nav__link--prev" href="/docs/domain-model/"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Domain Model</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/docs/domain-model/value-objects"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Value Objects</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#table-of-contents" class="table-of-contents__link toc-highlight">Table of Contents</a></li><li><a href="#introduction" class="table-of-contents__link toc-highlight">Introduction</a></li><li><a href="#project-structure" class="table-of-contents__link toc-highlight">Project Structure</a><ul><li><a href="#baseentity-base-class-and-entity-interface" class="table-of-contents__link toc-highlight">BaseEntity Base Class and Entity Interface</a></li></ul></li><li><a href="#troubleshooting-guide" class="table-of-contents__link toc-highlight">Troubleshooting Guide</a></li><li><a href="#appendix" class="table-of-contents__link toc-highlight">Appendix</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Guangzhou Ruiya Information Technology Co., Ltd. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>

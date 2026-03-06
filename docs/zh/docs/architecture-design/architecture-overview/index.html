@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="zh" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-architecture-design/architecture-overview" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">架构设计 | Sparrow</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://sparrow.rayainfo.cn/zh/img/sparrow-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://sparrow.rayainfo.cn/zh/img/sparrow-social-card.jpg"><meta data-rh="true" property="og:url" content="https://sparrow.rayainfo.cn/zh/docs/architecture-design/architecture-overview"><meta data-rh="true" property="og:locale" content="zh"><meta data-rh="true" property="og:locale:alternate" content="en"><meta data-rh="true" name="docusaurus_locale" content="zh"><meta data-rh="true" name="docsearch:language" content="zh"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="架构设计 | Sparrow"><meta data-rh="true" name="description" content="目录"><meta data-rh="true" property="og:description" content="目录"><link data-rh="true" rel="icon" href="/zh/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://sparrow.rayainfo.cn/zh/docs/architecture-design/architecture-overview"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/architecture-design/architecture-overview" hreflang="en"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/zh/docs/architecture-design/architecture-overview" hreflang="zh"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/architecture-design/architecture-overview" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"架构设计","item":"https://sparrow.rayainfo.cn/zh/docs/architecture-design/architecture-overview"}]}</script><link rel="stylesheet" href="/zh/assets/css/styles.63623602.css">
+<script src="/zh/assets/js/runtime~main.38d0fea1.js" defer="defer"></script>
+<script src="/zh/assets/js/main.fd56c047.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="跳到主要内容"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">跳到主要内容</a></div><nav aria-label="主导航" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="切换导航栏" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/zh/"><div class="navbar__logo"><img src="/zh/img/logo.png" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/zh/img/logo.png" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">Sparrow</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/zh/docs/getting-started">Docs</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="iconLanguage_nlXk"><path fill="currentColor" d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"></path></svg>简体中文</a><ul class="dropdown__menu"><li><a href="/docs/architecture-design/architecture-overview" target="_self" rel="noopener noreferrer" class="dropdown__link" lang="en">English</a></li><li><a href="/zh/docs/architecture-design/architecture-overview" target="_self" rel="noopener noreferrer" class="dropdown__link dropdown__link--active" lang="zh">简体中文</a></li></ul></div><a href="https://github.com/DotNetAge/sparrow" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="切换深色和浅色模式（当前为system mode）"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="回到顶部" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="文档侧边栏" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/getting-started"><span title="快速开始" class="linkLabel_WmDU">快速开始</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/example-project"><span title="示例项目" class="linkLabel_WmDU">示例项目</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/development-guide"><span title="开发指南" class="linkLabel_WmDU">开发指南</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/testing-strategy"><span title="测试策略" class="linkLabel_WmDU">测试策略</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/logging-monitoring"><span title="日志监控" class="linkLabel_WmDU">日志监控</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/utility-functions"><span title="工具函数库" class="linkLabel_WmDU">工具函数库</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/zh/docs/deployment-operations"><span title="部署运维" class="linkLabel_WmDU">部署运维</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/project-overview/"><span title="Project Overview" class="categoryLinkLabel_W154">Project Overview</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/zh/docs/architecture-design/architecture-overview"><span title="Architecture Design" class="categoryLinkLabel_W154">Architecture Design</span></a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/zh/docs/architecture-design/architecture-overview"><span title="架构设计" class="linkLabel_WmDU">架构设计</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/architecture-design/layered-architecture-details"><span title="分层架构详解" class="linkLabel_WmDU">分层架构详解</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/architecture-design/clean-architecture-principles"><span title="整洁架构原理" class="linkLabel_WmDU">整洁架构原理</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/architecture-design/dependency-inversion-principle"><span title="依赖倒置原则" class="linkLabel_WmDU">依赖倒置原则</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/zh/docs/architecture-design/design-pattern-application"><span title="设计模式应用" class="linkLabel_WmDU">设计模式应用</span></a></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/application-framework/"><span title="Application Framework" class="categoryLinkLabel_W154">Application Framework</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/interface-adapters/"><span title="Interface Adapters" class="categoryLinkLabel_W154">Interface Adapters</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/data-persistence/"><span title="Data Persistence" class="categoryLinkLabel_W154">Data Persistence</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/event-driven-system/"><span title="Event-Driven System" class="categoryLinkLabel_W154">Event-Driven System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/task-scheduling-system/"><span title="Task Scheduling System" class="categoryLinkLabel_W154">Task Scheduling System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/domain-model/"><span title="Domain Model" class="categoryLinkLabel_W154">Domain Model</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/authentication-authorization-system/"><span title="Authentication and Authorization System" class="categoryLinkLabel_W154">Authentication and Authorization System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/zh/docs/message-passing/"><span title="Message Passing" class="categoryLinkLabel_W154">Message Passing</span></a></div></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="页面路径"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="主页面" class="breadcrumbs__link" href="/zh/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Architecture Design</span></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">架构设计</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">本页目录</button></div><div class="theme-doc-markdown markdown"><header><h1>架构设计</h1></header>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="目录">目录<a href="#目录" class="hash-link" aria-label="直接 链接到 目录" title="直接链接到 目录" translate="no">​</a></h2>
+<ol>
+<li class=""><a href="#%E5%BC%95%E8%A8%80" class="">引言</a></li>
+<li class=""><a href="#%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84" class="">项目结构</a></li>
+<li class=""><a href="#%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6" class="">核心组件</a></li>
+<li class=""><a href="#%E6%9E%B6%E6%9E%84%E6%80%BB%E8%A7%88" class="">架构总览</a></li>
+<li class=""><a href="#%E8%AF%A6%E7%BB%86%E7%BB%84%E4%BB%B6%E5%88%86%E6%9E%90" class="">详细组件分析</a></li>
+<li class=""><a href="#%E4%BE%9D%E8%B5%96%E5%88%86%E6%9E%90" class="">依赖分析</a></li>
+<li class=""><a href="#%E6%80%A7%E8%83%BD%E8%80%83%E8%99%91" class="">性能考虑</a></li>
+<li class=""><a href="#%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5%E6%8C%87%E5%8D%97" class="">故障排查指南</a></li>
+<li class=""><a href="#%E7%BB%93%E8%AE%BA" class="">结论</a></li>
+<li class=""><a href="#%E9%99%84%E5%BD%95" class="">附录</a></li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="引言">引言<a href="#引言" class="hash-link" aria-label="直接链接到 引言" title="直接链接到 引言" translate="no">​</a></h2>
+<p>本文件面向架构师与高级开发者，系统阐述 Sparrow 框架在代码层面如何落地“整洁架构”（Clean Architecture）。通过明确应用层、适配器层、领域层、基础设施层的职责边界与交互关系，解释依赖倒置原则、分层设计与模块化实现，给出架构决策的技术考量、权衡取舍与扩展性设计建议。文中提供多幅架构与类图，帮助读者快速把握系统全貌。</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="项目结构">项目结构<a href="#项目结构" class="hash-link" aria-label="直接链接到 项目结构" title="直接链接到 项目结构" translate="no">​</a></h2>
+<p>Sparrow 采用按“关注点”分层的目录组织方式，结合 Go 模块化特性，形成清晰的分层边界：</p>
+<ul>
+<li class="">领域层（entity）：承载 业务实体与聚合根，定义业务不变量与行为契约</li>
+<li class="">用例层（usecase）：封装业务用例与流程编排，定义仓储接口与通用查询模型</li>
+<li class="">适配器层（adapter）：HTTP 路由与处理器、中间件、投影/Saga 等外部适配</li>
+<li class="">基础设施层（bootstrap、config、persistence、messaging、tasks 等）：提供运行时环境、配置、持久化、消息总线、任务调度等支撑能力</li>
+</ul>
+<!-- -->
+<p><strong>图示来源</strong></p>
+<ul>
+<li class="">
+<p><a href="file://pkg/entity/base_entity.go#L1-L49" target="_blank" rel="noopener noreferrer" class="">pkg/entity/base_entity.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/entity/agg_root.go#L1-L30" target="_blank" rel="noopener noreferrer" class="">pkg/entity/agg_root.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/entity/task.go#L1-L114" target="_blank" rel="noopener noreferrer" class="">pkg/entity/task.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/usecase/repo.go#L1-L44" target="_blank" rel="noopener noreferrer" class="">pkg/usecase/repo.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/usecase/base_repo.go#L1-L211" target="_blank" rel="noopener noreferrer" class="">pkg/usecase/base_repo.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/usecase/session.go#L1-L137" target="_blank" rel="noopener noreferrer" class="">pkg/usecase/session.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/bootstrap/app.go#L1-L333" target="_blank" rel="noopener noreferrer" class="">pkg/bootstrap/app.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/bootstrap/container.go#L1-L133" target="_blank" rel="noopener noreferrer" class="">pkg/bootstrap/container.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/config/config.go#L1-L90" target="_blank" rel="noopener noreferrer" class="">pkg/config/config.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/persistence/repo/sqldb.go#L1-L800" target="_blank" rel="noopener noreferrer" class="">pkg/persistence/repo/sqldb.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/messaging/bus.go#L1-L48" target="_blank" rel="noopener noreferrer" class="">pkg/messaging/bus.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/tasks/core.go#L1-L122" target="_blank" rel="noopener noreferrer" class="">pkg/tasks/core.go</a></p>
+</li>
+<li class="">
+<p>应用程序入口与容器</p>
+<ul>
+<li class="">App：全局应用对象，负责配置加载、日志初始化、HTTP 服务器启动、子进程生命周期管理、事件总线/消息总线接入、任务调度器集成</li>
+<li class="">Container：轻量 IoC 容器，支持匿名与具名依赖注册与解析，实现依赖注入与单例缓存</li>
+</ul>
+</li>
+<li class="">
+<p>领域模型</p>
+<ul>
+<li class="">BaseEntity：统一实体基类，提供标准字段与时间戳</li>
+<li class="">AggregateRoot：聚合根接口，定义事件溯源、版本控制、业务校验等核心契约</li>
+<li class="">Task：任务实体，体现领域层的业务对象</li>
+</ul>
+</li>
+<li class="">
+<p>用例与仓储</p>
+<ul>
+<li class="">Repository[T]：用例层对持久化的抽象接口</li>
+<li class="">BaseRepository[T]：仓储通用实现骨架，提供默认错误与查询选项工具</li>
+<li class="">SessionService：会话管理用例，封装业务规则与仓储交互</li>
+</ul>
+</li>
+<li class="">
+<p>基础设施</p>
+<ul>
+<li class="">Config：集中式配置结构，涵盖服务、日志、数据库、缓存、消息中间件等</li>
+<li class="">SqlDBRepository[T]：基于 database/sql 的泛型仓储实现，支持软删除、事务、条件查询、分页、随机取样等</li>
+<li class="">StreamHub：基于 NATS JetStream 的事件流总线，支持订阅、优雅关闭与启动</li>
+<li class="">TaskScheduler：任务调度器接口，抽象任务的调度、取消、状态查询与生命周期管理</li>
+</ul>
+</li>
+</ul>
+<p>Sparrow 的整洁架构以“依赖倒置”为核心：上层（应用层、适配器层）仅依赖抽象（接口），下层（基础设施层）实现这些抽象；领域层独立于技术细节，仅暴露接口给用例层消费。下图展示关键组件与依赖方向：</p>
+<!-- -->
+<p><strong>图示来源</strong></p>
+<ul>
+<li class=""><a href="file://pkg/adapter/http/router/tasks.go#L1-L20" target="_blank" rel="noopener noreferrer" class="">pkg/adapter/http/router/tasks.go</a></li>
+<li class=""><a href="file://pkg/usecase/session.go#L1-L137" target="_blank" rel="noopener noreferrer" class="">pkg/usecase/session.go</a></li>
+<li class=""><a href="file://pkg/usecase/repo.go#L1-L44" target="_blank" rel="noopener noreferrer" class="">pkg/usecase/repo.go</a></li>
+<li class=""><a href="file://pkg/usecase/base_repo.go#L1-L211" target="_blank" rel="noopener noreferrer" class="">pkg/usecase/base_repo.go</a></li>
+<li class=""><a href="file://pkg/entity/base_entity.go#L1-L49" target="_blank" rel="noopener noreferrer" class="">pkg/entity/base_entity.go</a></li>
+<li class=""><a href="file://pkg/entity/agg_root.go#L1-L30" target="_blank" rel="noopener noreferrer" class="">pkg/entity/agg_root.go</a></li>
+<li class=""><a href="file://pkg/entity/task.go#L1-L114" target="_blank" rel="noopener noreferrer" class="">pkg/entity/task.go</a></li>
+<li class=""><a href="file://pkg/bootstrap/app.go#L1-L333" target="_blank" rel="noopener noreferrer" class="">pkg/bootstrap/app.go</a></li>
+<li class=""><a href="file://pkg/bootstrap/container.go#L1-L133" target="_blank" rel="noopener noreferrer" class="">pkg/bootstrap/container.go</a></li>
+<li class=""><a href="file://pkg/config/config.go#L1-L90" target="_blank" rel="noopener noreferrer" class="">pkg/config/config.go</a></li>
+<li class=""><a href="file://pkg/persistence/repo/sqldb.go#L1-L800" target="_blank" rel="noopener noreferrer" class="">pkg/persistence/repo/sqldb.go</a></li>
+<li class=""><a href="file://pkg/messaging/bus.go#L1-L48" target="_blank" rel="noopener noreferrer" class="">pkg/messaging/bus.go</a></li>
+<li class=""><a href="file://pkg/tasks/core.go#L1-L122" target="_blank" rel="noopener noreferrer" class="">pkg/tasks/core.go</a></li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="详细组件分析">详细组件分析<a href="#详细组件分析" class="hash-link" aria-label="直接链接到 详细组件分析" title="直接链接到 详细组件分析" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="依赖注入与容器ioc">依赖注入与容器（IoC）<a href="#依赖注入与容器ioc" class="hash-link" aria-label="直接链接到 依赖注入与容器（IoC）" title="直接链接到 依赖注入与容器（IoC）" translate="no">​</a></h3>
+<ul>
+<li class="">设计要点<!-- -->
+<ul>
+<li class="">支持匿名与具名提供者注册，解析时优先命中具名，否则回退匿名</li>
+<li class="">构造函数参数按类型解析依赖，自动缓存首次解析结果（单例）</li>
+<li class="">提供便捷的按名称解析与实例注入方法</li>
+</ul>
+</li>
+<li class="">与应用层协作<!-- -->
+<ul>
+<li class="">App 通过 Container 注册与解析全局服务（如 NATS 连接、事件发布器、任务服务等）</li>
+<li class="">用例层通过 App 的解析方法获取仓储、会话服务等依赖</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<p><strong>图示来源</strong></p>
+<ul>
+<li class="">
+<p><a href="file://pkg/bootstrap/container.go#L1-L133" target="_blank" rel="noopener noreferrer" class="">pkg/bootstrap/container.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/bootstrap/app.go#L1-L333" target="_blank" rel="noopener noreferrer" class="">pkg/bootstrap/app.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/usecase/session.go#L1-L137" target="_blank" rel="noopener noreferrer" class="">pkg/usecase/session.go</a></p>
+</li>
+<li class="">
+<p>BaseEntity：统一实体标识与时间戳字段，为所有实体提供一致的生命周期管理</p>
+</li>
+<li class="">
+<p>AggregateRoot：定义聚合根必须实现的接口，包括版本控制、事件溯源（命令处理、事件应用、未提交事件管理）、从事件流/快照重建状态、业务校验等</p>
+</li>
+<li class="">
+<p>Task：任务实体，封装任务状态机与重试逻辑，体现领域层的业务不变量</p>
+</li>
+</ul>
+<!-- -->
+<p><strong>图示来源</strong></p>
+<ul>
+<li class="">
+<p><a href="file://pkg/entity/base_entity.go#L1-L49" target="_blank" rel="noopener noreferrer" class="">pkg/entity/base_entity.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/entity/agg_root.go#L1-L30" target="_blank" rel="noopener noreferrer" class="">pkg/entity/agg_root.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/entity/task.go#L1-L114" target="_blank" rel="noopener noreferrer" class="">pkg/entity/task.go</a></p>
+</li>
+<li class="">
+<p>Repository[T]：定义用例层对持久化的统一抽象，覆盖 CRUD、批量操作、分页、条件查询、随机取样等</p>
+</li>
+<li class="">
+<p>BaseRepository[T]：提供默认实现骨架，统一错误包装、查询选项构建、字段校验等，具体数据库实现只需关注 SQL 构造与扫描</p>
+</li>
+<li class="">
+<p>SessionService：会话管理用例，组合仓储接口，封装业务规则（过期检查、自动续期、数据读写）</p>
+</li>
+</ul>
+<!-- -->
+<p><strong>图示来源</strong></p>
+<ul>
+<li class="">
+<p><a href="file://pkg/usecase/repo.go#L1-L44" target="_blank" rel="noopener noreferrer" class="">pkg/usecase/repo.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/usecase/base_repo.go#L1-L211" target="_blank" rel="noopener noreferrer" class="">pkg/usecase/base_repo.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/usecase/session.go#L1-L137" target="_blank" rel="noopener noreferrer" class="">pkg/usecase/session.go</a></p>
+</li>
+<li class="">
+<p>Config：集中式配置结构，提供默认值与各子系统（服务、日志、数据库、缓存、消息中间件、权限等）的配置项</p>
+</li>
+<li class="">
+<p>SqlDBRepository[T]：基于 database/sql 的泛型仓储实现，支持软删除、事务、条件/排序/分页、随机取样、批量操作等</p>
+</li>
+<li class="">
+<p>StreamHub：基于 NATS JetStream 的事件流总线，封装订阅、启动/关闭、事件处理器注册等</p>
+</li>
+<li class="">
+<p>App：整合配置、容器、日志、HTTP 服务器、消息总线、任务调度器，提供统一的启动/关闭流程与重试机制</p>
+</li>
+</ul>
+<!-- -->
+<p><strong>图示来源</strong></p>
+<ul>
+<li class="">
+<p><a href="file://pkg/bootstrap/app.go#L1-L333" target="_blank" rel="noopener noreferrer" class="">pkg/bootstrap/app.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/bootstrap/container.go#L1-L133" target="_blank" rel="noopener noreferrer" class="">pkg/bootstrap/container.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/persistence/repo/sqldb.go#L1-L800" target="_blank" rel="noopener noreferrer" class="">pkg/persistence/repo/sqldb.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/usecase/session.go#L1-L137" target="_blank" rel="noopener noreferrer" class="">pkg/usecase/session.go</a></p>
+</li>
+<li class="">
+<p>TaskScheduler：抽象任务调度器接口，支持调度、取消、状态查询、并发上限设置、启动/停止/优雅关闭</p>
+</li>
+<li class="">
+<p>App：提供任务调度器集成点，便于在应用启动阶段注册与管理任务执行器</p>
+</li>
+</ul>
+<!-- -->
+<p><strong>图示来源</strong></p>
+<ul>
+<li class="">
+<p><a href="file://pkg/tasks/core.go#L1-L122" target="_blank" rel="noopener noreferrer" class="">pkg/tasks/core.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/bootstrap/app.go#L1-L333" target="_blank" rel="noopener noreferrer" class="">pkg/bootstrap/app.go</a></p>
+</li>
+<li class="">
+<p>依赖方向</p>
+<ul>
+<li class="">上层（适配器、用例）仅依赖抽象（接口）</li>
+<li class="">下层（基础设施）实现抽象（具体仓储、消息总线、任务调度器）</li>
+<li class="">领域层不依赖任何技术细节，仅暴露接口给用例层</li>
+</ul>
+</li>
+<li class="">
+<p>耦合与内聚</p>
+<ul>
+<li class="">通过接口隔离与依赖注入，降低模块间耦合</li>
+<li class="">用例层与仓储接口分离，便于替换不同存储实现</li>
+</ul>
+</li>
+<li class="">
+<p>循环依赖</p>
+<ul>
+<li class="">通过接口与容器解耦，避免直接循环引用</li>
+</ul>
+</li>
+<li class="">
+<p>外部依赖</p>
+<ul>
+<li class="">通过 go.mod 明确第三方库范围，基础设施层围绕这些库进行适配</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<p><strong>图示来源</strong></p>
+<ul>
+<li class="">
+<p><a href="file://go.mod#L1-L141" target="_blank" rel="noopener noreferrer" class="">go.mod</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/bootstrap/app.go#L1-L333" target="_blank" rel="noopener noreferrer" class="">pkg/bootstrap/app.go</a></p>
+</li>
+<li class="">
+<p><a href="file://pkg/usecase/repo.go#L1-L44" target="_blank" rel="noopener noreferrer" class="">pkg/usecase/repo.go</a></p>
+</li>
+<li class="">
+<p>仓储层</p>
+<ul>
+<li class="">事务与批量操作：SqlDBRepository 对批量保存/删除使用事务，减少往返开销</li>
+<li class="">条件查询与分页：支持多条件、排序、分页，避免一次性加载全量数据</li>
+<li class="">软删除：通过 deleted_at 字段实现软删除，兼顾审计与性能</li>
+</ul>
+</li>
+<li class="">
+<p>任务调度</p>
+<ul>
+<li class="">并发与顺序两种调度器，可根据任务特性选择执行模式</li>
+<li class="">支持最大并发限制，防止资源争用</li>
+</ul>
+</li>
+<li class="">
+<p>日志与配置</p>
+<ul>
+<li class="">集中式配置与可插拔日志，便于在生产环境调整性能相关参数</li>
+</ul>
+</li>
+</ul>
+<p>[本节为通用指导，不直接分析具体文件]</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="故障排查指南">故障排查指南<a href="#故障排查指南" class="hash-link" aria-label="直接链接到 故障排查指南" title="直接链接到 故障排查指南" translate="no">​</a></h2>
+<ul>
+<li class="">启动与重试<!-- -->
+<ul>
+<li class="">App 提供子进程指数退避重试机制，最大重试次数与等待上限可控</li>
+<li class="">优雅关闭：统一的关闭流程与超时控制，确保资源释放</li>
+</ul>
+</li>
+<li class="">仓储错误<!-- -->
+<ul>
+<li class="">BaseRepository 对空 ID、空字段等常见错误进行统一包装，便于定位问题</li>
+<li class="">SqlDBRepository 对查询异常进行分类处理（如未找到、事务回滚等）</li>
+</ul>
+</li>
+<li class="">会话服务<!-- -->
+<ul>
+<li class="">过期检查与自动清理，避免脏数据影响业务</li>
+</ul>
+</li>
+<li class="">消息总线<!-- -->
+<ul>
+<li class="">StreamHub 支持订阅器的启动/关闭，便于在调试阶段启用/禁用事件处理</li>
+</ul>
+</li>
+</ul>
+<p>Sparrow 通过整洁架构与依赖倒置，将业务逻辑与技术实现解耦，形成高内聚、低耦合的分层体系。用例层以接口抽象仓储，领域层专注于业务不变量，基础设施层提供可替换的实现，适配器层负责外部交互。配合 IoC 容器、集中式配置与任务/消息基础设施，系统具备良好的扩展性与可维护性。建议在扩展新功能时遵循“上层依赖抽象、下层实现抽象”的原则，持续保持架构清晰。</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="附录">附录<a href="#附录" class="hash-link" aria-label="直接链接到 附录" title="直接链接到 附录" translate="no">​</a></h2>
+<ul>
+<li class="">关键流程示意（启动与事件订阅）</li>
+</ul>
+<!-- -->
+<p><strong>图示来源</strong></p>
+<ul>
+<li class=""><a href="file://pkg/bootstrap/app.go#L156-L333" target="_blank" rel="noopener noreferrer" class="">pkg/bootstrap/app.go</a></li>
+<li class=""><a href="file://pkg/messaging/bus.go#L21-L47" target="_blank" rel="noopener noreferrer" class="">pkg/messaging/bus.go</a></li>
+<li class=""><a href="file://pkg/usecase/session.go#L1-L137" target="_blank" rel="noopener noreferrer" class="">pkg/usecase/session.go</a></li>
+</ul></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="文档页面导航"><a class="pagination-nav__link pagination-nav__link--prev" href="/zh/docs/project-overview/development-history"><div class="pagination-nav__sublabel">上一页</div><div class="pagination-nav__label">发展历程</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/zh/docs/architecture-design/layered-architecture-details"><div class="pagination-nav__sublabel">下一页</div><div class="pagination-nav__label">分层架构详解</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#目录" class="table-of-contents__link toc-highlight">目录</a></li><li><a href="#引言" class="table-of-contents__link toc-highlight">引言</a></li><li><a href="#项目结构" class="table-of-contents__link toc-highlight">项目结构</a></li><li><a href="#详细组件分析" class="table-of-contents__link toc-highlight">详细组件分析</a><ul><li><a href="#依赖注入与容器ioc" class="table-of-contents__link toc-highlight">依赖注入与容器（IoC）</a></li></ul></li><li><a href="#故障排查指南" class="table-of-contents__link toc-highlight">故障排查指南</a></li><li><a href="#附录" class="table-of-contents__link toc-highlight">附录</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Guangzhou Ruiya Information Technology Co., Ltd. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>

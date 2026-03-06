@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-interface-adapters/websocket-adapter" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">WebSocket Adapter | Sparrow</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://sparrow.rayainfo.cn/img/sparrow-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://sparrow.rayainfo.cn/img/sparrow-social-card.jpg"><meta data-rh="true" property="og:url" content="https://sparrow.rayainfo.cn/docs/interface-adapters/websocket-adapter"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" property="og:locale:alternate" content="zh"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="WebSocket Adapter | Sparrow"><meta data-rh="true" name="description" content="Table of Contents"><meta data-rh="true" property="og:description" content="Table of Contents"><link data-rh="true" rel="icon" href="/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://sparrow.rayainfo.cn/docs/interface-adapters/websocket-adapter"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/interface-adapters/websocket-adapter" hreflang="en"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/zh/docs/interface-adapters/websocket-adapter" hreflang="zh"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/interface-adapters/websocket-adapter" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"WebSocket Adapter","item":"https://sparrow.rayainfo.cn/docs/interface-adapters/websocket-adapter"}]}</script><link rel="stylesheet" href="/assets/css/styles.63623602.css">
+<script src="/assets/js/runtime~main.12b7ca60.js" defer="defer"></script>
+<script src="/assets/js/main.c8504be0.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/"><div class="navbar__logo"><img src="/img/logo.png" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/img/logo.png" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">Sparrow</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/getting-started">Docs</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="iconLanguage_nlXk"><path fill="currentColor" d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"></path></svg>English</a><ul class="dropdown__menu"><li><a href="/docs/interface-adapters/websocket-adapter" target="_self" rel="noopener noreferrer" class="dropdown__link dropdown__link--active" lang="en">English</a></li><li><a href="/zh/docs/interface-adapters/websocket-adapter" target="_self" rel="noopener noreferrer" class="dropdown__link" lang="zh">简体中文</a></li></ul></div><a href="https://github.com/DotNetAge/sparrow" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/getting-started"><span title="Getting Started" class="linkLabel_WmDU">Getting Started</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/example-project"><span title="Example Project" class="linkLabel_WmDU">Example Project</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/development-guide"><span title="Development Guide" class="linkLabel_WmDU">Development Guide</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/testing-strategy"><span title="Testing Strategy" class="linkLabel_WmDU">Testing Strategy</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/logging-monitoring"><span title="Logging and Monitoring" class="linkLabel_WmDU">Logging and Monitoring</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/utility-functions"><span title="Utility Functions Library" class="linkLabel_WmDU">Utility Functions Library</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/deployment-operations"><span title="Deployment and Operations" class="linkLabel_WmDU">Deployment and Operations</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/project-overview/"><span title="Project Overview" class="categoryLinkLabel_W154">Project Overview</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/architecture-design/architecture-overview"><span title="Architecture Design" class="categoryLinkLabel_W154">Architecture Design</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/application-framework/"><span title="Application Framework" class="categoryLinkLabel_W154">Application Framework</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/docs/interface-adapters/"><span title="Interface Adapters" class="categoryLinkLabel_W154">Interface Adapters</span></a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/interface-adapters/"><span title="Interface Adapters" class="linkLabel_WmDU">Interface Adapters</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/docs/interface-adapters/websocket-adapter"><span title="WebSocket Adapter" class="linkLabel_WmDU">WebSocket Adapter</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" tabindex="0" href="/docs/interface-adapters/http-adapter/"><span title="HTTP Adapter" class="categoryLinkLabel_W154">HTTP Adapter</span></a></div></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/data-persistence/"><span title="Data Persistence" class="categoryLinkLabel_W154">Data Persistence</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/event-driven-system/"><span title="Event-Driven System" class="categoryLinkLabel_W154">Event-Driven System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/task-scheduling-system/"><span title="Task Scheduling System" class="categoryLinkLabel_W154">Task Scheduling System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/domain-model/"><span title="Domain Model" class="categoryLinkLabel_W154">Domain Model</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/authentication-authorization-system/"><span title="Authentication and Authorization System" class="categoryLinkLabel_W154">Authentication and Authorization System</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/message-passing/"><span title="Message Passing" class="categoryLinkLabel_W154">Message Passing</span></a></div></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Interface Adapters</span></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">WebSocket Adapter</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>WebSocket Adapter</h1></header>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="table-of-contents">Table of Contents<a href="#table-of-contents" class="hash-link" aria-label="Direct link to Table of Contents" title="Direct link to Table of Contents" translate="no">​</a></h2>
+<ol>
+<li class=""><a href="#introduction" class="">Introduction</a></li>
+<li class=""><a href="#project-structure" class="">Project Structure</a></li>
+<li class=""><a href="#core-components" class="">Core Components</a></li>
+<li class=""><a href="#architecture-overview" class="">Architecture Overview</a></li>
+<li class=""><a href="#detailed-component-analysis" class="">Detailed Component Analysis</a></li>
+<li class=""><a href="#dependency-analysis" class="">Dependency Analysis</a></li>
+<li class=""><a href="#performance-considerations" class="">Performance Considerations</a></li>
+<li class=""><a href="#troubleshooting-guide" class="">Troubleshooting Guide</a></li>
+<li class=""><a href="#conclusion" class="">Conclusion</a></li>
+<li class=""><a href="#appendix" class="">Appendix</a></li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="introduction">Introduction<a href="#introduction" class="hash-link" aria-label="Direct link to Introduction" title="Direct link to Introduction" translate="no">​</a></h2>
+<p>This document is a detailed technical document for WebSocket adapter, targeting real-time application developers, systematically explaining connection establishment process, message transmission protocol, connection state management, lifecycle management, heartbeat detection and disconnect reconnection strategy, message routing and broadcast mechanism, private channel management, connection pool and concurrent processing, memory optimization, error handling and exception recovery, performance monitoring and other key technical points. The document also provides usage guide, extension development suggestions and troubleshooting methods, helping developers quickly integrate and stably run WebSocket services.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="project-structure">Project Structure<a href="#project-structure" class="hash-link" aria-label="Direct link to Project Structure" title="Direct link to Project Structure" translate="no">​</a></h2>
+<p>WebSocket adapter is located in pkg/ws directory, adopts lightweight design, built around Gin middleware and gorilla/websocket library, provides thread-safe connection pool, broadcast and single-point/user-level message delivery capabilities, and built-in heartbeat keepalive mechanism.</p>
+<!-- -->
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="core-components">Core Components<a href="#core-components" class="hash-link" aria-label="Direct link to Core Components" title="Direct link to Core Components" translate="no">​</a></h2>
+<ul>
+<li class=""><strong>Middleware and Connection Management</strong>: Responsible for identifying WebSocket requests, upgrading connections, generating client IDs, maintaining connection pool, starting message reading and heartbeat goroutines.</li>
+<li class=""><strong>Connection Pool</strong>: Map structure based on RWMutex, stores Client objects indexed by clientID.</li>
+<li class=""><strong>Message Routing and Broadcast</strong>: Provides convenient interfaces for global broadcast, single-point send, user-level broadcast, online count statistics, etc.</li>
+<li class=""><strong>Heartbeat Keepalive</strong>: Periodically sends ping messages, automatically removes connection on exception.</li>
+<li class=""><strong>Configuration Options</strong>: Supports custom CORS validation and heartbeat interval.</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="architecture-overview">Architecture Overview<a href="#architecture-overview" class="hash-link" aria-label="Direct link to Architecture Overview" title="Direct link to Architecture Overview" translate="no">​</a></h2>
+<p>WebSocket adapter intercepts WebSocket handshake requests through Gin middleware, uses gorilla/websocket to complete upgrade, then starts two goroutines for each connection: message reading and heartbeat keepalive. Connection pool maintains all active connections with clientID as key, message sending interfaces implement broadcast and targeted delivery through traversing connection pool.</p>
+<!-- -->
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="detailed-component-analysis">Detailed Component Analysis<a href="#detailed-component-analysis" class="hash-link" aria-label="Direct link to Detailed Component Analysis" title="Direct link to Detailed Component Analysis" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="middleware-and-connection-lifecycle">Middleware and Connection Lifecycle<a href="#middleware-and-connection-lifecycle" class="hash-link" aria-label="Direct link to Middleware and Connection Lifecycle" title="Direct link to Middleware and Connection Lifecycle" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="request-identification">Request Identification<a href="#request-identification" class="hash-link" aria-label="Direct link to Request Identification" title="Direct link to Request Identification" translate="no">​</a></h4>
+<ul>
+<li class="">Determines if it&#x27;s a WebSocket handshake by checking Upgrade and Connection headers.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="connection-upgrade">Connection Upgrade<a href="#connection-upgrade" class="hash-link" aria-label="Direct link to Connection Upgrade" title="Direct link to Connection Upgrade" translate="no">​</a></h4>
+<ul>
+<li class="">Uses upgrader to complete HTTP to WebSocket upgrade, returns 500 on failure.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="client-initialization">Client Initialization<a href="#client-initialization" class="hash-link" aria-label="Direct link to Client Initialization" title="Direct link to Client Initialization" translate="no">​</a></h4>
+<ul>
+<li class="">Generates clientID (supports query parameter or header), extracts userID (supports query or header), wraps Client and adds to connection pool.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="lifecycle-startup">Lifecycle Startup<a href="#lifecycle-startup" class="hash-link" aria-label="Direct link to Lifecycle Startup" title="Direct link to Lifecycle Startup" translate="no">​</a></h4>
+<ul>
+<li class="">Starts readMsg and startHeartbeat goroutines for each connection; readMsg removes connection on exception; startHeartbeat periodically sends ping, removes connection on failure.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="abort-subsequent-processing">Abort Subsequent Processing<a href="#abort-subsequent-processing" class="hash-link" aria-label="Direct link to Abort Subsequent Processing" title="Direct link to Abort Subsequent Processing" translate="no">​</a></h4>
+<ul>
+<li class="">Interrupts current request chain after handshake completion, avoids other route processing.</li>
+</ul>
+<!-- -->
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="connection-pool-and-concurrency">Connection Pool and Concurrency<a href="#connection-pool-and-concurrency" class="hash-link" aria-label="Direct link to Connection Pool and Concurrency" title="Direct link to Connection Pool and Concurrency" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="data-structure">Data Structure<a href="#data-structure" class="hash-link" aria-label="Direct link to Data Structure" title="Direct link to Data Structure" translate="no">​</a></h4>
+<ul>
+<li class="">clients is a map with RWMutex, key is clientID, value is Client pointer.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="concurrency-control">Concurrency Control<a href="#concurrency-control" class="hash-link" aria-label="Direct link to Concurrency Control" title="Direct link to Concurrency Control" translate="no">​</a></h4>
+<ul>
+<li class="">In read-heavy scenarios, reading uses RLock, writing uses Lock; broadcast and send interfaces copy list first during traversal, reduce lock holding time.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="memory-optimization">Memory Optimization<a href="#memory-optimization" class="hash-link" aria-label="Direct link to Memory Optimization" title="Direct link to Memory Optimization" translate="no">​</a></h4>
+<ul>
+<li class="">Pre-allocate slice capacity before traversal, reduce expansion; immediately remove connection on send failure, avoid zombie connections occupying memory.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="close-strategy">Close Strategy<a href="#close-strategy" class="hash-link" aria-label="Direct link to Close Strategy" title="Direct link to Close Strategy" translate="no">​</a></h4>
+<ul>
+<li class="">removeClient calls Conn.Close(), and deletes map entry within lock.</li>
+</ul>
+<!-- -->
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="message-routing-and-broadcast">Message Routing and Broadcast<a href="#message-routing-and-broadcast" class="hash-link" aria-label="Direct link to Message Routing and Broadcast" title="Direct link to Message Routing and Broadcast" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="global-broadcast">Global Broadcast<a href="#global-broadcast" class="hash-link" aria-label="Direct link to Global Broadcast" title="Direct link to Global Broadcast" translate="no">​</a></h4>
+<ul>
+<li class="">Traverses connection pool, WriteMessage one by one; collects failures and removes corresponding clients; returns aggregated error.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="single-point-send">Single-Point Send<a href="#single-point-send" class="hash-link" aria-label="Direct link to Single-Point Send" title="Direct link to Single-Point Send" translate="no">​</a></h4>
+<ul>
+<li class="">Finds connection by clientID, removes on send failure; returns boolean or error.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="user-broadcast">User Broadcast<a href="#user-broadcast" class="hash-link" aria-label="Direct link to User Broadcast" title="Direct link to User Broadcast" translate="no">​</a></h4>
+<ul>
+<li class="">Filters connection list by userID, sends one by one and handles failures.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="json-serialization">JSON Serialization<a href="#json-serialization" class="hash-link" aria-label="Direct link to JSON Serialization" title="Direct link to JSON Serialization" translate="no">​</a></h4>
+<ul>
+<li class="">BroadcastJSON and SendJSON* interfaces perform JSON encoding internally, returns error on failure.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="text-and-binary">Text and Binary<a href="#text-and-binary" class="hash-link" aria-label="Direct link to Text and Binary" title="Direct link to Text and Binary" translate="no">​</a></h4>
+<ul>
+<li class="">Provides Text and Binary two types of convenient interfaces.</li>
+</ul>
+<!-- -->
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="heartbeat-and-disconnect-reconnection">Heartbeat and Disconnect Reconnection<a href="#heartbeat-and-disconnect-reconnection" class="hash-link" aria-label="Direct link to Heartbeat and Disconnect Reconnection" title="Direct link to Heartbeat and Disconnect Reconnection" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="heartbeat-trigger">Heartbeat Trigger<a href="#heartbeat-trigger" class="hash-link" aria-label="Direct link to Heartbeat Trigger" title="Direct link to Heartbeat Trigger" translate="no">​</a></h4>
+<ul>
+<li class="">startHeartbeat sends ping text message with heartbeatInterval period.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="exception-handling">Exception Handling<a href="#exception-handling" class="hash-link" aria-label="Direct link to Exception Handling" title="Direct link to Exception Handling" translate="no">​</a></h4>
+<ul>
+<li class="">Heartbeat WriteMessage failure is considered connection unavailable, removes client and terminates goroutine.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="disconnect-reconnection">Disconnect Reconnection<a href="#disconnect-reconnection" class="hash-link" aria-label="Direct link to Disconnect Reconnection" title="Direct link to Disconnect Reconnection" translate="no">​</a></h4>
+<ul>
+<li class="">Client side needs to implement reconnection logic; server does not actively initiate reconnection, only cleans up connection on heartbeat failure.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="configuration">Configuration<a href="#configuration" class="hash-link" aria-label="Direct link to Configuration" title="Direct link to Configuration" translate="no">​</a></h4>
+<ul>
+<li class="">WithHeartbeatInterval supports custom heartbeat interval.</li>
+</ul>
+<!-- -->
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="private-channel-management">Private Channel Management<a href="#private-channel-management" class="hash-link" aria-label="Direct link to Private Channel Management" title="Direct link to Private Channel Management" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="private-channel">Private Channel<a href="#private-channel" class="hash-link" aria-label="Direct link to Private Channel" title="Direct link to Private Channel" translate="no">​</a></h4>
+<ul>
+<li class="">Distinguishes users through Client.UserID field, SendToUser series interfaces implement user-level broadcast.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="channel-management">Channel Management<a href="#channel-management" class="hash-link" aria-label="Direct link to Channel Management" title="Direct link to Channel Management" translate="no">​</a></h4>
+<ul>
+<li class="">Connection pool indexed by clientID, user dimension implements &quot;private channel&quot; semantics through userID filtering.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="extension-suggestions">Extension Suggestions<a href="#extension-suggestions" class="hash-link" aria-label="Direct link to Extension Suggestions" title="Direct link to Extension Suggestions" translate="no">​</a></h4>
+<ul>
+<li class="">Can add channelID field in Client structure to achieve finer-grained channel isolation.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="configuration-and-extension">Configuration and Extension<a href="#configuration-and-extension" class="hash-link" aria-label="Direct link to Configuration and Extension" title="Direct link to Configuration and Extension" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="custom-cors">Custom CORS<a href="#custom-cors" class="hash-link" aria-label="Direct link to Custom CORS" title="Direct link to Custom CORS" translate="no">​</a></h4>
+<ul>
+<li class="">WithCheckOrigin supports injecting custom validation function, meets production environment security requirements.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="heartbeat-interval">Heartbeat Interval<a href="#heartbeat-interval" class="hash-link" aria-label="Direct link to Heartbeat Interval" title="Direct link to Heartbeat Interval" translate="no">​</a></h4>
+<ul>
+<li class="">WithHeartbeatInterval supports adjusting heartbeat period, balances keepalive and resource consumption.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="default-behavior">Default Behavior<a href="#default-behavior" class="hash-link" aria-label="Direct link to Default Behavior" title="Direct link to Default Behavior" translate="no">​</a></h4>
+<ul>
+<li class="">Default allows any origin CORS, heartbeat interval is 10 seconds.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="error-handling-and-exception-recovery">Error Handling and Exception Recovery<a href="#error-handling-and-exception-recovery" class="hash-link" aria-label="Direct link to Error Handling and Exception Recovery" title="Direct link to Error Handling and Exception Recovery" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="upgrade-failed">Upgrade Failed<a href="#upgrade-failed" class="hash-link" aria-label="Direct link to Upgrade Failed" title="Direct link to Upgrade Failed" translate="no">​</a></h4>
+<ul>
+<li class="">Logs and returns 500, avoids continuing processing.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="send-failed">Send Failed<a href="#send-failed" class="hash-link" aria-label="Direct link to Send Failed" title="Direct link to Send Failed" translate="no">​</a></h4>
+<ul>
+<li class="">Logs failed client ID, immediately removes connection, prevents subsequent broadcast repeated failures.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="read-message-failed">Read Message Failed<a href="#read-message-failed" class="hash-link" aria-label="Direct link to Read Message Failed" title="Direct link to Read Message Failed" translate="no">​</a></h4>
+<ul>
+<li class="">Logs exception and triggers connection removal, ensures connection pool consistency.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="json-serialization-failed">JSON Serialization Failed<a href="#json-serialization-failed" class="hash-link" aria-label="Direct link to JSON Serialization Failed" title="Direct link to JSON Serialization Failed" translate="no">​</a></h4>
+<ul>
+<li class="">Returns wrapped error, convenient for upper layer handling.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="exception-recovery">Exception Recovery<a href="#exception-recovery" class="hash-link" aria-label="Direct link to Exception Recovery" title="Direct link to Exception Recovery" translate="no">​</a></h4>
+<ul>
+<li class="">Achieves automatic cleanup through defer in goroutine and connection pool removal, avoids leakage.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="performance-monitoring">Performance Monitoring<a href="#performance-monitoring" class="hash-link" aria-label="Direct link to Performance Monitoring" title="Direct link to Performance Monitoring" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="online-count">Online Count<a href="#online-count" class="hash-link" aria-label="Direct link to Online Count" title="Direct link to Online Count" translate="no">​</a></h4>
+<ul>
+<li class="">GetOnlineCount provides real-time statistics, can be used for frontend display and rate limiting strategy.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="periodic-broadcast">Periodic Broadcast<a href="#periodic-broadcast" class="hash-link" aria-label="Direct link to Periodic Broadcast" title="Direct link to Periodic Broadcast" translate="no">​</a></h4>
+<ul>
+<li class="">Example demonstrates periodic broadcast of system statistics, can be extended to richer monitoring metrics.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="broadcast-performance">Broadcast Performance<a href="#broadcast-performance" class="hash-link" aria-label="Direct link to Broadcast Performance" title="Direct link to Broadcast Performance" translate="no">​</a></h4>
+<ul>
+<li class="">Copies list first when traversing connection pool, reduces lock holding time; timely cleans up failed connections, avoids amplification effect.</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="dependency-analysis">Dependency Analysis<a href="#dependency-analysis" class="hash-link" aria-label="Direct link to Dependency Analysis" title="Direct link to Dependency Analysis" translate="no">​</a></h2>
+<p>WebSocket adapter depends on Gin and gorilla/websocket, integrates into HTTP routing through middleware; application startup creates HTTP server and mounts routing through app.go, configuration provided by config.go.</p>
+<!-- -->
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="performance-considerations">Performance Considerations<a href="#performance-considerations" class="hash-link" aria-label="Direct link to Performance Considerations" title="Direct link to Performance Considerations" translate="no">​</a></h2>
+<ul>
+<li class=""><strong>Connection Pool Scale</strong>: Current implementation is single map, suitable for small and medium scale concurrency; if higher throughput needed, can consider sharded lock or partitioned connection pool.</li>
+<li class=""><strong>Broadcast Strategy</strong>: Copy list when traversing connection pool, reduces lock contention; immediately removes failed connections, avoids subsequent repeated failures.</li>
+<li class=""><strong>Heartbeat Frequency</strong>: Reasonably set heartbeatInterval, too short increases CPU and bandwidth overhead, too long may cause gateway disconnect.</li>
+<li class=""><strong>Memory Occupancy</strong>: Timely clean up failed connections, avoids connection pool infinite growth; pay attention to JSON serialization overhead.</li>
+<li class=""><strong>Concurrency Model</strong>: Reading and heartbeat are in separate goroutines, avoids blocking; send interfaces are synchronous blocking, can change to asynchronous buffer queue according to business requirements.</li>
+</ul>
+<p>[This section is general performance recommendations, no specific file source needed]</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="troubleshooting-guide">Troubleshooting Guide<a href="#troubleshooting-guide" class="hash-link" aria-label="Direct link to Troubleshooting Guide" title="Direct link to Troubleshooting Guide" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="handshake-failed">Handshake Failed<a href="#handshake-failed" class="hash-link" aria-label="Direct link to Handshake Failed" title="Direct link to Handshake Failed" translate="no">​</a></h3>
+<ul>
+<li class="">Check if request headers contain correct Upgrade and Connection; view middleware log output.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="send-failed-1">Send Failed<a href="#send-failed-1" class="hash-link" aria-label="Direct link to Send Failed" title="Direct link to Send Failed" translate="no">​</a></h3>
+<ul>
+<li class="">Confirm if clientID is online; view failed client removal log; check client network status.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="heartbeat-failed">Heartbeat Failed<a href="#heartbeat-failed" class="hash-link" aria-label="Direct link to Heartbeat Failed" title="Direct link to Heartbeat Failed" translate="no">​</a></h3>
+<ul>
+<li class="">Confirm heartbeatInterval setting is reasonable; check if client supports ping/pong; view connection removal log.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="cors-issues">CORS Issues<a href="#cors-issues" class="hash-link" aria-label="Direct link to CORS Issues" title="Direct link to CORS Issues" translate="no">​</a></h3>
+<ul>
+<li class="">Use WithCheckOrigin to inject strict validation; ensure frontend request headers match configuration.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="performance-issues">Performance Issues<a href="#performance-issues" class="hash-link" aria-label="Direct link to Performance Issues" title="Direct link to Performance Issues" translate="no">​</a></h3>
+<ul>
+<li class="">Monitor online count and broadcast latency; evaluate heartbeat frequency and message size; enable connection pool sharding if necessary.</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="conclusion">Conclusion<a href="#conclusion" class="hash-link" aria-label="Direct link to Conclusion" title="Direct link to Conclusion" translate="no">​</a></h2>
+<p>This WebSocket adapter integrates Gin and gorilla/websocket with concise middleware pattern, provides thread-safe connection pool, complete broadcast and targeted delivery capabilities, built-in heartbeat keepalive and automatic cleanup mechanism. Through configuration options can flexibly customize CORS and heartbeat strategies. For high concurrency scenarios, recommend combining with sharded connection pool, asynchronous send queue and finer-grained channel management to further optimize performance and stability.</p>
+<p>[This section is summary content, no specific file source needed]</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="appendix">Appendix<a href="#appendix" class="hash-link" aria-label="Direct link to Appendix" title="Direct link to Appendix" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="usage-guide">Usage Guide<a href="#usage-guide" class="hash-link" aria-label="Direct link to Usage Guide" title="Direct link to Usage Guide" translate="no">​</a></h3>
+<ul>
+<li class="">Mount middleware in Gin routing: r.Use(ws.Middleware()).</li>
+<li class="">Provide WebSocket route: r.GET(&quot;/ws&quot;, func(c *gin.Context) <!-- -->).</li>
+<li class="">Send broadcast: ws.BroadcastText(&quot;Hello&quot;) / ws.BroadcastJSON(data).</li>
+<li class="">Query online count: ws.GetOnlineCount().</li>
+<li class="">Example reference: Example in file comments and periodic statistics broadcast.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="extension-development-suggestions">Extension Development Suggestions<a href="#extension-development-suggestions" class="hash-link" aria-label="Direct link to Extension Development Suggestions" title="Direct link to Extension Development Suggestions" translate="no">​</a></h3>
+<ul>
+<li class="">Add channel management: Add channelID field in Client, implement multi-channel isolation.</li>
+<li class="">Asynchronous send: Introduce send queue and batch write, reduces lock contention.</li>
+<li class="">Connection pool sharding: Shard by clientID hash, reduces lock contention.</li>
+<li class="">Monitoring metrics: Expose Prometheus metrics, including online count, broadcast latency, heartbeat failure rate, etc.</li>
+<li class="">Disconnect reconnection: Implement exponential backoff reconnection strategy on client side, cooperate with server heartbeat keepalive.</li>
+</ul>
+<p>[This section is extension suggestions, no specific file source needed]</p></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages navigation"><a class="pagination-nav__link pagination-nav__link--prev" href="/docs/interface-adapters/"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Interface Adapters</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/docs/interface-adapters/http-adapter/"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">HTTP Adapter</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#table-of-contents" class="table-of-contents__link toc-highlight">Table of Contents</a></li><li><a href="#introduction" class="table-of-contents__link toc-highlight">Introduction</a></li><li><a href="#project-structure" class="table-of-contents__link toc-highlight">Project Structure</a></li><li><a href="#core-components" class="table-of-contents__link toc-highlight">Core Components</a></li><li><a href="#architecture-overview" class="table-of-contents__link toc-highlight">Architecture Overview</a></li><li><a href="#detailed-component-analysis" class="table-of-contents__link toc-highlight">Detailed Component Analysis</a><ul><li><a href="#middleware-and-connection-lifecycle" class="table-of-contents__link toc-highlight">Middleware and Connection Lifecycle</a></li><li><a href="#connection-pool-and-concurrency" class="table-of-contents__link toc-highlight">Connection Pool and Concurrency</a></li><li><a href="#message-routing-and-broadcast" class="table-of-contents__link toc-highlight">Message Routing and Broadcast</a></li><li><a href="#heartbeat-and-disconnect-reconnection" class="table-of-contents__link toc-highlight">Heartbeat and Disconnect Reconnection</a></li><li><a href="#private-channel-management" class="table-of-contents__link toc-highlight">Private Channel Management</a></li><li><a href="#configuration-and-extension" class="table-of-contents__link toc-highlight">Configuration and Extension</a></li><li><a href="#error-handling-and-exception-recovery" class="table-of-contents__link toc-highlight">Error Handling and Exception Recovery</a></li><li><a href="#performance-monitoring" class="table-of-contents__link toc-highlight">Performance Monitoring</a></li></ul></li><li><a href="#dependency-analysis" class="table-of-contents__link toc-highlight">Dependency Analysis</a></li><li><a href="#performance-considerations" class="table-of-contents__link toc-highlight">Performance Considerations</a></li><li><a href="#troubleshooting-guide" class="table-of-contents__link toc-highlight">Troubleshooting Guide</a><ul><li><a href="#handshake-failed" class="table-of-contents__link toc-highlight">Handshake Failed</a></li><li><a href="#send-failed-1" class="table-of-contents__link toc-highlight">Send Failed</a></li><li><a href="#heartbeat-failed" class="table-of-contents__link toc-highlight">Heartbeat Failed</a></li><li><a href="#cors-issues" class="table-of-contents__link toc-highlight">CORS Issues</a></li><li><a href="#performance-issues" class="table-of-contents__link toc-highlight">Performance Issues</a></li></ul></li><li><a href="#conclusion" class="table-of-contents__link toc-highlight">Conclusion</a></li><li><a href="#appendix" class="table-of-contents__link toc-highlight">Appendix</a><ul><li><a href="#usage-guide" class="table-of-contents__link toc-highlight">Usage Guide</a></li><li><a href="#extension-development-suggestions" class="table-of-contents__link toc-highlight">Extension Development Suggestions</a></li></ul></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Guangzhou Ruiya Information Technology Co., Ltd. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>
