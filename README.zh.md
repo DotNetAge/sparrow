@@ -3,6 +3,7 @@
 # 🐦 Sparrow
 
 ![Sparrow](logo.png)
+<br>
 **一个为现代微服务而生的 Go 领域驱动框架**
 
 [![Go Version](https://img.shields.io/badge/Go-1.25-00ADD8?style=flat-square&logo=go)](https://golang.org)

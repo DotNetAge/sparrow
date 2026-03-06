@@ -3,6 +3,7 @@
 # 🐦 Sparrow
 
 ![Sparrow](logo.png)
+<br>
 **A Modern CQRS Framework for Go**
 
 [![Go Version](https://img.shields.io/badge/Go-1.25-00ADD8?style=flat-square&logo=go)](https://golang.org)
@@ -16,7 +17,7 @@
 <div align="center">
 
 [English](./README.md) | [中文](./README.zh.md)
-[Document](https://sparrow.rayainfo.cn)
+
 </div>
 
 
