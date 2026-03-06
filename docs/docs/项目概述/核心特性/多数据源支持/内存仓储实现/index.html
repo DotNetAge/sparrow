@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="zh" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-项目概述/核心特性/多数据源支持/内存仓储实现" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">内存仓储实现 | Sparrow</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://sparrow.rayainfo.cn/img/sparrow-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://sparrow.rayainfo.cn/img/sparrow-social-card.jpg"><meta data-rh="true" property="og:url" content="https://sparrow.rayainfo.cn/docs/项目概述/核心特性/多数据源支持/内存仓储实现"><meta data-rh="true" property="og:locale" content="zh"><meta data-rh="true" property="og:locale:alternate" content="en"><meta data-rh="true" name="docusaurus_locale" content="zh"><meta data-rh="true" name="docsearch:language" content="zh"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="内存仓储实现 | Sparrow"><meta data-rh="true" name="description" content="目录"><meta data-rh="true" property="og:description" content="目录"><link data-rh="true" rel="icon" href="/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://sparrow.rayainfo.cn/docs/项目概述/核心特性/多数据源支持/内存仓储实现"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/项目概述/核心特性/多数据源支持/内存仓储实现" hreflang="zh"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/en/docs/项目概述/核心特性/多数据源支持/内存仓储实现" hreflang="en"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/项目概述/核心特性/多数据源支持/内存仓储实现" hreflang="x-default"><link rel="stylesheet" href="/assets/css/styles.e402f4ef.css">
+<script src="/assets/js/runtime~main.b30ea3d8.js" defer="defer"></script>
+<script src="/assets/js/main.1f18fe0a.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="跳到主要内容"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">跳到主要内容</a></div><nav aria-label="主导航" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="切换导航栏" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/"><div class="navbar__logo"><img src="/img/logo.svg" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/img/logo.svg" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">Sparrow</b></a><a class="navbar__item navbar__link" href="/docs/快速开始">文档</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="iconLanguage_nlXk"><path fill="currentColor" d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"></path></svg>简体中文</a><ul class="dropdown__menu"><li><a href="/docs/项目概述/核心特性/多数据源支持/内存仓储实现" target="_self" rel="noopener noreferrer" class="dropdown__link dropdown__link--active" lang="zh">简体中文</a></li><li><a href="/en/docs/项目概述/核心特性/多数据源支持/内存仓储实现" target="_self" rel="noopener noreferrer" class="dropdown__link" lang="en">English</a></li></ul></div><a href="https://github.com/DotNetAge/sparrow" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="切换深色和浅色模式（当前为system mode）"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="回到顶部" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><main class="docMainContainer_TBSr docMainContainerEnhanced_lQrH"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">本页目录</button></div><div class="theme-doc-markdown markdown"><header><h1>内存仓储实现</h1></header>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="目录">目录<a href="#目录" class="hash-link" aria-label="直接链接到 目录" title="直接链接到 目录" translate="no">​</a></h2>
+<ol>
+<li class=""><a href="#%E7%AE%80%E4%BB%8B" class="">简介</a></li>
+<li class=""><a href="#%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84" class="">项目结构</a></li>
+<li class=""><a href="#%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6" class="">核心组件</a></li>
+<li class=""><a href="#%E6%9E%B6%E6%9E%84%E6%80%BB%E8%A7%88" class="">架构总览</a></li>
+<li class=""><a href="#%E8%AF%A6%E7%BB%86%E7%BB%84%E4%BB%B6%E5%88%86%E6%9E%90" class="">详细组件分析</a></li>
+<li class=""><a href="#%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E5%88%86%E6%9E%90" class="">依赖关系分析</a></li>
+<li class=""><a href="#%E6%80%A7%E8%83%BD%E8%80%83%E9%87%8F" class="">性能考量</a></li>
+<li class=""><a href="#%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5%E6%8C%87%E5%8D%97" class="">故障排查指南</a></li>
+<li class=""><a href="#%E7%BB%93%E8%AE%BA" class="">结论</a></li>
+<li class=""><a href="#%E9%99%84%E5%BD%95%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B%E4%B8%8E%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5" class="">附录：使用示例与最佳实践</a></li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="简介">简介<a href="#简介" class="hash-link" aria-label="直接链接到 简介" title="直接链接到 简介" translate="no">​</a></h2>
+<p>本文件面向 Sparrow 框架的内存仓储实现，系统性阐述 MemoryRepository 泛型仓储的设计原理与实现细节，重点覆盖：</p>
+<ul>
+<li class="">基于 sync.RWMutex 的并发安全机制</li>
+<li class="">内存中的实体存储结构与 CRUD 完整实现</li>
+<li class="">适用场景（测试环境、临时数据存储、高性能缓存）</li>
+<li class="">错误处理机制、并发访问控制与最佳实践</li>
+<li class="">与其他数据源仓储的差异与优势</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="项目结构">项目结构<a href="#项目结构" class="hash-link" aria-label="直接链接到 项目结构" title="直接链接到 项目结构" translate="no">​</a></h2>
+<p>内存仓储位于持久化层，与实体层、用例层、错误层协同工作，形成清晰的分层职责：</p>
+<ul>
+<li class="">实体层：定义统一的 Entity 接口与基础实体结构</li>
+<li class="">用例层：定义仓储接口与通用查询条件/排序模型</li>
+<li class="">错误层：统一的仓储错误类型</li>
+<li class="">持久化层：MemoryRepository 提供内存中的完整 CRUD 与查询能力</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">MemoryRepository[T]: 泛型内存仓储，封装并发锁与内存映射表，提供完整的 CRUD 与查询能力</li>
+<li class="">Repository[T] 接口：统一的仓储契约，定义所有对外操作</li>
+<li class="">QueryOptions/QueryCondition：多条件查询与排序的基础模型</li>
+<li class="">Entity 接口与 BaseEntity：实体抽象与标准字段（ID、创建/更新时间）</li>
+</ul>
+<p>MemoryRepository 通过组合 usecase.BaseRepository[T]，在内存中维护一个 map[string]T 的实体集合，并以 RWMutex 控制并发读写。所有操作均遵循仓储接口契约，保证与上层用例解耦。</p>
+<!-- -->
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="并发安全与锁策略">并发安全与锁策略<a href="#并发安全与锁策略" class="hash-link" aria-label="直接链接到 并发安全与锁策略" title="直接链接到 并发安全与锁策略" translate="no">​</a></h3>
+<ul>
+<li class="">
+<p>读写分离：使用 sync.RWMutex，在读取路径采用 RLock/RUnlock，写入路径采用 Lock/Unlock，提升并发读性能</p>
+</li>
+<li class="">
+<p>并发插入保护：insert 与 Save 在写入前双重检查，避免竞态导致的重复键冲突</p>
+</li>
+<li class="">
+<p>读写一致性：所有读取操作在进入时加读锁，退出时释放；写入操作在进入时加写锁，退出时释放</p>
+</li>
+<li class="">
+<p>存储容器：map[string]T，键为实体 ID，值为实体对象</p>
+</li>
+<li class="">
+<p>类型信息：构造时记录实体类型字符串，用于错误报告</p>
+</li>
+<li class="">
+<p>时间字段自动填充：通过反射设置 CreatedAt/UpdatedAt 字段（若实体具备对应字段）</p>
+</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="保存save">保存（Save）<a href="#保存save" class="hash-link" aria-label="直接链接到 保存（Save）" title="直接链接到 保存（Save）" translate="no">​</a></h4>
+<ul>
+<li class="">
+<p>若实体 ID 为空，返回仓储错误</p>
+</li>
+<li class="">
+<p>先 Exists 检查，存在则 Update，否则 insert</p>
+</li>
+<li class="">
+<p>insert 中对重复键进行二次校验，确保并发安全</p>
+</li>
+<li class="">
+<p>加写锁，检查重复键</p>
+</li>
+<li class="">
+<p>自动设置 CreatedAt/UpdatedAt（反射）</p>
+</li>
+<li class="">
+<p>写入 map</p>
+</li>
+<li class="">
+<p>ID 校验，不存在返回错误</p>
+</li>
+<li class="">
+<p>加写锁，检查实体存在性</p>
+</li>
+<li class="">
+<p>自动设置 UpdatedAt（反射）</p>
+</li>
+<li class="">
+<p>更新 map</p>
+</li>
+<li class="">
+<p>FindByID：空 ID 校验，读锁，返回实体或错误</p>
+</li>
+<li class="">
+<p>FindAll：读锁，遍历 map 返回全部实体</p>
+</li>
+<li class="">
+<p>Exists：读锁，判断键存在</p>
+</li>
+<li class="">
+<p>Count：读锁，返回长度</p>
+</li>
+<li class="">
+<p>Delete：空 ID 校验，加写锁，删除键</p>
+</li>
+<li class="">
+<p>DeleteBatch：空 ID 列表校验，加写锁，逐个删除</p>
+</li>
+<li class="">
+<p>SaveBatch：空列表直接返回；逐项设置时间字段；写锁内批量写入</p>
+</li>
+<li class="">
+<p>FindByIDs：空 ID 列表返回空切片；读锁，过滤存在项</p>
+</li>
+<li class="">
+<p>DeleteBatch：空列表直接返回；写锁，逐个删除</p>
+</li>
+<li class="">
+<p>FindWithPagination：读锁，准备全量切片，处理默认 limit/offset，返回子切片</p>
+</li>
+<li class="">
+<p>Count：读锁，返回长度</p>
+</li>
+<li class="">
+<p>FindWithConditions：读锁，遍历实体，逐条件匹配（反射字段访问与类型比较）</p>
+</li>
+<li class="">
+<p>CountWithConditions：读锁，同上逻辑仅计数</p>
+</li>
+<li class="">
+<p>matchCondition：支持 EQ/NE/GT/LT/GTE/LTE 等操作符，含数值与字符串/时间类型比较</p>
+</li>
+<li class="">
+<p>Random：读锁，收集所有 ID，随机打乱，取前 take 个，返回实体</p>
+</li>
+<li class="">
+<p>Clear：写锁，重建空 map</p>
+</li>
+<li class="">
+<p>反射用于自动设置时间字段与字段值读取</p>
+</li>
+<li class="">
+<p>对指针字段做解引用处理</p>
+</li>
+<li class="">
+<p>类型不一致时进行有限的数值类型转换（int/float），字符串/布尔直比较</p>
+</li>
+<li class="">
+<p>RepositoryError：统一的仓储错误类型，包含实体类型、操作、ID、消息与原因</p>
+</li>
+<li class="">
+<p>各操作在输入校验失败或未找到实体时返回该错误</p>
+</li>
+<li class="">
+<p>上层可基于错误类型进行差异化处理</p>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">MemoryRepository[T] 实现 usecase.Repository[T] 接口</li>
+<li class="">组合 usecase.BaseRepository[T]，继承通用查询模型</li>
+<li class="">依赖 entity.Entity 接口与 BaseEntity 标准字段</li>
+<li class="">依赖 errs.RepositoryError 进行错误包装</li>
+<li class="">测试覆盖了典型 CRUD、批量操作、分页、条件查询、并发插入与随机取样</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">
+<p>读多写少场景：RWMutex 显著提升并发读吞吐</p>
+</li>
+<li class="">
+<p>内存访问：O(1) 键查找，O(n) 遍历（分页/条件查询）</p>
+</li>
+<li class="">
+<p>反射成本：字段读取与类型比较带来一定开销，适合小中规模数据</p>
+</li>
+<li class="">
+<p>批量操作：单次加锁批量写入，减少锁竞争</p>
+</li>
+<li class="">
+<p>分页与条件查询：全量扫描，建议结合业务规模评估</p>
+</li>
+<li class="">
+<p>输入校验失败：ID 为空、字段名为空、实体 ID 为空等，均会返回 RepositoryError</p>
+</li>
+<li class="">
+<p>未找到实体：FindByID/Update/Delete/Exists 等在实体不存在时返回错误</p>
+</li>
+<li class="">
+<p>并发冲突：重复插入可能触发“实体已存在”错误，需检查 ID 生成策略</p>
+</li>
+<li class="">
+<p>类型不匹配：条件查询中类型不一致时，仅支持有限的数值类型转换</p>
+</li>
+<li class="">
+<p>随机取样：take&lt;=0 时默认取 1 个</p>
+</li>
+</ul>
+<p>MemoryRepository 以简洁的内存映射表与 RWMutex 并发控制，提供了完整的仓储能力，特别适用于测试、临时数据与高性能缓存场景。其泛型设计与统一接口契约，使其易于替换与扩展。在实际应用中，应结合业务数据规模与并发特征，合理评估反射与全量扫描带来的性能影响，并在需要持久化与高可用的生产环境中选择更合适的持久化仓储实现。</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="适用场景">适用场景<a href="#适用场景" class="hash-link" aria-label="直接链接到 适用场景" title="直接链接到 适用场景" translate="no">​</a></h3>
+<ul>
+<li class="">测试环境：快速搭建内存仓储，隔离外部依赖</li>
+<li class="">临时数据存储：短期缓存、会话数据、中间计算结果</li>
+<li class="">高性能缓存：热点数据的只读/短生命周期缓存</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="使用示例步骤说明">使用示例（步骤说明）<a href="#使用示例步骤说明" class="hash-link" aria-label="直接链接到 使用示例（步骤说明）" title="直接链接到 使用示例（步骤说明）" translate="no">​</a></h3>
+<ul>
+<li class="">
+<p>创建实体：以 Task 为例，确保其实现 Entity 接口并嵌入 BaseEntity</p>
+</li>
+<li class="">
+<p>创建仓储：调用 NewMemoryRepository<a href="" class="">*entity.Task</a> 获取仓储实例</p>
+</li>
+<li class="">
+<p>基本操作：Save/FindByID/FindAll/Update/Delete/Count</p>
+</li>
+<li class="">
+<p>批量操作：SaveBatch/FindByIDs/DeleteBatch</p>
+</li>
+<li class="">
+<p>分页与统计：FindWithPagination/Count</p>
+</li>
+<li class="">
+<p>条件查询：FindWithConditions/CountWithConditions</p>
+</li>
+<li class="">
+<p>随机  取样：Random</p>
+</li>
+<li class="">
+<p>清空（测试）：Clear</p>
+</li>
+<li class="">
+<p>ID 生成：确保实体 ID 唯一且非空，避免并发插入冲突</p>
+</li>
+<li class="">
+<p>时间字段：实体可包含 CreatedAt/UpdatedAt 字段，仓储会自动设置</p>
+</li>
+<li class="">
+<p>并发控制：读多写少场景优先使用 FindByID/FindAll 等读操作</p>
+</li>
+<li class="">
+<p>条件查询：尽量缩小查询范围，避免全量扫描</p>
+</li>
+<li class="">
+<p>批量操作：合并多次写入为 SaveBatch，减少锁竞争</p>
+</li>
+<li class="">
+<p>测试清理：使用 Clear 清空测试数据，避免跨用例污染</p>
+</li>
+<li class="">
+<p>错误处理：区分 RepositoryError 与业务错误，按需降级或重试</p>
+</li>
+</ul></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="文档页面导航"></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#目录" class="table-of-contents__link toc-highlight">目录</a></li><li><a href="#简介" class="table-of-contents__link toc-highlight">简介</a></li><li><a href="#项目结构" class="table-of-contents__link toc-highlight">项目结构</a><ul><li><a href="#并发安全与锁策略" class="table-of-contents__link toc-highlight">并发安全与锁策略</a></li><li><a href="#适用场景" class="table-of-contents__link toc-highlight">适用场景</a></li><li><a href="#使用示例步骤说明" class="table-of-contents__link toc-highlight">使用示例（步骤说明）</a></li></ul></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 广州睿雅信息科技有限公司. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>

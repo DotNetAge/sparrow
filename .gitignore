@@ -33,3 +33,6 @@ Thumbs.db
 # 环境文件
 .env.local
 .env.production
+.trae
+.vscode
+.qoder

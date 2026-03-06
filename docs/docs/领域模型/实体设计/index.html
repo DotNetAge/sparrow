@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="zh" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-领域模型/实体设计" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">实体设计 | Sparrow</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://sparrow.rayainfo.cn/img/sparrow-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://sparrow.rayainfo.cn/img/sparrow-social-card.jpg"><meta data-rh="true" property="og:url" content="https://sparrow.rayainfo.cn/docs/领域模型/实体设计"><meta data-rh="true" property="og:locale" content="zh"><meta data-rh="true" property="og:locale:alternate" content="en"><meta data-rh="true" name="docusaurus_locale" content="zh"><meta data-rh="true" name="docsearch:language" content="zh"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="实体设计 | Sparrow"><meta data-rh="true" name="description" content="目录"><meta data-rh="true" property="og:description" content="目录"><link data-rh="true" rel="icon" href="/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://sparrow.rayainfo.cn/docs/领域模型/实体设计"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/领域模型/实体设计" hreflang="zh"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/en/docs/领域模型/实体设计" hreflang="en"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/领域模型/实体设计" hreflang="x-default"><link rel="stylesheet" href="/assets/css/styles.e402f4ef.css">
+<script src="/assets/js/runtime~main.b30ea3d8.js" defer="defer"></script>
+<script src="/assets/js/main.1f18fe0a.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="跳到主要内容"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">跳到主要内容</a></div><nav aria-label="主导航" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="切换导航栏" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/"><div class="navbar__logo"><img src="/img/logo.svg" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/img/logo.svg" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">Sparrow</b></a><a class="navbar__item navbar__link" href="/docs/快速开始">文档</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="iconLanguage_nlXk"><path fill="currentColor" d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"></path></svg>简体中文</a><ul class="dropdown__menu"><li><a href="/docs/领域模型/实体设计" target="_self" rel="noopener noreferrer" class="dropdown__link dropdown__link--active" lang="zh">简体中文</a></li><li><a href="/en/docs/领域模型/实体设计" target="_self" rel="noopener noreferrer" class="dropdown__link" lang="en">English</a></li></ul></div><a href="https://github.com/DotNetAge/sparrow" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="切换深色和浅色模式（当前为system mode）"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="回到顶部" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><main class="docMainContainer_TBSr docMainContainerEnhanced_lQrH"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">本页目录</button></div><div class="theme-doc-markdown markdown"><header><h1>实体设计</h1></header>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="目录">目录<a href="#目录" class="hash-link" aria-label="直接链接到 目录" title="直接链接到 目录" translate="no">​</a></h2>
+<ol>
+<li class=""><a href="#%E7%AE%80%E4%BB%8B" class="">简介</a></li>
+<li class=""><a href="#%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84" class="">项目结构</a></li>
+<li class=""><a href="#%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6" class="">核心组件</a></li>
+<li class=""><a href="#%E6%9E%B6%E6%9E%84%E6%A6%82%E8%A7%88" class="">架构概览</a></li>
+<li class=""><a href="#%E8%AF%A6%E7%BB%86%E7%BB%84%E4%BB%B6%E5%88%86%E6%9E%90" class="">详细组件分析</a></li>
+<li class=""><a href="#%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E5%88%86%E6%9E%90" class="">依赖关系分析</a></li>
+<li class=""><a href="#%E6%80%A7%E8%83%BD%E8%80%83%E8%99%91" class="">性能考虑</a></li>
+<li class=""><a href="#%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5%E6%8C%87%E5%8D%97" class="">故障排查指南</a></li>
+<li class=""><a href="#%E7%BB%93%E8%AE%BA" class="">结论</a></li>
+<li class=""><a href="#%E9%99%84%E5%BD%95" class="">附录</a></li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="简介">简介<a href="#简介" class="hash-link" aria-label="直接链接到 简介" title="直接链接到 简介" translate="no">​</a></h2>
+<p>本文件系统性阐述 Sparrow 框架中的实体设计，重点覆盖：</p>
+<ul>
+<li class="">BaseEntity 基类的设计理念与职责</li>
+<li class="">Entity 接口的约束与契约</li>
+<li class="">实体标识符生成机制</li>
+<li class="">实体生命周期管理、状态变更方法与时间戳处理</li>
+<li class="">Task 实体的完整实现示例与最佳实践</li>
+<li class="">验证规则、数据完整性保障与性能优化建议</li>
+<li class="">事件溯源与聚合根的扩展能力</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="项目结构">项目结构<a href="#项目结构" class="hash-link" aria-label="直接链接到 项目结构" title="直接链接到 项目结构" translate="no">​</a></h2>
+<p>实体相关代码集中在 pkg/entity 目录，采用“接口 + 基类 + 具体实体”的分层设计，配合命令、领域事件与聚合根接口，形成清晰的 DDD/CQRS 与事件溯源架构。</p>
+<!-- -->
+<ul>
+<li class="">Entity 接  口：统一约束实体的标识、时间戳访问与更新能力，确保仓储与持久化层的契约一致。</li>
+<li class="">BaseEntity 基类：提供 Id、CreatedAt、UpdatedAt 的标准字段与访问器，统一实体的生命周期管理。</li>
+<li class="">Task 实体：以任务为核心业务实体，展示状态机、重试策略、执行时长计算与过期判断等业务逻辑。</li>
+<li class="">聚合根接口与基类：提供版本控制、事件收集与应用、快照加载等事件溯源能力。</li>
+<li class="">领域事件与基础事件：标准化事件元数据与负载处理。</li>
+<li class="">命令与基础命令：标准化命令的标识与聚合根绑定。</li>
+</ul>
+<p>实体设计遵循整洁架构的“核心层”理念，将业务实体置于最内层，通过接口与基类向上提供稳定契约，向下由具体实体实现业务规则。聚合根在事件溯源模式下承担状态变更与事件管理职责；命令驱动聚合根产生领域事件；仓储负责实体的持久化；事件存储与快照用于状态重建与优化。</p>
+<!-- -->
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="baseentity-基类与-entity-接口">BaseEntity 基类与 Entity 接口<a href="#baseentity-基类与-entity-接口" class="hash-link" aria-label="直接链接到 BaseEntity 基类与 Entity 接口" title="直接链接到 BaseEntity 基类与 Entity 接口" translate="no">​</a></h3>
+<ul>
+<li class="">设计理念<!-- -->
+<ul>
+<li class="">统一实体标识与时间戳管理，避免重复实现。</li>
+<li class="">通过 NewBaseEntity 初始化创建与更新时间，确保一致性。</li>
+</ul>
+</li>
+<li class="">关键方法<!-- -->
+<ul>
+<li class="">Get/SetID：读写实体标识</li>
+<li class="">Get/SetCreatedAt：只读创建时间</li>
+<li class="">Get/SetUpdatedAt：更新时间随业务变更同步</li>
+</ul>
+</li>
+<li class="">生命周期<!-- -->
+<ul>
+<li class="">创建时设置 CreatedAt 与 UpdatedAt</li>
+<li class="">任何状态变更应调用 SetUpdatedAt 以保持审计一致性</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">状态枚举：pending、running、completed、failed、cancelled</li>
+<li class="">关键方法<!-- -->
+<ul>
+<li class="">Start/Complete/Fail/Cancel：驱动状态机与时间戳更新</li>
+<li class="">CanRetry：基于 Retries 与 MaxRetry 的重试判定</li>
+<li class="">GetExecutionTime：计算执行时长（需两端时间均存在）</li>
+<li class="">IsExpired：基于 CreatedAt 的过期检查</li>
+</ul>
+</li>
+<li class="">标识符生成<!-- -->
+<ul>
+<li class="">NewTask 内部调用 generateTaskID，组合纳秒与毫秒，保证高并发下的唯一性</li>
+</ul>
+</li>
+<li class="">时间戳处理<!-- -->
+<ul>
+<li class="">所有状态变更均更新 UpdatedAt，Fail 时增加 Retries</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">AggregateRoot 接口<!-- -->
+<ul>
+<li class="">继承 Entity，扩展聚合类型、聚合 ID、版本控制与事件溯源能力</li>
+<li class="">提供 HandleCommand、ApplyEvent、LoadFromEvents、LoadFromSnapshot、Validate 等预留方法</li>
+</ul>
+</li>
+<li class="">BaseAggregateRoot 基类<!-- -->
+<ul>
+<li class="">嵌入 BaseEntity，维护 Version 与 uncommittedEvents 列表</li>
+<li class="">AddEvent：校验事件 ID/类型/聚合 ID 一致性，递增版本并更新 UpdatedAt</li>
+<li class="">MarkEventsAsCommitted：清空未提交事件列表</li>
+<li class="">HasUncommittedEvents：辅助判断</li>
+</ul>
+</li>
+<li class="">事件与快照<!-- -->
+<ul>
+<li class="">DomainEvent 接口定义事件元数据</li>
+<li class="">BaseEvent 提供事件的通用结构与负载解码工具</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">
+<p>Command 接口与 BaseCommand：标准化命令 ID 与聚合根 ID 的绑定</p>
+</li>
+<li class="">
+<p>BaseEvent：标准化事件元数据，提供负载解码工具 UnmarshalEvent</p>
+</li>
+<li class="">
+<p>Session：基于 BaseEntity，提供过期检查、数据读写与 TTL 更新</p>
+</li>
+<li class="">
+<p>Transaction：实现 Entity 接口，用于 Saga 协作的事务编排</p>
+</li>
+<li class="">
+<p>组件耦合</p>
+<ul>
+<li class="">实体层依赖 Entity 接口与 BaseEntity 基类，确保一致性</li>
+<li class="">聚合根层在事件溯源模式下依赖 DomainEvent 接口与 BaseEvent 基类</li>
+<li class="">命令层与聚合根交互，通过事件实现无侵入的状态变更</li>
+</ul>
+</li>
+<li class="">
+<p>外部依赖</p>
+<ul>
+<li class="">UUID 工具用于生成全局唯一标识</li>
+<li class="">JSON 编解码用于事件负载传输</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">标识符生成<!-- -->
+<ul>
+<li class="">Task 使用纳秒+毫秒组合生成 ID，具备高并发唯一性；如需进一步降低冲突概率，可在上层引入分布式 ID 生成器（例如雪花算法）或数据库自增主键策略</li>
+</ul>
+</li>
+<li class="">时间戳更新<!-- -->
+<ul>
+<li class="">所有状态变更均调用 SetUpdatedAt，确保审计一致性；批量更新时可合并一次更新，减少多次写入</li>
+</ul>
+</li>
+<li class="">事件溯源<!-- -->
+<ul>
+<li class="">使用 BaseAggregateRoot 的 AddEvent 自动递增版本并更新时间戳；建议对未提交事件进行批量化提交，减少事件存储压力</li>
+</ul>
+</li>
+<li class="">查询与排序<!-- -->
+<ul>
+<li class="">实体实现 GetCreatedAt 可用于排序与分页；建议在仓储层对常用查询建立索引，避免全表扫描</li>
+</ul>
+</li>
+<li class="">内存与序列化<!-- -->
+<ul>
+<li class="">领域事件的 Payload 建议采用二进制或压缩编码，降低网络传输与存储开销</li>
+</ul>
+</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="故障排查指南">故障排查指南<a href="#故障排查指南" class="hash-link" aria-label="直接链接到 故障排查指南" title="直接链接到 故障排查指南" translate="no">​</a></h2>
+<ul>
+<li class="">事件 ID/类型/聚合 ID 校验失败<!-- -->
+<ul>
+<li class="">AddEvent 会对事件 ID、类型与聚合 ID 进行严格校验，若出 现 panic，请检查事件构造与聚合根 ID 是否一致</li>
+</ul>
+</li>
+<li class="">重复事件 ID<!-- -->
+<ul>
+<li class="">AddEvent 会检测重复事件 ID，避免事件流污染；请确保事件 ID 唯一</li>
+</ul>
+</li>
+<li class="">状态变更异常<!-- -->
+<ul>
+<li class="">Task 的 Fail 会增加 Retries，若达到 MaxRetry 则不再自动重试；请检查 CanRetry 条件与业务流程</li>
+</ul>
+</li>
+<li class="">过期与执行时长<!-- -->
+<ul>
+<li class="">IsExpired 基于 CreatedAt 判断；GetExecutionTime 需两端时间均存在，否则返回空</li>
+</ul>
+</li>
+</ul>
+<p>Sparrow 框架的实体设计以接口与基类为核心，通过统一的时间戳管理、严格的事件溯源与聚合根版本控制，提供了高内聚、低耦合的领域建模能力。Task 实体展示了状态机与重试策略的典型实现，Session 与 Transaction 则体现了不同层次的业务抽象。结合模板化聚合根生成与事件存储/快照机制，开发者可快速构建可演进、可观测的领域模型。</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="附录">附录<a href="#附录" class="hash-link" aria-label="直接链接到 附录" title="直接链接到 附录" translate="no">​</a></h2>
+<ul>
+<li class="">验证规则与模板化生成<!-- -->
+<ul>
+<li class="">README 提供了聚合根模板的使用指南，支持字段级验证规则与快照功能，便于生成符合业务规范的聚合根代码</li>
+</ul>
+</li>
+<li class="">最佳实践清单<!-- -->
+<ul>
+<li class="">明确实体职责边界，避免在实体中混入基础设施代码</li>
+<li class="">使用 BaseEntity 统一时间戳，确保审计一致性</li>
+<li class="">通过聚合根的 ApplyEvent 与事件存储实现业务可追溯</li>
+<li class="">对高频查询建立索引，必要时引入快照加速重建</li>
+<li class="">使用命令驱动聚合根，保持状态变更的幂等与可追踪</li>
+</ul>
+</li>
+</ul></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="文档页面导航"></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#目录" class="table-of-contents__link toc-highlight">目录</a></li><li><a href="#简介" class="table-of-contents__link toc-highlight">简介</a></li><li><a href="#项目结构" class="table-of-contents__link toc-highlight">项目结构</a><ul><li><a href="#baseentity-基类与-entity-接口" class="table-of-contents__link toc-highlight">BaseEntity 基类与 Entity 接口</a></li></ul></li><li><a href="#故障排查指南" class="table-of-contents__link toc-highlight">故障排查指南</a></li><li><a href="#附录" class="table-of-contents__link toc-highlight">附录</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 广州睿雅信息科技有限公司. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>

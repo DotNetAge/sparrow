@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="zh" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-项目概述/核心特性/多数据源支持/多数据源支持" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">多数据源支持 | Sparrow</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://sparrow.rayainfo.cn/img/sparrow-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://sparrow.rayainfo.cn/img/sparrow-social-card.jpg"><meta data-rh="true" property="og:url" content="https://sparrow.rayainfo.cn/docs/项目概述/核心特性/多数据源支持/"><meta data-rh="true" property="og:locale" content="zh"><meta data-rh="true" property="og:locale:alternate" content="en"><meta data-rh="true" name="docusaurus_locale" content="zh"><meta data-rh="true" name="docsearch:language" content="zh"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="多数据源支持 | Sparrow"><meta data-rh="true" name="description" content="目录"><meta data-rh="true" property="og:description" content="目录"><link data-rh="true" rel="icon" href="/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://sparrow.rayainfo.cn/docs/项目概述/核心特性/多数据源支持/"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/项目概述/核心特性/多数据源支持/" hreflang="zh"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/en/docs/项目概述/核心特性/多数据源支持/" hreflang="en"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/项目概述/核心特性/多数据源支持/" hreflang="x-default"><link rel="stylesheet" href="/assets/css/styles.e402f4ef.css">
+<script src="/assets/js/runtime~main.b30ea3d8.js" defer="defer"></script>
+<script src="/assets/js/main.1f18fe0a.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="跳到主要内容"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">跳到主要内容</a></div><nav aria-label="主导航" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="切换导航栏" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/"><div class="navbar__logo"><img src="/img/logo.svg" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/img/logo.svg" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">Sparrow</b></a><a class="navbar__item navbar__link" href="/docs/快速开始">文档</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="iconLanguage_nlXk"><path fill="currentColor" d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"></path></svg>简体中文</a><ul class="dropdown__menu"><li><a href="/docs/项目概述/核心特性/多数据源支持/" target="_self" rel="noopener noreferrer" class="dropdown__link dropdown__link--active" lang="zh">简体中文</a></li><li><a href="/en/docs/项目概述/核心特性/多数据源支持/" target="_self" rel="noopener noreferrer" class="dropdown__link" lang="en">English</a></li></ul></div><a href="https://github.com/DotNetAge/sparrow" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="切换深色和浅色模式（当前为system mode）"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="回到顶部" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><main class="docMainContainer_TBSr docMainContainerEnhanced_lQrH"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">本页目录</button></div><div class="theme-doc-markdown markdown"><header><h1>多数据源支持</h1></header>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="目录">目录<a href="#目录" class="hash-link" aria-label="直接链接到 目录" title="直接链接到 目录" translate="no">​</a></h2>
+<ol>
+<li class=""><a href="#%E7%AE%80%E4%BB%8B" class="">简介</a></li>
+<li class=""><a href="#%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84" class="">项目结构</a></li>
+<li class=""><a href="#%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6" class="">核心组件</a></li>
+<li class=""><a href="#%E6%9E%B6%E6%9E%84%E6%A6%82%E8%A7%88" class="">架构概览</a></li>
+<li class=""><a href="#%E8%AF%A6%E7%BB%86%E7%BB%84%E4%BB%B6%E5%88%86%E6%9E%90" class="">详细组件分析</a></li>
+<li class=""><a href="#%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E5%88%86%E6%9E%90" class="">依赖关系分析</a></li>
+<li class=""><a href="#%E6%80%A7%E8%83%BD%E8%80%83%E9%87%8F" class="">性能考量</a></li>
+<li class=""><a href="#%E6%95%85%E9%9A%9C%E6%8E%92%E9%99%A4%E6%8C%87%E5%8D%97" class="">故障排除指南</a></li>
+<li class=""><a href="#%E7%BB%93%E8%AE%BA" class="">结论</a></li>
+<li class=""><a href="#%E9%99%84%E5%BD%95" class="">附录</a></li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="简介">简介<a href="#简介" class="hash-link" aria-label="直接链接到 简介" title="直接链接到 简介" translate="no">​</a></h2>
+<p>本文件系统性阐述 Sparrow 框架的多数据源支持体系，覆盖内存存储、Redis 缓存、PostgreSQL 关系数据库、MongoDB 文档数据库与 BadgerDB 键值数据库五类后端。文档重点说明：</p>
+<ul>
+<li class="">仓储模式（Repository Pattern）的抽象接口设计与通用基类实现</li>
+<li class="">各数据源的特性、适用场景与性能表现</li>
+<li class="">配置方法与使用示例</li>
+<li class="">数据源切换机制与最佳实践</li>
+<li class="">事务管理、连接池配置与性能优化策略</li>
+<li class="">如何依据业务需求选择合适的存储方案</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="项目结构">项目结构<a href="#项目结构" class="hash-link" aria-label="直接链接到 项目结构" title="直接链接到 项目结构" translate="no">​</a></h2>
+<p>围绕多数据源的核心代码主要分布在以下模块：</p>
+<ul>
+<li class="">usecase 层：定义仓储接口与通用查询条件、排序等工具</li>
+<li class="">persistence/repo 层：各数据源的仓储实现</li>
+<li class="">bootstrap 层：应用容器、数据库连接聚合与启动流程</li>
+<li class="">config 层：各类数据源的配置结构与默认值</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">
+<p>仓储接口与通用基类</p>
+<ul>
+<li class="">仓储接口定义了统一的 CRUD、批量操作、分页、条件查询、随机读取等能力，保证不同数据源的使用一致性。</li>
+<li class="">通用基类提供默认实现与错误处理骨架，具体仓储只需实现核心逻辑。</li>
+</ul>
+</li>
+<li class="">
+<p>数据源仓储实现</p>
+<ul>
+<li class="">内存仓储：适合测试与临时数据，提供并发安全的内存存储。</li>
+<li class="">Redis 仓储：基于键值存储，支持 TTL、批量操作与全表扫描条件查询。</li>
+<li class="">PostgreSQL 仓储：关系型数据库，支持软删除、事务、批量操作与复杂条件查询。</li>
+<li class="">MongoDB 仓储：文档数据库，支持聚合与随机采样，条件查询丰富。</li>
+<li class="">BadgerDB 仓储：嵌入式键值数据库，提供本地持久化与高效迭代。</li>
+</ul>
+</li>
+<li class="">
+<p>应用容器与数据库聚合</p>
+<ul>
+<li class="">Container 提供依赖注入与实例缓存，支持具名与匿名解析。</li>
+<li class="">Database 聚合 Redis、SQL、Badger 等连接，便于集中管理。</li>
+</ul>
+</li>
+<li class="">
+<p>配置系统</p>
+<ul>
+<li class="">Config 提供应用、服务器、日志、NATS、SQL、Redis、Badger、RabbitMQ、Kafka、Casbin 等配置项默认值与结构。</li>
+<li class="">各数据源配置结构独立，通过 viper 加载与校验。</li>
+</ul>
+</li>
+</ul>
+<p>多数据源架构采用“统一接口 + 多实现”的模式，通过 IoC 容器按需注入具体仓储实现。应用启动时加载配置，初始化数据库连接，注册仓储提供者，运行时通过具名解析获取对应仓储实例。</p>
+<!-- -->
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="仓储接口与通用基类">仓储接口与通用基类<a href="#仓储接口与通用基类" class="hash-link" aria-label="直接链接到 仓储接口与通用基类" title="直接链接到 仓储接口与通用基类" translate="no">​</a></h3>
+<ul>
+<li class="">接口能力<!-- -->
+<ul>
+<li class="">基本 CRUD：Save、FindByID、FindAll、Update、Delete、Exists</li>
+<li class="">批量操作：SaveBatch、FindByIDs、DeleteBatch</li>
+<li class="">分页与统计：FindWithPagination、Count、CountByField、FindByFieldWithPagination</li>
+<li class="">条件查询：FindWithConditions、CountWithConditions</li>
+<li class="">随机读取：Random</li>
+</ul>
+</li>
+<li class="">基类职责<!-- -->
+<ul>
+<li class="">提供默认实现与错误处理骨架</li>
+<li class="">统一 ID 校验、时间戳设置等通用逻辑</li>
+<li class="">提供查询条件构建器与排序字段辅助函数</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">特点<!-- -->
+<ul>
+<li class="">基于 map 的并发安全存储，读写性能高</li>
+<li class="">支持全量扫描、分页、条件查询（反射实现）</li>
+<li class="">适合测试、临时数据与低延迟场景</li>
+</ul>
+</li>
+<li class="">并发控制<!-- -->
+<ul>
+<li class="">读写锁保护 map，避免竞态</li>
+</ul>
+</li>
+<li class="">查询与分页<!-- -->
+<ul>
+<li class="">全表扫描实现条件查询与分页，注意大数据量下的性能开销</li>
+</ul>
+</li>
+<li class="">适用场景<!-- -->
+<ul>
+<li class="">单机测试、缓存层、临时会话数据</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">特点<!-- -->
+<ul>
+<li class="">键值存储，支持 TTL、批量 Pipeline、MGET/MSET</li>
+<li class="">全表扫描实现条件查询，不适合大规模条件过滤</li>
+<li class="">适合缓存、会话、事件存储等场景</li>
+</ul>
+</li>
+<li class="">键空间组织<!-- -->
+<ul>
+<li class="">通过前缀区分实体类型，键格式为 prefix<!-- -->:id</li>
+</ul>
+</li>
+<li class="">批量与事务<!-- -->
+<ul>
+<li class="">Pipeline 提升批量写入吞吐</li>
+<li class="">TTL 设置与查询支持</li>
+</ul>
+</li>
+<li class="">适用场景<!-- -->
+<ul>
+<li class="">高频读写、短期缓存、事件总线</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">特点<!-- -->
+<ul>
+<li class="">关系型数据库，支持软删除、事务、批量操作、复杂条件查询</li>
+<li class="">通过 sqlx 访问，支持反射扫描与自定义类型处理</li>
+<li class="">适合强一致性、复杂查询与事务场景</li>
+</ul>
+</li>
+<li class="">事务与批量<!-- -->
+<ul>
+<li class="">SaveBatch 在单事务内执行，保证原子性</li>
+<li class="">支持 existsInTx、insertInTx、updateInTx 等事务内操作</li>
+</ul>
+</li>
+<li class="">查询能力<!-- -->
+<ul>
+<li class="">FindByField、FindByIDs、FindWithPagination、Count、Random 等</li>
+<li class="">条件查询通过构建 WHERE 与排序，支持 LIMIT/OFFSET</li>
+</ul>
+</li>
+<li class="">适用场景<!-- -->
+<ul>
+<li class="">用户、订单、财务等核心业务数据</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">特点<!-- -->
+<ul>
+<li class="">文档数据库，支持丰富的查询操作与聚合</li>
+<li class="">集合命名默认基于实体类型，支持 ObjectID 与自定义 ID</li>
+<li class="">支持随机采样（$sample）、条件查询、分页与排序</li>
+</ul>
+</li>
+<li class="">查询与聚合<!-- -->
+<ul>
+<li class="">buildMongoFilter 将 QueryCondition 映射为 BSON 过滤器</li>
+<li class="">FindWithConditions 支持排序与分页</li>
+</ul>
+</li>
+<li class="">适用场景<!-- -->
+<ul>
+<li class="">日志、画像、内容管理、事件溯源等半结构化数据</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">特点<!-- -->
+<ul>
+<li class="">嵌入式键值数据库，本地持久化、迭代友好</li>
+<li class="">不支持软删除，删除为硬删除</li>
+<li class="">全表扫描实现条件查询，适合小中型数据与本地缓存</li>
+</ul>
+</li>
+<li class="">键空 间与迭代<!-- -->
+<ul>
+<li class="">前缀迭代实现分页与统计</li>
+<li class="">JSON 序列化存储实体</li>
+</ul>
+</li>
+<li class="">适用场景<!-- -->
+<ul>
+<li class="">本地缓存、事件存储、轻量级持久化</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">组件耦合<!-- -->
+<ul>
+<li class="">仓储实现严格依赖 usecase 接口与基类，降低耦合度</li>
+<li class="">各仓储对具体数据源客户端（Redis、sqlx、mongo、badger）有直接依赖</li>
+</ul>
+</li>
+<li class="">容器与注册<!-- -->
+<ul>
+<li class="">Container 支持具名/匿名提供者注册与解析，便于切换数据源</li>
+</ul>
+</li>
+<li class="">配置与连接<!-- -->
+<ul>
+<li class="">Database 聚合多数据源连接，App 启动时加载配置并初始化</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">内存仓储<!-- -->
+<ul>
+<li class="">优点：极低延迟、并发安全</li>
+<li class="">缺点：无持久化、容量受限</li>
+<li class="">优化：合理使用分页与条件过滤，避免全量扫描</li>
+</ul>
+</li>
+<li class="">Redis 仓储<!-- -->
+<ul>
+<li class="">优点：高吞吐、支持 TTL、Pipeline 批量</li>
+<li class="">优化：合理设置 TTL、批量写入、避免全表扫描条件查询</li>
+</ul>
+</li>
+<li class="">PostgreSQL 仓储<!-- -->
+<ul>
+<li class="">优点：强一致、事务、复杂查询</li>
+<li class="">优化：索引设计、批量操作、连接池配置、分页查询</li>
+</ul>
+</li>
+<li class="">MongoDB 仓储<!-- -->
+<ul>
+<li class="">优点：灵活文档模型、聚合能力强</li>
+<li class="">优化：建立必要索引、合理使用投影与分页</li>
+</ul>
+</li>
+<li class="">BadgerDB 仓储<!-- -->
+<ul>
+<li class="">优点：本地持久化、迭代友好</li>
+<li class="">优化：合理前缀、避免全表扫描、控制序列化大小</li>
+</ul>
+</li>
+</ul>
+<p>[本节为通用指导，无需列出具体文件来源]</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="故障排除指南">故障排除指南<a href="#故障排除指南" class="hash-link" aria-label="直接链接到 故障排除指南" title="直接链接到 故障排除指南" translate="no">​</a></h2>
+<ul>
+<li class="">常见错误类型<!-- -->
+<ul>
+<li class="">RepositoryError：仓储操作错误，包含实体类型、操作、ID、消息等信息</li>
+<li class="">连接失败：检查配置项（主机、端口、密码、数据库名）</li>
+<li class="">空 ID：调用 Save/Update/Delete 前确保实体 ID 非空</li>
+</ul>
+</li>
+<li class="">排查步骤<!-- -->
+<ul>
+<li class="">核对配置文件与环境变量</li>
+<li class="">检查数据源可达性与认证信息</li>
+<li class="">观察日志输出，定位具体仓储方法与错误原因</li>
+<li class="">针对条件查询，确认字段名与操作符正确</li>
+</ul>
+</li>
+</ul>
+<p>Sparrow 框架通过统一的仓储接口与多实现的数据源体系，提供了灵活、可扩展且高性能的数据访问层。开发者可根据业务需求在内存、Redis、PostgreSQL、MongoDB 与 BadgerDB 之间自由切换，并借助 IoC 容器与配置系统快速集成与部署。建议在生产环境中优先考虑一致性与扩展性，结合业务特征选择合适的数据源并实施相应的性能优化与监控策略。</p>
+<p>[本节为总结性内容，无需列出具体文件来源]</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="附录">附录<a href="#附录" class="hash-link" aria-label="直接链接到 附录" title="直接链接到 附录" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="数据源配置与使用示例路径指引">数据源配置与使用示例（路径指引）<a href="#数据源配置与使用示例路径指引" class="hash-link" aria-label="直接链接到 数据源配置与使用示例（路径指引）" title="直接链接到 数据源配置与使用示例（路径指引）" translate="no">​</a></h3>
+<ul>
+<li class="">Redis 配置结构与默认值<!-- -->
+<ul>
+<li class=""><a href="file://pkg/config/redis.go#L1-L10" target="_blank" rel="noopener noreferrer" class="">pkg/config/redis.go</a></li>
+<li class=""><a href="file://pkg/config/config.go#L53-L59" target="_blank" rel="noopener noreferrer" class="">pkg/config/config.go</a></li>
+</ul>
+</li>
+<li class="">PostgreSQL 配置结构与 DSN 构造<!-- -->
+<ul>
+<li class=""><a href="file://pkg/config/sql.go#L1-L20" target="_blank" rel="noopener noreferrer" class="">pkg/config/sql.go</a></li>
+<li class=""><a href="file://pkg/config/config.go#L73-L81" target="_blank" rel="noopener noreferrer" class="">pkg/config/config.go</a></li>
+</ul>
+</li>
+<li class="">Badger 配置结构与默认值<!-- -->
+<ul>
+<li class=""><a href="file://pkg/config/badger.go#L1-L12" target="_blank" rel="noopener noreferrer" class="">pkg/config/badger.go</a></li>
+<li class=""><a href="file://pkg/config/config.go#L60-L68" target="_blank" rel="noopener noreferrer" class="">pkg/config/config.go</a></li>
+</ul>
+</li>
+<li class="">应用启动与容器注册<!-- -->
+<ul>
+<li class=""><a href="file://pkg/bootstrap/app.go#L46-L88" target="_blank" rel="noopener noreferrer" class="">pkg/bootstrap/app.go</a></li>
+<li class=""><a href="file://pkg/bootstrap/container.go#L32-L96" target="_blank" rel="noopener noreferrer" class="">pkg/bootstrap/container.go</a></li>
+</ul>
+</li>
+<li class="">数据库连接聚合<!-- -->
+<ul>
+<li class=""><a href="file://pkg/bootstrap/db.go#L10-L15" target="_blank" rel="noopener noreferrer" class="">pkg/bootstrap/db.go</a></li>
+</ul>
+</li>
+</ul></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="文档页面导航"></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#目录" class="table-of-contents__link toc-highlight">目录</a></li><li><a href="#简介" class="table-of-contents__link toc-highlight">简介</a></li><li><a href="#项目结构" class="table-of-contents__link toc-highlight">项目结构</a><ul><li><a href="#仓储 接口与通用基类" class="table-of-contents__link toc-highlight">仓储接口与通用基类</a></li></ul></li><li><a href="#故障排除指南" class="table-of-contents__link toc-highlight">故障排除指南</a></li><li><a href="#附录" class="table-of-contents__link toc-highlight">附录</a><ul><li><a href="#数据源配置与使用示例路径指引" class="table-of-contents__link toc-highlight">数据源配置与使用示例（路径指引）</a></li></ul></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 广州睿雅信息科技有限公司. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>

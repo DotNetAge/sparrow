@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="zh" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-项目概述/核心特性/接口适配器/HTTP 适配器" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">HTTP 适配器 | Sparrow</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://sparrow.rayainfo.cn/img/sparrow-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://sparrow.rayainfo.cn/img/sparrow-social-card.jpg"><meta data-rh="true" property="og:url" content="https://sparrow.rayainfo.cn/docs/项目概述/核心特性/接口适配器/HTTP 适配器"><meta data-rh="true" property="og:locale" content="zh"><meta data-rh="true" property="og:locale:alternate" content="en"><meta data-rh="true" name="docusaurus_locale" content="zh"><meta data-rh="true" name="docsearch:language" content="zh"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="HTTP 适配器 | Sparrow"><meta data-rh="true" name="description" content="目录"><meta data-rh="true" property="og:description" content="目录"><link data-rh="true" rel="icon" href="/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://sparrow.rayainfo.cn/docs/项目概述/核心特性/接口适配器/HTTP 适配器"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/项目概述/核心特性/接口适配器/HTTP 适配器" hreflang="zh"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/en/docs/项目概述/核心特性/接口适配器/HTTP 适配器" hreflang="en"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/项目概述/核心特性/接口适配器/HTTP 适配器" hreflang="x-default"><link rel="stylesheet" href="/assets/css/styles.e402f4ef.css">
+<script src="/assets/js/runtime~main.b30ea3d8.js" defer="defer"></script>
+<script src="/assets/js/main.1f18fe0a.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="跳到主要内容"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">跳到主要内容</a></div><nav aria-label="主导航" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="切换导航栏" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/"><div class="navbar__logo"><img src="/img/logo.svg" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/img/logo.svg" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">Sparrow</b></a><a class="navbar__item navbar__link" href="/docs/快速开始">文档</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="iconLanguage_nlXk"><path fill="currentColor" d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"></path></svg>简体中文</a><ul class="dropdown__menu"><li><a href="/docs/项目概述/核心特性/接口适配器/HTTP 适配器" target="_self" rel="noopener noreferrer" class="dropdown__link dropdown__link--active" lang="zh">简体中文</a></li><li><a href="/en/docs/项目概述/核心特性/接口适配器/HTTP 适配器" target="_self" rel="noopener noreferrer" class="dropdown__link" lang="en">English</a></li></ul></div><a href="https://github.com/DotNetAge/sparrow" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="切换深色和浅色模式（当前为system mode）"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="回到顶部" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><main class="docMainContainer_TBSr docMainContainerEnhanced_lQrH"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">本页目录</button></div><div class="theme-doc-markdown markdown"><header><h1>HTTP 适配器</h1></header>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="目录">目录<a href="#目录" class="hash-link" aria-label="直接链接到 目录" title="直接链接到 目录" translate="no">​</a></h2>
+<ol>
+<li class=""><a href="#%E7%AE%80%E4%BB%8B" class="">简介</a></li>
+<li class=""><a href="#%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84" class="">项目结构</a></li>
+<li class=""><a href="#%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6" class="">核心组件</a></li>
+<li class=""><a href="#%E6%9E%B6%E6%9E%84%E6%80%BB%E8%A7%88" class="">架构总览</a></li>
+<li class=""><a href="#%E8%AF%A6%E7%BB%86%E7%BB%84%E4%BB%B6%E5%88%86%E6%9E%90" class="">详细组件分析</a></li>
+<li class=""><a href="#%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E5%88%86%E6%9E%90" class="">依赖关系分析</a></li>
+<li class=""><a href="#%E6%80%A7%E8%83%BD%E8%80%83%E9%87%8F" class="">性能考量</a></li>
+<li class=""><a href="#%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5%E6%8C%87%E5%8D%97" class="">故障排查指南</a></li>
+<li class=""><a href="#%E7%BB%93%E8%AE%BA" class="">结论</a></li>
+<li class=""><a href="#%E9%99%84%E5%BD%95" class="">附录</a></li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="简介">简介<a href="#简介" class="hash-link" aria-label="直接链接到 简介" title="直接链接到 简介" translate="no">​</a></h2>
+<p>本文件面向 HTTP 适配器的实现与扩展，基于 Gin 框架，系统性阐述路由注册机制、处理器模式与中间件集成；并围绕健康检查、会话管理等接口进行深入解析，覆盖 URL 模式设计、请求处理流程、错误码与响应规范、最佳实践、性能优化与安全考虑。同时提供扩展新接口与自定义处理器的步骤指引。</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="项目结构">项目结构<a href="#项目结构" class="hash-link" aria-label="直接链接到 项目结构" title="直接链接到 项目结构" translate="no">​</a></h2>
+<p>HTTP 适配器采用“路由注册 + 处理器 + 中间件”的分层组织方式，配合整洁架构的服务层与实体层，形成清晰的职责边界：</p>
+<ul>
+<li class="">路由层：按功能域拆分注册函数，集中于 router 包</li>
+<li class="">处理器层：面向具体资源的 HTTP 处理逻辑，位于 handlers 包</li>
+<li class="">中间件层  ：鉴权与授权相关能力，位于 middlewares 包</li>
+<li class="">配置与引导：全局配置与 HTTP 服务器启动逻辑位于 config 与 bootstrap 包</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">健康检查处理器与路由：提供 /health 与 /ready 两个端点，分别用于健康检查与就绪检查</li>
+<li class="">会话处理器与路由：提供会话的创建、查询、更新、删除以及数据读写等接口</li>
+<li class="">任务路由：预留任务相关接口的路由注册入口（当前未启用）</li>
+<li class="">中间件：JWT 鉴权、RBAC 授权、RSA 客户端签名验证</li>
+<li class="">配置与引导：全局配置注入、Gin 引擎初始化、HTTP 服务器启动与优雅关闭</li>
+</ul>
+<p>下图展示了从请求进入 Gin 引擎，经由中间件链路，到达处理器，再调用用例层与实体层的整体流程。</p>
+<!-- -->
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="健康检查模块">健康检查模块<a href="#健康检查模块" class="hash-link" aria-label="直接链接到 健康检查模块" title="直接链接到 健康检查模块" translate="no">​</a></h3>
+<ul>
+<li class="">路由注册：在路由层集中注册 /health 与 /ready 两个端点</li>
+<li class="">处理器逻辑：读取配置中的应用名与版本，返回统一结构的 JSON 响应</li>
+<li class="">响应字段：状态、消息、名称、版本、时间戳</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">路由注册：提供会话的创建、查询、更新、删除与数据读取接口</li>
+<li class="">处理器逻辑：参数绑定、错误处理、调用用例层服务</li>
+<li class="">用例层逻辑：会话实体生命周期管理、过期检查、数据读写</li>
+<li class="">实体层逻辑：会话实体结构、过期判断、数据增删改查</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">
+<p>路由注册：预留任务相关接口的路由注册入口（当前未启用）</p>
+</li>
+<li class="">
+<p>处理器与用例：任务相关接口在 handlers/tasks.go   中以注释形式给出，未启用</p>
+</li>
+<li class="">
+<p>JWT 鉴权中间件：校验 Authorization 头、解析与验证 JWT，注入用户主体到上下文</p>
+</li>
+<li class="">
+<p>RBAC 授权中间件：基于 Casbin 执行主体-资源-动作的权限检查</p>
+</li>
+<li class="">
+<p>RSA 客户端签名中间件：基于 RSA-PSS 的客户端签名验证，防重放与时间戳校验</p>
+</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">路由层依赖处理器层与配置层</li>
+<li class="">处理器层依赖用例层与实体层</li>
+<li class="">中间件层独立于处理器，可按需组合</li>
+<li class="">引导层负责组装引擎、注册路由与中间件、启动 HTTP 服务器</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">
+<p>中间件顺序：将快速失败的中间件（如 JWT 鉴权）置于前部，减少后续处理开销</p>
+</li>
+<li class="">
+<p>缓存与幂等：RSA 客户端签名中间件内置签名缓存与随机数存储，降低重复验证成本</p>
+</li>
+<li class="">
+<p>超时与并发：引导层设置 ReadTimeout/WriteTimeout，避免慢请求拖垮服务</p>
+</li>
+<li class="">
+<p>日志与可观测性：结合用例层日志记录关键路径错误，便于定位性能瓶颈</p>
+</li>
+<li class="">
+<p>健康检查失败</p>
+<ul>
+<li class="">检查配置项名称与版本是否正确注入</li>
+<li class="">确认路由是否注册到引擎</li>
+</ul>
+</li>
+<li class="">
+<p>会话接口异常</p>
+<ul>
+<li class="">参数绑定错误：确认请求体 JSON 字段与绑定标签一致</li>
+<li class="">业务错误：关注用例层返回的会话不存在或过期等错误</li>
+</ul>
+</li>
+<li class="">
+<p>鉴权失败</p>
+<ul>
+<li class="">JWT：确认 Authorization 头格式为 Bearer &lt;token&gt;，密钥与签名方法匹配</li>
+<li class="">RBAC：确认用户名与资源路径、HTTP 方法匹配</li>
+<li class="">RSA：确认客户端 ID、签名、随机数、时间戳均在有效范围内且未重复</li>
+</ul>
+</li>
+</ul>
+<p>该 HTTP 适配器以 Gin 为核心，采  用清晰的分层与职责划分，结合中间件实现鉴权与授权，提供健康检查与会话管理等关键接口。通过合理的路由组织、参数绑定与错误处理，既保证了易用性也兼顾了安全性与可扩展性。建议在生产环境中优先启用鉴权与授权中间件，并结合缓存与超时策略提升整体性能与稳定性。</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="附录">附录<a href="#附录" class="hash-link" aria-label="直接链接到 附录" title="直接链接到 附录" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="http-端点规范健康检查">HTTP 端点规范（健康检查）<a href="#http-端点规范健康检查" class="hash-link" aria-label="直接链接到 HTTP 端点规范（健康检查）" title="直接链接到 HTTP 端点规范（健康检查）" translate="no">​</a></h3>
+<ul>
+<li class="">
+<p>GET /health</p>
+<ul>
+<li class="">响应：包含状态、消息、名称、版本、时间戳的 JSON 对象</li>
+<li class="">状态码：200</li>
+</ul>
+</li>
+<li class="">
+<p>GET /ready</p>
+<ul>
+<li class="">响应：包含状态、消息、时间戳的 JSON 对象</li>
+<li class="">状态码：200</li>
+</ul>
+</li>
+<li class="">
+<p>POST /sessions</p>
+<ul>
+<li class="">请求体：无（服务端生成会话 ID）</li>
+<li class="">响应：创建成功的会话对象</li>
+<li class="">状态码：201</li>
+</ul>
+</li>
+<li class="">
+<p>GET /sessions/<!-- -->:id</p>
+<ul>
+<li class="">路径参数：id（会话 ID）</li>
+<li class="">响应：会话对象</li>
+<li class="">状态码：200；若不存在返回 404</li>
+</ul>
+</li>
+<li class="">
+<p>PUT /sessions/<!-- -->:id</p>
+<ul>
+<li class="">路径参数：id（会话 ID）</li>
+<li class="">请求体：空结构（用于演示，实际为更新数据）</li>
+<li class="">响应：成功消息</li>
+<li class="">状态码：200；错误返回 500</li>
+</ul>
+</li>
+<li class="">
+<p>GET /sessions/<!-- -->:id<!-- -->/data</p>
+<ul>
+<li class="">路径参数：id（会话 ID）</li>
+<li class="">响应：包含 key 与 value 的对象</li>
+<li class="">状态码：200；不存在返回 404</li>
+</ul>
+</li>
+<li class="">
+<p>DELETE /sessions/<!-- -->:id</p>
+<ul>
+<li class="">路径参数：id（会话 ID）</li>
+<li class="">响应：成功消息</li>
+<li class="">状态码：200；错误返回 500</li>
+</ul>
+</li>
+<li class="">
+<p>通用响应结构（当使用 pkg/http/results.go 时）：</p>
+<ul>
+<li class="">成功：code=0, msg=&quot;success&quot;, data=...</li>
+<li class="">400：BAD_REQ</li>
+<li class="">401：UNAUTH</li>
+<li class="">404：NOT_FOUND</li>
+<li class="">500：FAIL/ERROR</li>
+</ul>
+</li>
+<li class="">
+<p>会话接口错误：</p>
+<ul>
+<li class="">会话不存在：404</li>
+<li class="">参数绑定失败：400</li>
+<li class="">其他业务错误：500</li>
+</ul>
+</li>
+<li class="">
+<p>中间件顺序建议</p>
+<ul>
+<li class="">鉴权类中间件（JWT/RSA）优先</li>
+<li class="">授权类中间件（RBAC）次之</li>
+<li class="">业务无关中间件（如 CORS/Gzip）最后</li>
+</ul>
+</li>
+<li class="">
+<p>配置与注入</p>
+<ul>
+<li class="">JWT 密钥与 RSA 公钥通过配置注入中间件</li>
+<li class="">Casbin 策略模型与策略文件在引导阶段加载</li>
+</ul>
+</li>
+<li class="">
+<p>性能优化</p>
+<ul>
+<li class="">启用签名缓存与随机数存储，避免重复计算与重放</li>
+<li class="">控制请求体大小与超时时间，防止资源耗尽</li>
+</ul>
+</li>
+<li class="">
+<p>安全考虑</p>
+<ul>
+<li class="">严格校验 Authorization 头格式与签名</li>
+<li class="">限制时间戳窗口，启用随机数去重</li>
+<li class="">对敏感接口启用 RBAC 策略</li>
+</ul>
+</li>
+<li class="">
+<p>新增路由</p>
+<ul>
+<li class="">在 router 包新增文件，定义注册函数，将处理器与路由绑定</li>
+</ul>
+</li>
+<li class="">
+<p>新增处理器</p>
+<ul>
+<li class="">在 handlers 包新增处理器结构体与方法，完成参数绑定与错误处理</li>
+</ul>
+</li>
+<li class="">
+<p>  新增用例层服务</p>
+<ul>
+<li class="">在 usecase 包新增服务方法，实现业务逻辑与实体交互</li>
+</ul>
+</li>
+<li class="">
+<p>新增实体</p>
+<ul>
+<li class="">在 entity 包新增实体结构与方法，定义业务规则</li>
+</ul>
+</li>
+<li class="">
+<p>注册路由与中间件</p>
+<ul>
+<li class="">在引导层组装引擎时调用路由注册函数，并挂载所需中间件</li>
+</ul>
+</li>
+<li class="">
+<p>编写测试</p>
+<ul>
+<li class="">参考现有测试用例，覆盖鉴权、授权与业务场景</li>
+</ul>
+</li>
+</ul></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="文档页面导航"></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#目录" class="table-of-contents__link toc-highlight">目录</a></li><li><a href="#简介" class="table-of-contents__link toc-highlight">简介</a></li><li><a href="#项目结构" class="table-of-contents__link toc-highlight">项目结构</a><ul><li><a href="#健康检查模块" class="table-of-contents__link toc-highlight">健康检查模块</a></li></ul></li><li><a href="#附录" class="table-of-contents__link toc-highlight">附录</a><ul><li><a href="#http-端点规范健康检查" class="table-of-contents__link toc-highlight">HTTP 端点规范（健康检查）</a></li></ul></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 广州睿雅信息科技有限公司. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>

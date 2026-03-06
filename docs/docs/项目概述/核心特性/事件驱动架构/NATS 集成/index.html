@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="zh" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-项目概述/核心特性/事件驱动架构/NATS 集成" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">NATS 集成 | Sparrow</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://sparrow.rayainfo.cn/img/sparrow-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://sparrow.rayainfo.cn/img/sparrow-social-card.jpg"><meta data-rh="true" property="og:url" content="https://sparrow.rayainfo.cn/docs/项目概述/核心特性/事件驱动架构/NATS 集成"><meta data-rh="true" property="og:locale" content="zh"><meta data-rh="true" property="og:locale:alternate" content="en"><meta data-rh="true" name="docusaurus_locale" content="zh"><meta data-rh="true" name="docsearch:language" content="zh"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="NATS 集成 | Sparrow"><meta data-rh="true" name="description" content="目录"><meta data-rh="true" property="og:description" content="目录"><link data-rh="true" rel="icon" href="/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://sparrow.rayainfo.cn/docs/项目概述/核心特性/事件驱动架构/NATS 集成"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/项目概述/核心特性/事件驱动架构/NATS 集成" hreflang="zh"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/en/docs/项目概述/核心特性/事件驱动架构/NATS 集成" hreflang="en"><link data-rh="true" rel="alternate" href="https://sparrow.rayainfo.cn/docs/项目概述/核心特性/事件驱动架构/NATS 集成" hreflang="x-default"><link rel="stylesheet" href="/assets/css/styles.e402f4ef.css">
+<script src="/assets/js/runtime~main.b30ea3d8.js" defer="defer"></script>
+<script src="/assets/js/main.1f18fe0a.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="跳到主要内容"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">跳到主要内容</a></div><nav aria-label="主导航" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="切换导航栏" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/"><div class="navbar__logo"><img src="/img/logo.svg" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/img/logo.svg" alt="Sparrow Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">Sparrow</b></a><a class="navbar__item navbar__link" href="/docs/快速开始">文档</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="iconLanguage_nlXk"><path fill="currentColor" d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"></path></svg>简体中文</a><ul class="dropdown__menu"><li><a href="/docs/项目概述/核心特性/事件驱动架构/NATS 集成" target="_self" rel="noopener noreferrer" class="dropdown__link dropdown__link--active" lang="zh">简体中文</a></li><li><a href="/en/docs/项目概述/核心特性/事件驱动架构/NATS 集成" target="_self" rel="noopener noreferrer" class="dropdown__link" lang="en">English</a></li></ul></div><a href="https://github.com/DotNetAge/sparrow" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="切换深色和浅色模式（当前为system mode）"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="回到顶部" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><main class="docMainContainer_TBSr docMainContainerEnhanced_lQrH"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">本页目录</button></div><div class="theme-doc-markdown markdown"><header><h1>NATS 集成</h1></header>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="目录">目录<a href="#目录" class="hash-link" aria-label="直接链接到 目录" title="直接链接到 目录" translate="no">​</a></h2>
+<ol>
+<li class=""><a href="#%E7%AE%80%E4%BB%8B" class="">简介</a></li>
+<li class=""><a href="#%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84" class="">项目结构</a></li>
+<li class=""><a href="#%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6" class="">核心组件</a></li>
+<li class=""><a href="#%E6%9E%B6%E6%9E%84%E6%80%BB%E8%A7%88" class="">架构总览</a></li>
+<li class=""><a href="#%E7%BB%84%E4%BB%B6%E8%AF%A6%E8%A7%A3" class="">组件详解</a></li>
+<li class=""><a href="#%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E5%88%86%E6%9E%90" class="">依赖关系分析</a></li>
+<li class=""><a href="#%E6%80%A7%E8%83%BD%E4%B8%8E%E5%8F%AF%E9%9D%A0%E6%80%A7" class="">性能与可靠性</a></li>
+<li class=""><a href="#%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5%E6%8C%87%E5%8D%97" class="">故障排查指南</a></li>
+<li class=""><a href="#%E7%BB%93%E8%AE%BA" class="">结论</a></li>
+<li class=""><a href="#%E9%99%84%E5%BD%95" class="">附录</a></li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="简介">简介<a href="#简介" class="hash-link" aria-label="直接链接到 简介" title="直接链接到 简介" translate="no">​</a></h2>
+<p>本文件面向 NATS 集成，聚焦 NATS JetStream 在事件驱动架构中的实现与使用，涵盖 JSBus 设计、连接管理、主题订阅与消息读取机制；深入解析 NATS Reader 的流式读取、批量处理与错误恢复；提供配置、发布与订阅的实践指引；并总结高并发场景下的性能优势与可靠性保障，以及集群配置、安全认证、监控指标与故障排查建议。</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="项目结构">项目结构<a href="#项目结构" class="hash-link" aria-label="直接链接到 项目结构" title="直接链接到 项目结构" translate="no">​</a></h2>
+<p>围绕 NATS 的核心实现位于以下模块：</p>
+<ul>
+<li class="">配置层：NATS 连接与流配置</li>
+<li class="">消息层：JetStream 发布器、订阅器、事件读取器</li>
+<li class="">投影层：基于 JetStream 的事件读取器（投影视图）</li>
+<li class="">事件总线层：兼容传统 NATS 的事件总线实现  （未使用 JetStream）</li>
+</ul>
+<!-- -->
+<ul>
+<li class="">NATS 配置模型：NATsConfig 提供连接 URL、事件流名称、最大保存时间等字段，配合全局配置默认值使用。</li>
+<li class="">JetStream 发布器：负责将领域事件发布到 JetStream，确保流存在并按主题规则组织消息。</li>
+<li class="">JetStream 订阅器：基于持久化消费者，支持优雅启动/停止、并发处理、错误恢复与确认机制。</li>
+<li class="">事件读取器：支持按聚合根 ID、版本、偏移量读取事件，提供重放与应用到聚合根的能力。</li>
+<li class="">投影事件读取器：按聚合类型与事件类型收集各聚合的最高版本事件，用于构建投影视图。</li>
+<li class="">事件总线（非 JetStream）：兼容传统 NATS 主题发布/订阅，不保证持久化与可靠交付。</li>
+</ul>
+<p>下图展示了事件从发布到订阅、再到读取与投影的整体流程，以及与 NATS/JetStream 的交互。</p>
+<!-- -->
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="nats-连接与配置">NATS 连接与配置<a href="#nats-连接与配置" class="hash-link" aria-label="直接链接到 NATS 连接与配置" title="直接链接到 NATS 连接与配置" translate="no">​</a></h3>
+<ul>
+<li class="">NATsConfig 字段：<!-- -->
+<ul>
+<li class="">URL：NATS 地址</li>
+<li class="">StreamName：事件流名称（服务名亦作为流名）</li>
+<li class="">MaxAge：事件流最大保存时间（纳秒）</li>
+</ul>
+</li>
+<li class="">全局默认值：应用配置中设置了 nats.url、nats.stream_name、nats.max_age 的默认值，便于快速启动。</li>
+</ul>
+<p>最佳实践</p>
+<ul>
+<li class="">生产环境建议显式配置 URL 与流名，避免默认值带来的歧义。</li>
+<li class="">MaxAge 可按业务需求设置，注意与存储成本平衡。</li>
+</ul>
+<p>职责</p>
+<ul>
+<li class="">确保流存在（按服务名作为流名，主题集合为各聚合类型的“聚合类型.&gt;”）</li>
+<li class="">将领域事件序列化为通用 BaseEvent，再发布到主题“聚合类型.聚合ID.事件类型”</li>
+<li class="">支持选项：最大消息年龄、最大流大小、最大消息大小、调试模式（内存存储）</li>
+</ul>
+<p>关键点</p>
+<ul>
+<li class="">主题命名规范：统一由聚合类型、聚合 ID、事件类型构成，便于订阅与过滤。</li>
+<li class="">流策略：使用 LimitsPolicy，适配事件存储场景。</li>
+<li class="">错误处理：发布失败时记录错误并返回，避免静默失败。</li>
+</ul>
+<!-- -->
+<p>职责</p>
+<ul>
+<li class="">基于持久化消费者（Durable）实现可靠订阅</li>
+<li class="">支持 Start/Stop/Close 的优雅生命周期管理</li>
+<li class="">内部 goroutine + WaitGroup 控制消费生命周期，避免资源泄漏</li>
+<li class="">消息处理异常时发送 Nak，触发重试；处理成功发送 Ack</li>
+</ul>
+<p>关键点</p>
+<ul>
+<li class="">消费者配置：显式确认、按事件类型过滤、从最早消息开始投递、立即重放</li>
+<li class="">并发与健壮性：recover 防止 panic 导致消费者崩溃；上下文取消支持优雅停止</li>
+<li class="">类型安全：先反序列化为 BaseEvent，再通过 UnmarshalEvent[T] 转为强类型事件</li>
+</ul>
+<!-- -->
+<p>职责</p>
+<ul>
+<li class="">读取指定聚合的事件，支持：<!-- -->
+<ul>
+<li class="">全量读取（GetEvents）</li>
+<li class="">按版本重放（ReplayFromVersion）</li>
+<li class="">按物理偏移量重放（ReplayFromOffset）</li>
+<li class="">将事件应用到聚合根（LoadFromEvents）</li>
+</ul>
+</li>
+</ul>
+<p>实现要点</p>
+<ul>
+<li class="">临时消费者模式：每次读取时创建临时消费者，避免复用持久消费者带来的状态复杂性</li>
+<li class="">批量获取：FetchNoWait + batchSize=1000，提升吞吐</li>
+<li class="">过滤与排序：按聚合 ID 过滤，按版本升序排序后应用</li>
+<li class="">错误处理：反序列化失败时 Ack 并继续；流不存在时返回空结果</li>
+</ul>
+<!-- -->
+<p>职责</p>
+<ul>
+<li class="">从事件流中读取指定聚合类型与事件类型的最新版本事件</li>
+<li class="">使用 map 按聚合 ID 记录最高版本事件，最终输出去重后的事件列表</li>
+</ul>
+<p>实现要点</p>
+<ul>
+<li class="">临时消费者 + 分页批量读取（FetchNoWait + batchSize=1000）</li>
+<li class="">反序列化失败时 Ack 并继续，保证不阻塞后续消息</li>
+<li class="">适合构建最终一致性投影视图</li>
+</ul>
+<p>职责</p>
+<ul>
+<li class="">基于标准 NATS 主题发布/订阅，不使用 JetStream</li>
+<li class="">支持 Pub/Sub/Unsub/Close，具备基本的连接管理与日志记录</li>
+</ul>
+<p>适用场景</p>
+<ul>
+<li class="">
+<p>对持久化与可靠投递无强需求的场景；或与现有 NATS 集成兼容</p>
+</li>
+<li class="">
+<p>接口与约束：core.go 定义了 StreamPublisher、StreamSubscriber、StreamReader、DomainEventHandler 等抽象，统一了发布/订阅/读取的契约。</p>
+</li>
+<li class="">
+<p>事件流 Hub：bus.go 将订阅器组合为可启动/可优雅关闭的 Hub，便于服务侧统一管理。</p>
+</li>
+<li class="">
+<p>事件总线与消息层解耦：事件总线（非 JetStream）与消息层（JetStream）并存，分别满足不同场景。</p>
+</li>
+</ul>
+<!-- -->
+<p>性能优势</p>
+<ul>
+<li class="">JetStream 流式批处理：读取器与订阅器均采用批量 FetchNoWait，提升吞吐。</li>
+<li class="">显式确认与重试：订阅器在处理失败时发送 Nak，触发重试，提高可靠性。</li>
+<li class="">临时消费者模式：事件读取器每次创建临时消费者，避免持久消费者状态干扰，降低控制面开销。</li>
+</ul>
+<p>可靠性保障</p>
+<ul>
+<li class="">持久化消费者：订阅器使用 Durable 消费者，重启后可从上次进度继续消费。</li>
+<li class="">优雅关闭：订阅器支持 Stop(ctx)，等待处理完成或超时，避免消息丢失。</li>
+<li class="">错误隔离  ：订阅器内部 recover，防止单条消息处理 panic 导致整体崩溃。</li>
+</ul>
+<p>高并发建议</p>
+<ul>
+<li class="">合理设置 batchSize（当前为 1000），结合 CPU 与网络带宽调优。</li>
+<li class="">控制并发消费者数量，避免 JetStream 资源争用。</li>
+<li class="">使用分层主题（聚合类型.&gt;）与过滤，减少无关消息处理。</li>
+</ul>
+<p>[本节为通用性能讨论，无需列出具体文件来源]</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="故障排查指南">故障排查指南<a href="#故障排查指南" class="hash-link" aria-label="直接链接到 故障排查指南" title="直接链接到 故障排查指南" translate="no">​</a></h2>
+<p>常见问题与定位思路</p>
+<ul>
+<li class="">连接失败<!-- -->
+<ul>
+<li class="">检查 NATsConfig.URL 是否可达，确认 NATS 服务已启用 JetStream。</li>
+<li class="">查看日志中“获取JetStream客户端失败/创建流失败/创建消费者失败”等错误。</li>
+</ul>
+</li>
+<li class="">发布无响应<!-- -->
+<ul>
+<li class="">确认流已存在且主题匹配（聚合类型.&gt;），检查发布主题格式。</li>
+<li class="">观察日志中“发布事件失败”与“序列化事件失败”。</li>
+</ul>
+</li>
+<li class="">订阅无消息<!-- -->
+<ul>
+<li class="">检查消费者过滤条件（聚合类型.事件类型）与主题是否一致。</li>
+<li class="">确认消费者为 Durable，避免重启后进度丢失。</li>
+</ul>
+</li>
+<li class="">处理失败重试<!-- -->
+<ul>
+<li class="">查看日志中“事件处理失败/Nak”，定位处理器逻辑或外部依赖。</li>
+</ul>
+</li>
+<li class="">读取为空<!-- -->
+<ul>
+<li class="">若流不存在或无消息，读取器会返回空结果；确认事件是否已发布。</li>
+</ul>
+</li>
+</ul>
+<p>参考测试用例</p>
+<ul>
+<li class="">使用 TestContainers 启动 NATS（含 JetStream），创建测试流（&gt;），验证发布/订阅/多订阅者/关闭/错误处理等场景。</li>
+</ul>
+<p>本实现以 NATS JetStream 为核心，提供了可靠的事件发布/订阅与事件读取能力。通过明确的主题命名、批量处理、显式确认与优雅关闭机制，既满足高并发场景下的性能需求，也保障了事件驱动架构的可靠性。结合投影读取器与事件总线（非 JetStream）的并存设计，可在不同场景间灵活选择与演进。</p>
+<p>[本节为总结性内容，无需列出具体文件来源]</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="附录">附录<a href="#附录" class="hash-link" aria-label="直接链接到 附录" title="直接链接到 附录" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="配置项与默认值">配置项与默认值<a href="#配置项与默认值" class="hash-link" aria-label="直接链接到 配置项与默认值" title="直接链接到 配置项与默认值" translate="no">​</a></h3>
+<ul>
+<li class="">
+<p>nats.url：NATS 地址，默认 localhost:4222</p>
+</li>
+<li class="">
+<p>nats.stream_name：事件流名称，默认 default_stream</p>
+</li>
+<li class="">
+<p>nats.max_age：事件流最大保存时间，默认 0（永久）</p>
+</li>
+<li class="">
+<p>发布事件</p>
+<ul>
+<li class="">初始化 JetStream 发布器（服务名、聚合类型列表、日志）</li>
+<li class="">调用 Publish 或 PublishEvents</li>
+</ul>
+</li>
+<li class="">
+<p>订阅事件</p>
+<ul>
+<li class="">初始化 JetStream 订阅器（服务名、聚合类型、事件类型、处理器）</li>
+<li class="">调用 Start 启动；在业务生命周期结束时调用 Stop/Close</li>
+</ul>
+</li>
+<li class="">
+<p>读取事件</p>
+<ul>
+<li class="">初始化事件读取器（连接、服务名、聚合类型、日志）</li>
+<li class="">调用 GetEvents/Replay/ReplayFromVersion/ReplayFromOffset</li>
+</ul>
+</li>
+<li class="">
+<p>集群配置</p>
+<ul>
+<li class="">使用 NATS 集群部署，启用 JetStream，合理规划分区与副本。</li>
+</ul>
+</li>
+<li class="">
+<p>安全认证</p>
+<ul>
+<li class="">启用用户/密码或 TLS 认证，限制访问权限。</li>
+</ul>
+</li>
+<li class="">
+<p>监控指标</p>
+<ul>
+<li class="">关注 JetStream 的消息数、存储使用、消费者积压、处理延迟等指标。</li>
+</ul>
+</li>
+<li class="">
+<p>故障排查</p>
+<ul>
+<li class="">结合日志与测试用例，验证连接、流与消费者状态，逐步定位问题。</li>
+</ul>
+</li>
+</ul>
+<p>[本节为通用指导，无需列出具体文件来源]</p></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="文档页面导航"></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#目录" class="table-of-contents__link toc-highlight">目录</a></li><li><a href="#简介" class="table-of-contents__link toc-highlight">简介</a></li><li><a href="#项目结构" class="table-of-contents__link toc-highlight">项目结构</a><ul><li><a href="#nats-连接与配置" class="table-of-contents__link toc-highlight">NATS 连接与配置</a></li></ul></li><li><a href="#故障排查指南" class="table-of-contents__link toc-highlight">故障排查指南</a></li><li><a href="#附录" class="table-of-contents__link toc-highlight">附录</a><ul><li><a href="#配置项与默认值" class="table-of-contents__link toc-highlight">配置项与默认值</a></li></ul></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 广州睿雅信息科技有限公司. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>

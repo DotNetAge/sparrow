@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunksparrow_docs=globalThis.webpackChunksparrow_docs||[]).push([[225],{225(r,s,c){c.d(s,{createArchitectureServices:()=>e.S});var e=c(7713);c(808)}}]);
