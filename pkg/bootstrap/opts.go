@@ -29,6 +29,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/nats-io/nats.go"
 	"github.com/redis/go-redis/v9"
+	bolt "go.etcd.io/bbolt"
 )
 
 // ServerPort 配置服务器端口
@@ -156,6 +157,55 @@ func BadgerDB() Option {
 				}
 				return db
 			}
+		})
+	}
+}
+
+// BoltDB 配置 bbolt 数据库连接
+func BoltDB() Option {
+	return func(o *App) {
+		o.Container.Register(func() *bolt.DB {
+			dataDir := o.Config.Bolt.DataDir
+			if dataDir == "" {
+				dataDir = "./data/bolt/views.db"
+			}
+
+			if o.Debug {
+				dataDir = ":memory:"
+			}
+
+			// 确保目录存在
+			if dataDir != ":memory:" {
+				dir := filepath.Dir(dataDir)
+				if err := os.MkdirAll(dir, 0755); err != nil {
+					o.Logger.Error("创建BoltDB目录失败", "error", err)
+					panic(err)
+				}
+			}
+
+			db, err := bolt.Open(dataDir, 0600, nil)
+			if err != nil {
+				o.Logger.Error("创建BoltDB实例失败", "error", err)
+				panic(err)
+			}
+
+			return db
+		})
+	}
+}
+
+// BoltRepo 注册基于 bbolt 的泛型仓储
+func BoltRepo[T entity.Entity]() Option {
+	return func(o *App) {
+		var db *bolt.DB
+		if err := o.Container.ResolveInstance(&db); err != nil {
+			o.Logger.Panic("解析BoltDB数据库实例失败", "error", err)
+		}
+		name := utils.GetShotTypeName[T]()
+		repoName := utils.Pascal(name + "Repo")
+		bucket := utils.Snake(name)
+		o.Container.RegisterNamed(repoName, func() usecase.Repository[T] {
+			return repo.NewBoltRepository[T](db, bucket)
 		})
 	}
 }

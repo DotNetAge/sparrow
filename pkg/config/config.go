@@ -13,6 +13,7 @@ type Config struct {
 	SQL      SQLConfig      `mapstructure:"sql"`
 	Redis    RedisConfig    `mapstructure:"redis"`
 	Badger   BadgerConfig   `mapstructure:"badger"`
+	Bolt     BoltConfig     `mapstructure:"bolt"`
 	RabbitMQ RabbitMQConfig `mapstructure:"rabbitmq"`
 	Kafka    KafkaConfig    `mapstructure:"kafka"`
 	Casbin   CasbinConfig   `mapstructure:"casbin"`
@@ -65,6 +66,9 @@ func SetDefaults(viper *viper.Viper) {
 	viper.SetDefault("badger.in_memory", false)
 	// viper.SetDefault("badger.mem_table_size", int64(1024*1024)) // 1MB
 	// viper.SetDefault("badger.max_table_size", int64(1024*1024*1024)) // 1GB
+
+	// Bolt 配置
+	viper.SetDefault("bolt.data_dir", "./data/bolt/views.db") // 作为仓库存储的路径
 
 	// Casbin 配置
 	viper.SetDefault("casbin.model_path", "./data/casbin/model.conf")
