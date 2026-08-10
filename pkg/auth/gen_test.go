@@ -84,6 +84,12 @@ func TestGrantToken(t *testing.T) {
 
 	// 验证两个令牌是不同的
 	assert.NotEqual(t, tokenPair.AccessToken, tokenPair.RefreshToken, "访问令牌和刷新令牌应该不同")
+
+	// 验证令牌类型（access/refresh 必须区分，防止访问令牌被当作刷新令牌）
+	accessClaims := accessToken.Claims.(*UserClaims)
+	refreshClaims := refreshToken.Claims.(*UserClaims)
+	assert.Equal(t, "access", accessClaims.TokenType, "访问令牌 token_type 应为 access")
+	assert.Equal(t, "refresh", refreshClaims.TokenType, "刷新令牌 token_type 应为 refresh")
 }
 
 func TestRefreshToken(t *testing.T) {
@@ -158,6 +164,13 @@ func TestRefreshTokenWithInvalidToken(t *testing.T) {
 	wrongSignedToken, _ := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(wrongSecret)
 	_, err = generator.RefreshToken(wrongSignedToken, scope)
 	assert.Error(t, err, "使用错误签名的令牌应该返回错误")
+
+	// 测试使用访问令牌刷新（token_type=access 必须被拒绝）
+	generator2 := NewTokenGenerator(secret, time.Hour, time.Hour*24)
+	pair, err := generator2.GrantToken(NewUserClaims("test-issuer", "user-123", "test-user", []string{"admin"}), scope)
+	assert.NoError(t, err, "生成令牌对不应报错")
+	_, err = generator2.RefreshToken(pair.AccessToken, scope)
+	assert.Error(t, err, "访问令牌不能用于刷新")
 }
 
 func TestGrantJWTTokenWithCustomExpiration(t *testing.T) {

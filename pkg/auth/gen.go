@@ -33,17 +33,24 @@ func NewTokenGenerator(secret []byte, expiresIn time.Duration, refreshExp time.D
 }
 
 func (g *tokenGenerator) GrantToken(claims *UserClaims, scope string) (*Token, error) {
-	// 实现令牌生成逻辑......
+	// 复制 claims，避免修改调用方持有的对象（副作用）。
+	// 访问令牌与刷新令牌通过 TokenType claim 区分（access/refresh）。
+	now := time.Now()
+
 	// 1. 生成访问令牌
-	claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(g.expiresIn))
-	accessToken, err := g.GrantJWTToken(claims)
+	access := *claims
+	access.TokenType = "access"
+	access.ExpiresAt = jwt.NewNumericDate(now.Add(g.expiresIn))
+	accessToken, err := g.GrantJWTToken(&access)
 	if err != nil {
 		return nil, err
 	}
 
 	// 2. 生成刷新令牌
-	claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(g.refreshExp))
-	refreshToken, err := g.GrantJWTToken(claims)
+	refresh := *claims
+	refresh.TokenType = "refresh"
+	refresh.ExpiresAt = jwt.NewNumericDate(now.Add(g.refreshExp))
+	refreshToken, err := g.GrantJWTToken(&refresh)
 	if err != nil {
 		return nil, err
 	}
@@ -85,6 +92,12 @@ func (g *tokenGenerator) RefreshToken(tokenString string, scope string) (*Token,
 	claims, ok := token.Claims.(*UserClaims)
 	if !ok || !token.Valid {
 		return nil, fmt.Errorf("无效的刷新令牌")
+	}
+
+	// 仅允许 refresh 类型令牌刷新：显式标记为 "access" 的令牌一律拒绝，
+	// 防止访问令牌被当作刷新令牌使用（token_type 为空视为旧版令牌，兼容放行）。
+	if claims.TokenType == "access" {
+		return nil, fmt.Errorf("访问令牌不能用于刷新")
 	}
 
 	// 生成新令牌时更新签发时间
