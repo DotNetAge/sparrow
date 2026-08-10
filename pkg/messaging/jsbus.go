@@ -44,6 +44,8 @@ type JetStreamBus struct {
 	wg             sync.WaitGroup     // 等待所有处理完成的WaitGroup
 	running        bool               // 运行状态标志
 	mu             sync.Mutex         // 保护running状态的互斥锁
+	dedupeMu       sync.Mutex         // 保护已处理事件位图的互斥锁
+	seenEvents     map[string]struct{} // 已成功处理的事件位图，键：{aggregateID}:{eventID}
 }
 
 func NewJetStreamBus(
@@ -67,6 +69,7 @@ func NewJetStreamBus(
 		serviceName:  serviceName,
 		consumerName: consumerName,
 		handlers:     make(map[string]DomainEventHandler[*entity.BaseEvent]),
+		seenEvents:   make(map[string]struct{}),
 		logger:       logger,
 		running:      false,
 	}
@@ -241,14 +244,20 @@ func (s *JetStreamBus) handleMessage(msg jetstream.Msg) {
 	}
 
 	detailSubject := msg.Subject()
-	aggType := strings.Split(detailSubject, ".")[0]
-	eventType := strings.Split(detailSubject, ".")[2]
+	parts := strings.Split(detailSubject, ".")
+	if len(parts) < 3 {
+		s.logger.Error("事件主题格式无效，跳过", "consumer", s.consumerName, "subject", detailSubject)
+		msg.Ack() // 格式无效的消息直接确认丢弃，避免无限重试
+		return
+	}
+	aggType := parts[0]
+	eventType := parts[2]
 	subjectPattern := fmt.Sprintf("%s.*.%s", aggType, eventType)
 
 	handler := s.handlers[subjectPattern]
 	if handler == nil {
-		s.logger.Error("未找到处理程序", "consumer", s.consumerName, "subject", msg.Subject())
-		msg.Nak() // 标记处理失败
+		s.logger.Warn("未找到处理程序，跳过", "consumer", s.consumerName, "subject", msg.Subject())
+		msg.Ack() // 本服务未注册该事件类型，确认丢弃，避免 Nak 无限重试阻塞消费
 		return
 	}
 
@@ -260,14 +269,35 @@ func (s *JetStreamBus) handleMessage(msg jetstream.Msg) {
 		return
 	}
 
-	// 2. 调用类型安全的处理器
+	// 2. 幂等去重：同一 (聚合ID, 事件ID) 已成功处理过则跳过 handler，直接确认
+	//    事件ID为空（存量事件）时不做去重，避免误杀
+	eventKey := baseEvent.GetAggregateID() + ":" + baseEvent.GetEventID()
+	if baseEvent.GetEventID() != "" {
+		s.dedupeMu.Lock()
+		_, seen := s.seenEvents[eventKey]
+		s.dedupeMu.Unlock()
+		if seen {
+			s.logger.Info("重复事件已成功处理过，跳过", "consumer", s.consumerName, "eventID", baseEvent.GetEventID())
+			msg.Ack()
+			return
+		}
+	}
+
+	// 3. 调用类型安全的处理器
 	if err := handler(ctx, &baseEvent); err != nil {
 		s.logger.Error("事件处理失败", "consumer", s.consumerName, "error", err, "eventID", baseEvent.GetEventID())
-		msg.Nak() // 失败重试
+		msg.Nak() // 失败重试（不记录已处理，保证重试可再次执行）
 		return
 	}
 
-	// 3. 确认处理完成
+	// 4. 处理成功后记录已处理，供后续重复投递去重
+	if baseEvent.GetEventID() != "" {
+		s.dedupeMu.Lock()
+		s.seenEvents[eventKey] = struct{}{}
+		s.dedupeMu.Unlock()
+	}
+
+	// 5. 确认处理完成
 	if err := msg.Ack(); err != nil {
 		s.logger.Warn("消息确认失败", "consumer", s.consumerName, "error", err)
 	}

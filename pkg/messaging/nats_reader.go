@@ -103,32 +103,42 @@ func (r *JetStreamReader) getEvents(ctx context.Context, aggregateID string, fil
 	// 收集事件
 	var events []entity.DomainEvent
 
-	// 获取消息
-	batch, err := consumer.FetchNoWait(1000)
-	if err != nil {
-		r.logger.Error("[事件流读取器]获取消息失败", "stream", r.serviceName, "error", err)
-		return nil, fmt.Errorf("[事件流读取器]获取消息失败: %w", err)
-	}
+	// 分页获取所有消息，避免单个聚合事件数超过单批上限时被截断
+	batchSize := 1000
+	for {
+		batch, err := consumer.FetchNoWait(batchSize)
+		if err != nil {
+			r.logger.Error("[事件流读取器]获取消息失败", "stream", r.serviceName, "error", err)
+			return nil, fmt.Errorf("[事件流读取器]获取消息失败: %w", err)
+		}
 
-	for msg := range batch.Messages() {
-		// 反序列化事件
-		var event entity.BaseEvent
-		data := msg.Data()
-		if err := json.Unmarshal(data, &event); err != nil {
-			r.logger.Error("[事件流读取器]反序列化事件失败", "stream", r.serviceName, "error", err)
+		messageCount := 0
+		for msg := range batch.Messages() {
+			messageCount++
+			// 反序列化事件
+			var event entity.BaseEvent
+			data := msg.Data()
+			if err := json.Unmarshal(data, &event); err != nil {
+				r.logger.Error("[事件流读取器]反序列化事件失败", "stream", r.serviceName, "error", err)
+				msg.Ack()
+				continue
+			}
+			// 必须将原始数据赋值给事件负载，因为Go是无法进行类型反射，只能将反序列化推延至事件处理器之中。
+			// event.Payload = data
+			eventPtr := &event
+
+			// 应用过滤函数
+			if filterFunc == nil || filterFunc(eventPtr) {
+				events = append(events, eventPtr)
+			}
+
 			msg.Ack()
-			continue
-		}
-		// 必须将原始数据赋值给事件负载，因为Go是无法进行类型反射，只能将反序列化推延至事件处理器之中。
-		// event.Payload = data
-		eventPtr := &event
-
-		// 应用过滤函数
-		if filterFunc == nil || filterFunc(eventPtr) {
-			events = append(events, eventPtr)
 		}
 
-		msg.Ack()
+		// 如果当前批次没有消息，说明已经读取完所有消息，退出循环
+		if messageCount == 0 {
+			break
+		}
 	}
 
 	return events, nil
@@ -163,6 +173,26 @@ func (r *JetStreamReader) GetEvents(ctx context.Context, aggregateID string) ([]
 
 	return r.getEvents(ctx, aggregateID, filterFunc)
 
+}
+
+// GetAggregateEvents 按聚合ID获取完整事件流（按版本升序），用于聚合重放与全量投影重建
+func (r *JetStreamReader) GetAggregateEvents(ctx context.Context, aggregateID string) ([]entity.DomainEvent, error) {
+	// 过滤函数：只保留目标聚合ID的事件
+	filterFunc := func(event *entity.BaseEvent) bool {
+		return event.GetAggregateID() == aggregateID
+	}
+
+	events, err := r.getEvents(ctx, aggregateID, filterFunc)
+	if err != nil {
+		return nil, err
+	}
+
+	// 按版本升序排列，保证重放与投影的版本连续性
+	sort.Slice(events, func(i, j int) bool {
+		return events[i].GetVersion() < events[j].GetVersion()
+	})
+
+	return events, nil
 }
 
 // Replay 将事件重放至聚合根（实现EventReader接口）
@@ -224,29 +254,39 @@ func (r *JetStreamReader) ReplayFromOffset(ctx context.Context, aggregateID stri
 	// 收集事件
 	var events []entity.DomainEvent
 
-	// 获取消息
-	batch, err := consumer.FetchNoWait(1000)
-	if err != nil {
-		r.logger.Error("[事件流读取器]获取消息失败", "stream", r.serviceName, "error", err)
-		return fmt.Errorf("[事件流读取器]获取消息失败: %w", err)
-	}
+	// 分页获取所有消息，避免单个聚合事件数超过单批上限时被截断
+	batchSize := 1000
+	for {
+		batch, err := consumer.FetchNoWait(batchSize)
+		if err != nil {
+			r.logger.Error("[事件流读取器]获取消息失败", "stream", r.serviceName, "error", err)
+			return fmt.Errorf("[事件流读取器]获取消息失败: %w", err)
+		}
 
-	for msg := range batch.Messages() {
-		// 反序列化事件
-		var event entity.BaseEvent
-		if err := json.Unmarshal(msg.Data(), &event); err != nil {
-			r.logger.Error("[事件流读取器]反序列化事件失败", "stream", r.serviceName, "error", err)
+		messageCount := 0
+		for msg := range batch.Messages() {
+			messageCount++
+			// 反序列化事件
+			var event entity.BaseEvent
+			if err := json.Unmarshal(msg.Data(), &event); err != nil {
+				r.logger.Error("[事件流读取器]反序列化事件失败", "stream", r.serviceName, "error", err)
+				msg.Ack()
+				continue
+			}
+			eventPtr := &event
+
+			// 检查是否是目标聚合ID的事件
+			if eventPtr.GetAggregateID() == aggregateID {
+				events = append(events, eventPtr)
+			}
+
 			msg.Ack()
-			continue
-		}
-		eventPtr := &event
-
-		// 检查是否是目标聚合ID的事件
-		if eventPtr.GetAggregateID() == aggregateID {
-			events = append(events, eventPtr)
 		}
 
-		msg.Ack()
+		// 如果当前批次没有消息，说明已经读取完所有消息，退出循环
+		if messageCount == 0 {
+			break
+		}
 	}
 
 	// 按版本升序排序
