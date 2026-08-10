@@ -1,8 +1,9 @@
 package entity
 
 import (
-	"fmt"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // Step 事务步骤实体
@@ -69,7 +70,7 @@ const (
 func NewTransaction(name string, steps []Step) *Transaction {
 	now := time.Now()
 	return &Transaction{
-		ID:      generateID(now),
+		ID:      uuid.NewString(),
 		Name:    name,
 		Steps:   steps,
 		Current: 0,
@@ -77,9 +78,4 @@ func NewTransaction(name string, steps []Step) *Transaction {
 		Created: now,
 		Updated: now,
 	}
-}
-
-// generateID 生成事务ID的辅助函数
-func generateID(t time.Time) string {
-	return fmt.Sprintf("tx_%d", t.UnixNano())
 }

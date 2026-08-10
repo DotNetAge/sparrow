@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/DotNetAge/sparrow/pkg/entity"
@@ -59,7 +60,9 @@ func (s *SagaService) ExecuteTransaction(ctx context.Context, name string, steps
 	for i, step := range tx.Steps {
 		if err := s.executeStep(ctx, tx, i, step); err != nil {
 			// 执行失败，触发补偿
-			s.compensate(ctx, tx, i-1)
+			if compErr := s.compensate(ctx, tx, i-1); compErr != nil {
+				return tx, fmt.Errorf("transaction failed at step %d: %w; compensation failed: %w", i, err, compErr)
+			}
 			return tx, fmt.Errorf("transaction failed at step %d: %w", i, err)
 		}
 	}
@@ -90,10 +93,11 @@ func (s *SagaService) executeStep(ctx context.Context, tx *entity.Transaction, s
 	return s.repo.Save(ctx, tx)
 }
 
-// compensate 执行补偿
-func (s *SagaService) compensate(ctx context.Context, tx *entity.Transaction, failedStepIndex int) {
+// compensate 执行补偿，返回补偿过程中发生的所有错误
+func (s *SagaService) compensate(ctx context.Context, tx *entity.Transaction, failedStepIndex int) error {
 	tx.Status = entity.StatusFailed
 
+	var compErrs []error
 	// 反向执行补偿
 	for i := failedStepIndex; i >= 0; i-- {
 		step := tx.Steps[i]
@@ -102,13 +106,18 @@ func (s *SagaService) compensate(ctx context.Context, tx *entity.Transaction, fa
 		}
 
 		if compensator, ok := s.compensators[step.Compensate]; ok {
-			// 忽略补偿错误，记录日志即可
-			_ = compensator(ctx, step.Payload)
+			if err := compensator(ctx, step.Payload); err != nil {
+				compErrs = append(compErrs, fmt.Errorf("step %d compensate %s: %w", i, step.Compensate, err))
+			}
 		}
 	}
 
 	tx.Status = entity.StatusCompensated
-	s.repo.Save(ctx, tx)
+	if err := s.repo.Save(ctx, tx); err != nil {
+		compErrs = append(compErrs, fmt.Errorf("save compensated transaction: %w", err))
+	}
+
+	return errors.Join(compErrs...)
 }
 
 // GetTransaction 获取事务状态
