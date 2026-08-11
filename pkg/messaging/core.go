@@ -44,6 +44,9 @@ type DomainEventHandler[T DomainEventConstraint] func(ctx context.Context, event
 type StreamReader interface {
 	// 获取聚合根的所有事件（事件流的核心读操作）
 	GetEvents(ctx context.Context, aggregateID string) ([]entity.DomainEvent, error)
+	// 按聚合ID获取完整事件流（按版本升序），用于聚合重放与全量投影重建
+	// （与 projection.AggregateEventReader 对齐，2026-08-10）
+	GetAggregateEvents(ctx context.Context, aggregateID string) ([]entity.DomainEvent, error)
 	// 将事件重放至聚合根（封装“获取事件→应用到聚合根”的逻辑）
 	// Replay 方法是可以允许传入的aggregateID不存在，而不引发错误。相当于Unexists的情况，多用于添加新聚合根时的初始化
 	Replay(ctx context.Context, aggregateID string, aggregate entity.AggregateRoot) error

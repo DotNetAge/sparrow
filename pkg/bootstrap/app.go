@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"strconv"
 	"syscall"
 	"time"
@@ -37,9 +38,48 @@ type App struct {
 }
 
 var (
-	AppName    = ""
-	AppVersion = "v0.0.1"
+	AppName = ""
+	// buildVersion 由使用本框架的程序的构建脚本通过 -ldflags 注入
+	// （如 -X github.com/DotNetAge/sparrow/pkg/bootstrap.buildVersion=v2.0.0），
+	// 值为该程序所在 git 仓库的 tag，是 AppVersion 的最高优先级来源。
+	buildVersion = ""
+	// AppVersion 应用版本号，自动从主模块（使用方程序）的 VCS 信息解析，
+	// 无需也不应再在业务代码中手动赋值。
+	AppVersion = "devel"
 )
+
+// init 解析 AppVersion，优先级：ldflags 注入的 tag > 主模块 VCS commit hash > devel。
+// Go 只对主模块嵌入 VCS 信息，因此这里拿到的一定是使用方仓库的提交，而非 sparrow 自身的。
+func init() {
+	if buildVersion != "" {
+		AppVersion = buildVersion
+		return
+	}
+	bi, ok := debug.ReadBuildInfo()
+	if !ok {
+		return
+	}
+	var revision string
+	modified := false
+	for _, s := range bi.Settings {
+		switch s.Key {
+		case "vcs.revision":
+			revision = s.Value
+		case "vcs.modified":
+			modified = s.Value == "true"
+		}
+	}
+	if revision == "" {
+		return
+	}
+	if len(revision) > 8 {
+		revision = revision[:8]
+	}
+	AppVersion = "dev-" + revision
+	if modified {
+		AppVersion += "-dirty"
+	}
+}
 
 type Option func(*App)
 
@@ -57,10 +97,6 @@ func NewApp(opts ...Option) *App {
 
 	if cfg.App.Name != "" {
 		AppName = cfg.App.Name
-	}
-
-	if cfg.App.Version != "" {
-		AppVersion = cfg.App.Version
 	}
 
 	r := gin.Default()

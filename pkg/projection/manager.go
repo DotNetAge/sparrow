@@ -111,7 +111,7 @@ func (m *ProjectionManager) Checkpointed(projectorName string, handler EventHand
 
 // Rebuild 全量重建：按聚合ID拉取完整事件流，经已注册投影器重建视图
 // 事件流会先按版本升序排列再传入投影器；重建成功后推进 checkpoint 到该聚合最后一个事件
-func (m *ProjectionManager) Rebuild(ctx context.Context, eventReader EventReader, projectorName string, aggregateIDs []string) ([]entity.Entity, error) {
+func (m *ProjectionManager) Rebuild(ctx context.Context, eventReader AggregateEventReader, projectorName string, aggregateIDs []string) ([]entity.Entity, error) {
 	reg, ok := m.projectors[projectorName]
 	if !ok {
 		return nil, fmt.Errorf("投影器未注册: %s", projectorName)
@@ -154,7 +154,7 @@ func (m *ProjectionManager) Rebuild(ctx context.Context, eventReader EventReader
 // RebuildAll 全量重建指定投影器的全部聚合视图（管理接口触发入口）：
 // 聚合ID清单来自该投影器已持久化的 checkpoint（即增量处理过的聚合范围），
 // 保证"先增量、后全量"语义下重建范围与已处理范围一致
-func (m *ProjectionManager) RebuildAll(ctx context.Context, eventReader EventReader, projectorName string) (int, error) {
+func (m *ProjectionManager) RebuildAll(ctx context.Context, eventReader AggregateEventReader, projectorName string) (int, error) {
 	if _, ok := m.projectors[projectorName]; !ok {
 		return 0, fmt.Errorf("投影器未注册: %s", projectorName)
 	}

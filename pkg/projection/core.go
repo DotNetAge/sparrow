@@ -35,6 +35,14 @@ type EventReader interface {
 	GetAggregateEvents(ctx context.Context, aggregateID string) ([]entity.DomainEvent, error)
 }
 
+// AggregateEventReader 按聚合ID读取完整事件流的最小接口（P1 全量重建依赖）
+// 与 messaging.StreamReader 对齐：服务侧的事件流读取器天然满足该接口，
+// 避免断言 EventReader 时与旧 GetEvents 签名冲突（2026-08-10）
+type AggregateEventReader interface {
+	// GetAggregateEvents 按聚合ID获取完整事件流（按版本升序），用于聚合重放与全量投影重建
+	GetAggregateEvents(ctx context.Context, aggregateID string) ([]entity.DomainEvent, error)
+}
+
 // Projector 定义投影逻辑接口：将事件流转换为视图
 //
 //	使用场景：用于将事件流转换为聚合根的当前状态视图（如订单详情、用户信息等）
