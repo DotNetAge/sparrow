@@ -942,12 +942,26 @@ type nullableTime struct {
 }
 
 // Scan 实现 sql.Scanner 接口
+// 兼容 SQLite（modernc 驱动）以字符串返回的 TIMESTAMP 列：驱动绑定 time.Time 时
+// 存储为 "2006-01-02 15:04:05.999999999-07:00" 文本，读取原样返回 string，
+// 直接断言 time.Time 会报 "unsupported type: string"（2026-09-02 修复）。
 func (nt *nullableTime) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
-	t, ok := value.(time.Time)
-	if !ok {
+	var t time.Time
+	switch v := value.(type) {
+	case time.Time:
+		t = v
+	case string:
+		parsed, ok := parseSQLTimeString(v)
+		if !ok {
+			return fmt.Errorf("无法解析时间字符串: %q", v)
+		}
+		t = parsed
+	case []byte:
+		return nt.Scan(string(v))
+	default:
 		return fmt.Errorf("unsupported type: %T", value)
 	}
 	*nt.timePtr = t
@@ -955,6 +969,26 @@ func (nt *nullableTime) Scan(value interface{}) error {
 		nt.setValue(t)
 	}
 	return nil
+}
+
+// parseSQLTimeString 解析 SQLite/常见方言存储的时间字符串。
+// 首选 modernc 驱动的 SQLite 默认格式，再兼容 RFC3339 与无时区的本地格式。
+func parseSQLTimeString(s string) (time.Time, bool) {
+	layouts := []string{
+		"2006-01-02 15:04:05.999999999-07:00", // SQLite 默认格式（modernc 驱动绑定 time.Time 的存储格式）
+		time.RFC3339Nano,
+		time.RFC3339,
+		"2006-01-02 15:04:05.999999999",
+		"2006-01-02 15:04:05",
+		"2006-01-02T15:04:05",
+		"2006-01-02",
+	}
+	for _, layout := range layouts {
+		if t, err := time.Parse(layout, s); err == nil {
+			return t, true
+		}
+	}
+	return time.Time{}, false
 }
 
 // Value 实现 driver.Valuer 接口

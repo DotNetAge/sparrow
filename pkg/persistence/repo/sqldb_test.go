@@ -538,3 +538,45 @@ func TestSqlDBRepository_Random(t *testing.T) {
 	require.NoError(t, err)
 	assert.Len(t, randomEntities, 1)
 }
+
+// TestNullableTime_ScanStringTime modernc/sqlite 驱动以 string 返回 TIMESTAMP 列，
+// nullableTime 必须兼容字符串时间（2026-09-02 修复 "unsupported type: string"）
+func TestNullableTime_ScanStringTime(t *testing.T) {
+	// modernc 驱动绑定 time.Time 的 SQLite 默认存储格式
+	storeFormat := "2006-01-02 15:04:05.999999999-07:00"
+	full := time.Date(2025, 7, 6, 3, 21, 52, 871875072, time.FixedZone("", 0))
+	second := time.Date(2025, 7, 6, 3, 21, 52, 0, time.UTC)
+	day := time.Date(2025, 7, 6, 0, 0, 0, 0, time.UTC)
+
+	cases := []struct {
+		name    string
+		value   interface{}
+		want    time.Time
+		wantErr bool
+	}{
+		{"SQLite默认格式字符串", full.Format(storeFormat), full, false},
+		{"RFC3339", full.Format(time.RFC3339Nano), full, false},
+		{"无时区本地格式", "2025-07-06 03:21:52", second, false},
+		{"仅日期", "2025-07-06", day, false},
+		{"原生time.Time", full, full, false},
+		{"字节切片", []byte(full.Format(storeFormat)), full, false},
+		{"NULL", nil, time.Time{}, false},
+		{"非法字符串", "not-a-time", time.Time{}, true},
+		{"不支持的类型", 12345, time.Time{}, true},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			nt := &nullableTime{timePtr: new(time.Time)}
+			err := nt.Scan(tc.value)
+			if tc.wantErr {
+				assert.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+			if tc.value != nil {
+				assert.True(t, tc.want.Equal(*nt.timePtr), "解析结果不一致: got=%v want=%v", *nt.timePtr, tc.want)
+			}
+		})
+	}
+}
