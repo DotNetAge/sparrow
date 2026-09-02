@@ -43,9 +43,15 @@ func NewSqlDBRepository[T entity.Entity](db *sql.DB) *SqlDBRepository[T] {
 
 	// 生成表名：只使用类型名的最后一部分，转换为小写
 	// 例如：repo.TestEntity -> testentity, *repo.TestEntity -> testentity
+	//
+	// 表名统一加双引号（SQL 标准标识符引用）：实体类型名可能撞数据库保留字，
+	// 如 SQLite 的 transaction / order / user，无引号时会报
+	// "SQL logic error: near \"transaction\": syntax error"（2026-09-02 修复）。
+	// SQLite/PostgreSQL 原生支持双引号；MySQL 需 ANSI_QUOTES 模式（PostgreSQL 走 postgres.go 不受影响）。
+	// 引用标识符大小写敏感，故配合 ToLower 与 DDL 的小写表名约定保持一致。
 	parts := strings.Split(strings.ReplaceAll(entityType, "*", ""), ".")
 	typeName := parts[len(parts)-1]
-	tableName := strings.ToLower(typeName)
+	tableName := `"` + strings.ToLower(typeName) + `"`
 
 	// 正确初始化model，特别是当T是指针类型时
 	modelValue := reflect.ValueOf(model)

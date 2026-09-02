@@ -275,9 +275,17 @@ func (app *App) Start() error {
 	srv := &http.Server{
 		Addr:           app.Config.Server.Host + ":" + strconv.Itoa(app.Config.Server.Port),
 		Handler:        app.Engine,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
+		ReadTimeout:    app.Config.Server.ReadTimeout,
+		WriteTimeout:   app.Config.Server.WriteTimeout,
+		IdleTimeout:    app.Config.Server.IdleTimeout,
 		MaxHeaderBytes: 1 << 20,
+	}
+	// 显式配置为 0 视为未配置而非"永不超时"：无超时的服务端会被慢请求拖垮连接资源
+	if srv.ReadTimeout <= 0 {
+		srv.ReadTimeout = 10 * time.Second
+	}
+	if srv.WriteTimeout <= 0 {
+		srv.WriteTimeout = 10 * time.Second
 	}
 
 	// 启动服务器
