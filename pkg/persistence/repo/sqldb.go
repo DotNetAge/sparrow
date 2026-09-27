@@ -1008,6 +1008,17 @@ func (r *SqlDBRepository[T]) findFieldForColumn(entityValue reflect.Value, colum
 		return field, nil
 	}
 
+	// 兼容两种 id 列命名约定（2026-09-28 回归修复）：
+	// b993f26 把 toCamelCase 的 id 词统一映射为 "ID"（与测试实体一致），
+	// 但生成代码的实体字段是 Id 后缀（如 WarehouseId），导致 scan 时
+	// warehouse_id → WarehouseID 找不到字段而留零值（读路径返回空 ID）。
+	// 主映射失败后按相反约定重试，两种命名并存皆可正确映射。
+	if alt := alternateIdCasing(camelColumn); alt != camelColumn {
+		if altField := entityValue.FieldByName(alt); altField.IsValid() && altField.CanSet() {
+			return altField, nil
+		}
+	}
+
 	// 特殊处理ID字段，尝试"Id"形式（与BaseEntity保持一致）
 	if column == "id" {
 		field = entityValue.FieldByName("Id")
@@ -1196,6 +1207,19 @@ func (r *SqlDBRepository[T]) toCamelCase(s string) string {
 		}
 	}
 	return result.String()
+}
+
+// alternateIdCasing 在 "ID" 与 "Id" 两种 id 词命名约定间切换，供字段查找失败时回退尝试。
+// 场景：列 warehouse_id 依 toCamelCase 得到 WarehouseID，但实体字段可能是 WarehouseId
+// （生成代码约定）或 WarehouseID（测试实体约定）；两种命名并存，主映射失败后按相反约定重试。
+func alternateIdCasing(s string) string {
+	if strings.Contains(s, "ID") {
+		return strings.ReplaceAll(s, "ID", "Id")
+	}
+	if strings.Contains(s, "Id") {
+		return strings.ReplaceAll(s, "Id", "ID")
+	}
+	return s
 }
 
 // extractFields 递归提取结构体及其嵌入结构体、值对象的所有字段
