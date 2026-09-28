@@ -8,8 +8,9 @@ import (
 
 type UserClaims struct {
 	jwt.RegisteredClaims
-	UserID string   `json:"user_id"`
-	Roles  []string `json:"roles"` // Roles 用户的角色
+	UserID    string   `json:"user_id"`
+	Roles     []string `json:"roles"`                // Roles 用户的角色
+	TokenType string   `json:"token_type,omitempty"` // TokenType 令牌类型："access" / "refresh"；空值视为旧版令牌（兼容）
 }
 
 func NewUserClaims(issuer string, userID string, userName string, roles []string) *UserClaims {

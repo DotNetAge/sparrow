@@ -46,6 +46,15 @@ func ServerHost(host string) Option {
 	}
 }
 
+// ServerTimeouts 配置服务器读写超时。
+// 含 LLM 同步调用的服务需放宽 WriteTimeout（如 15m），否则处理超时后服务端强断连接，客户端收到 EOF。
+func ServerTimeouts(read, write time.Duration) Option {
+	return func(o *App) {
+		o.Config.Server.ReadTimeout = read
+		o.Config.Server.WriteTimeout = write
+	}
+}
+
 // SQLDB 配置SQL数据库连接
 func SQLiteDB(schema string) Option {
 	return func(app *App) {

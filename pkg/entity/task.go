@@ -1,8 +1,9 @@
 package entity
 
 import (
-	"fmt"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // TaskStatus 任务状态枚举
@@ -40,8 +41,7 @@ var _ Entity = (*Task)(nil)
 // NewTask 创建新任务实体
 func NewTask(taskType string, payload map[string]interface{}) *Task {
 
-	id := generateTaskID()
-	baseEntity := NewBaseEntity(id)
+	baseEntity := NewBaseEntity(uuid.NewString())
 	return &Task{
 		BaseEntity: *baseEntity,
 		Type:       taskType,
@@ -51,11 +51,6 @@ func NewTask(taskType string, payload map[string]interface{}) *Task {
 		Retries:    0,
 		MaxRetry:   3,
 	}
-}
-
-// generateTaskID 生成任务ID
-func generateTaskID() string {
-	return fmt.Sprintf("task_%d_%d", time.Now().UnixNano(), time.Now().UnixMilli())
 }
 
 // Start 标记任务开始

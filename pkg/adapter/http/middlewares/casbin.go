@@ -3,16 +3,25 @@ package middlewares
 import (
 	"net/http"
 
+	"github.com/DotNetAge/sparrow/pkg/auth"
 	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
 )
 
-// NewCasbinMiddleware 创建一个 Casbin 中间件
+// RBACMiddleware 创建一个 Casbin 中间件
 func RBACMiddleware(e *casbin.Enforcer) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// 1. 从上下文获取用户名 (假设 JWT 中间件已经将用户名存入了 "username")
-		username, exists := c.Get("username")
-		if !exists {
+		// 1. 获取 Casbin subject（用户名）：
+		//    优先从 request.Context 读取 JWTAuthMiddleware 写入的 Principal
+		//    （auth.Current，JWT 签名校验后的可信身份），仅当 request.Context
+		//    无 Principal 时，才回退兼容直接 c.Set("username") 的旧调用方。
+		username := ""
+		if p := auth.Current(c.Request.Context()); p != nil {
+			username = p.Username
+		} else if v, exists := c.Get("username"); exists {
+			username, _ = v.(string)
+		}
+		if username == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "未认证"})
 			c.Abort()
 			return

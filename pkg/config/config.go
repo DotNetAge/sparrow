@@ -29,9 +29,9 @@ func SetDefaults(viper *viper.Viper) {
 
 	viper.SetDefault("server.host", "0.0.0.0")
 	viper.SetDefault("server.port", 8080)
-	// viper.SetDefault("server.read_timeout", "30s")
-	// viper.SetDefault("server.write_timeout", "30s")
-	// viper.SetDefault("server.idle_timeout", "60s")
+	// 默认与历史硬编码一致（10s）；含 LLM 同步调用的服务通过配置文件/环境变量/Option 放宽
+	viper.SetDefault("server.read_timeout", "10s")
+	viper.SetDefault("server.write_timeout", "10s")
 
 	// CORS 配置
 	viper.SetDefault("cors.allow_origins", []string{"*"})

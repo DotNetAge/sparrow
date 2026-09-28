@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/DotNetAge/sparrow/pkg/entity"
@@ -36,6 +37,8 @@ func NewJetStreamEventReader(
 	}
 }
 
+// GetEvents 获取指定聚合类型下的特定事件类型的事件
+// Deprecated: 该实现只返回每个聚合根的最高版本事件，与事件溯源相悖，请改用 GetAggregateEvents
 func (j *JetStreamEventReader) GetEvents(aggregateType string, eventType string) ([]entity.DomainEvent, error) {
 	ctx := context.Background()
 
@@ -134,6 +137,81 @@ func (j *JetStreamEventReader) GetEvents(aggregateType string, eventType string)
 	for _, event := range highestVersionEvents {
 		events = append(events, event)
 	}
+
+	return events, nil
+}
+
+// GetAggregateEvents 按聚合ID获取完整事件流（按版本升序），用于聚合重放与全量投影重建
+func (j *JetStreamEventReader) GetAggregateEvents(ctx context.Context, aggregateID string) ([]entity.DomainEvent, error) {
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+
+	// 构建消费者配置：过滤主题通配所有聚合类型下该聚合ID的事件
+	cfg := jetstream.ConsumerConfig{
+		AckPolicy:     jetstream.AckExplicitPolicy,
+		FilterSubject: fmt.Sprintf("*.%s.*", aggregateID),
+		DeliverPolicy: jetstream.DeliverAllPolicy,
+		ReplayPolicy:  jetstream.ReplayInstantPolicy,
+	}
+
+	stream, err := j.js.Stream(ctxWithTimeout, j.streamName)
+	if err != nil {
+		if err == jetstream.ErrStreamNotFound {
+			j.logger.Warn("[事件流读取器]获取流失败,聚合根不存在可能还未创建,不进行任何读取操作。", "stream", j.streamName, "error", err)
+			return []entity.DomainEvent{}, nil
+		}
+
+		j.logger.Error("[事件流读取器]获取流失败", "stream", j.streamName, "error", err)
+		return nil, fmt.Errorf("[事件流读取器]获取流失败 %w", err)
+	}
+
+	consumer, err := stream.CreateConsumer(ctxWithTimeout, cfg)
+	if err != nil {
+		j.logger.Error("[事件流读取器]创建消费者失败", "stream", j.streamName, "error", err)
+		return nil, fmt.Errorf("[事件流读取器]创建消费者失败: %w", err)
+	}
+
+	// 分页拉取该聚合ID的全部事件
+	var events []entity.DomainEvent
+	batchSize := 1000
+	for {
+		batch, err := consumer.FetchNoWait(batchSize)
+		if err != nil {
+			j.logger.Error("[事件流读取器]获取消息失败", "stream", j.streamName, "error", err)
+			return nil, fmt.Errorf("[事件流读取器]获取消息失败: %w", err)
+		}
+
+		messageCount := 0
+		for msg := range batch.Messages() {
+			messageCount++
+			// 反序列化事件
+			var event entity.BaseEvent
+			data := msg.Data()
+			if err := json.Unmarshal(data, &event); err != nil {
+				j.logger.Error("[事件流读取器]反序列化事件失败", "stream", j.streamName, "error", err)
+				_ = msg.Ack()
+				continue
+			}
+			event.Payload = data
+
+			if event.GetAggregateID() != aggregateID {
+				_ = msg.Ack()
+				continue
+			}
+
+			events = append(events, &event)
+			_ = msg.Ack()
+		}
+
+		if messageCount == 0 {
+			break
+		}
+	}
+
+	// 按版本升序排列，保证重放与投影的版本连续性
+	sort.Slice(events, func(i, j int) bool {
+		return events[i].GetVersion() < events[j].GetVersion()
+	})
 
 	return events, nil
 }

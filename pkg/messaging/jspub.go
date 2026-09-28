@@ -157,6 +157,11 @@ func (p *JetStreamPublisher) Publish(ctx context.Context, event entity.DomainEve
 
 	// 将原有的事件先转换为一般化的领域事件，避免Playload丢失。这是为了与StreamReader保持一致
 	playload, err := json.Marshal(event)
+	if err != nil {
+		p.logger.Error("[事件流发布器]序列化事件失败", "subject", subject, "aggregateType", event.GetAggregateType(), "eventType", event.GetEventType(), "error", err)
+		return fmt.Errorf("marshal event: %w", err)
+	}
+
 	baseEvent := entity.NewBaseEvent(
 		event.GetAggregateID(),
 		event.GetEventType(),
@@ -164,13 +169,18 @@ func (p *JetStreamPublisher) Publish(ctx context.Context, event entity.DomainEve
 		event.GetVersion(),
 	)
 	baseEvent.Id = event.GetEventID()
+	// 保留原始事件的创建时间，避免重播时时间失真
+	baseEvent.Timestamp = event.GetCreatedAt()
+	// 携带事件契约版本：实现 SchemaVersioned 接口的事件可声明自身版本，否则按 1
+	if sv, ok := event.(entity.SchemaVersioned); ok {
+		baseEvent.SchemaVersion = sv.GetSchemaVersion()
+	}
 	baseEvent.Payload = base64.StdEncoding.EncodeToString(playload)
 
-	data, _ := json.Marshal(baseEvent)
-
+	data, err := json.Marshal(baseEvent)
 	if err != nil {
-		p.logger.Error("[事件流发布器]序列化事件失败", "subject", subject, "aggregateType", event.GetAggregateType(), "eventType", event.GetEventType(), "error", err)
-		return fmt.Errorf("marshal event: %w", err)
+		p.logger.Error("[事件流发布器]序列化基础事件失败", "subject", subject, "error", err)
+		return fmt.Errorf("marshal base event: %w", err)
 	}
 
 	// 发布到JetStream

@@ -43,9 +43,15 @@ func NewSqlDBRepository[T entity.Entity](db *sql.DB) *SqlDBRepository[T] {
 
 	// 生成表名：只使用类型名的最后一部分，转换为小写
 	// 例如：repo.TestEntity -> testentity, *repo.TestEntity -> testentity
+	//
+	// 表名统一加双引号（SQL 标准标识符引用）：实体类型名可能撞数据库保留字，
+	// 如 SQLite 的 transaction / order / user，无引号时会报
+	// "SQL logic error: near \"transaction\": syntax error"（2026-09-02 修复）。
+	// SQLite/PostgreSQL 原生支持双引号；MySQL 需 ANSI_QUOTES 模式（PostgreSQL 走 postgres.go 不受影响）。
+	// 引用标识符大小写敏感，故配合 ToLower 与 DDL 的小写表名约定保持一致。
 	parts := strings.Split(strings.ReplaceAll(entityType, "*", ""), ".")
 	typeName := parts[len(parts)-1]
-	tableName := strings.ToLower(typeName)
+	tableName := `"` + strings.ToLower(typeName) + `"`
 
 	// 正确初始化model，特别是当T是指针类型时
 	modelValue := reflect.ValueOf(model)
@@ -936,12 +942,26 @@ type nullableTime struct {
 }
 
 // Scan 实现 sql.Scanner 接口
+// 兼容 SQLite（modernc 驱动）以字符串返回的 TIMESTAMP 列：驱动绑定 time.Time 时
+// 存储为 "2006-01-02 15:04:05.999999999-07:00" 文本，读取原样返回 string，
+// 直接断言 time.Time 会报 "unsupported type: string"（2026-09-02 修复）。
 func (nt *nullableTime) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
-	t, ok := value.(time.Time)
-	if !ok {
+	var t time.Time
+	switch v := value.(type) {
+	case time.Time:
+		t = v
+	case string:
+		parsed, ok := parseSQLTimeString(v)
+		if !ok {
+			return fmt.Errorf("无法解析时间字符串: %q", v)
+		}
+		t = parsed
+	case []byte:
+		return nt.Scan(string(v))
+	default:
 		return fmt.Errorf("unsupported type: %T", value)
 	}
 	*nt.timePtr = t
@@ -949,6 +969,26 @@ func (nt *nullableTime) Scan(value interface{}) error {
 		nt.setValue(t)
 	}
 	return nil
+}
+
+// parseSQLTimeString 解析 SQLite/常见方言存储的时间字符串。
+// 首选 modernc 驱动的 SQLite 默认格式，再兼容 RFC3339 与无时区的本地格式。
+func parseSQLTimeString(s string) (time.Time, bool) {
+	layouts := []string{
+		"2006-01-02 15:04:05.999999999-07:00", // SQLite 默认格式（modernc 驱动绑定 time.Time 的存储格式）
+		time.RFC3339Nano,
+		time.RFC3339,
+		"2006-01-02 15:04:05.999999999",
+		"2006-01-02 15:04:05",
+		"2006-01-02T15:04:05",
+		"2006-01-02",
+	}
+	for _, layout := range layouts {
+		if t, err := time.Parse(layout, s); err == nil {
+			return t, true
+		}
+	}
+	return time.Time{}, false
 }
 
 // Value 实现 driver.Valuer 接口
@@ -966,6 +1006,17 @@ func (r *SqlDBRepository[T]) findFieldForColumn(entityValue reflect.Value, colum
 	field := entityValue.FieldByName(camelColumn)
 	if field.IsValid() && field.CanSet() {
 		return field, nil
+	}
+
+	// 兼容两种 id 列命名约定（2026-09-28 回归修复）：
+	// b993f26 把 toCamelCase 的 id 词统一映射为 "ID"（与测试实体一致），
+	// 但生成代码的实体字段是 Id 后缀（如 WarehouseId），导致 scan 时
+	// warehouse_id → WarehouseID 找不到字段而留零值（读路径返回空 ID）。
+	// 主映射失败后按相反约定重试，两种命名并存皆可正确映射。
+	if alt := alternateIdCasing(camelColumn); alt != camelColumn {
+		if altField := entityValue.FieldByName(alt); altField.IsValid() && altField.CanSet() {
+			return altField, nil
+		}
 	}
 
 	// 特殊处理ID字段，尝试"Id"形式（与BaseEntity保持一致）
@@ -1159,6 +1210,19 @@ func (r *SqlDBRepository[T]) toCamelCase(s string) string {
 		}
 	}
 	return result.String()
+}
+
+// alternateIdCasing 在 "ID" 与 "Id" 两种 id 词命名约定间切换，供字段查找失败时回退尝试。
+// 场景：列 warehouse_id 依 toCamelCase 得到 WarehouseID，但实体字段可能是 WarehouseId
+// （生成代码约定）或 WarehouseID（测试实体约定）；两种命名并存，主映射失败后按相反约定重试。
+func alternateIdCasing(s string) string {
+	if strings.Contains(s, "ID") {
+		return strings.ReplaceAll(s, "ID", "Id")
+	}
+	if strings.Contains(s, "Id") {
+		return strings.ReplaceAll(s, "Id", "ID")
+	}
+	return s
 }
 
 // extractFields 递归提取结构体及其嵌入结构体、值对象的所有字段
