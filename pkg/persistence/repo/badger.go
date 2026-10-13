@@ -775,6 +775,28 @@ func (r *BadgerRepository[T]) compareField(fieldValue interface{}, operator stri
 
 	fieldValueStr := fmt.Sprintf("%v", fieldValue)
 
+	// 时间比较（2026-10-05 修复）：任一侧可解析为时间且两侧均为时间语义时，按时间先后比较，
+	// 覆盖 EQ/NEQ/GT/GTE/LT/LTE——此前 GT 族一律走数值转换，time.Time 恒判 false，
+	// 导致所有视图的时间区间过滤（start_date/end_date）空结果。
+	if ft, fok := r.toTime(fieldValue); fok {
+		if ct, cok := r.toTime(conditionValue); cok {
+			switch operator {
+			case "EQ":
+				return ft.Equal(ct)
+			case "NEQ":
+				return !ft.Equal(ct)
+			case "GT":
+				return ft.After(ct)
+			case "GTE":
+				return !ft.Before(ct)
+			case "LT":
+				return ft.Before(ct)
+			case "LTE":
+				return !ft.After(ct)
+			}
+		}
+	}
+
 	switch operator {
 	case "EQ":
 		return fieldValueStr == fmt.Sprintf("%v", conditionValue)
@@ -834,6 +856,25 @@ func (r *BadgerRepository[T]) compareNumeric(fieldValue interface{}, conditionVa
 
 	// 使用比较函数进行比较
 	return compareFunc(fieldFloat, conditionFloat)
+}
+
+// toTime 将值解析为时间（time.Time / *time.Time / RFC3339 / 'YYYY-MM-DD HH:MM:SS' / 日期字符串），不可解析返回 false
+func (r *BadgerRepository[T]) toTime(value interface{}) (time.Time, bool) {
+	switch v := value.(type) {
+	case time.Time:
+		return v, true
+	case *time.Time:
+		if v != nil {
+			return *v, true
+		}
+	case string:
+		for _, layout := range []string{time.RFC3339Nano, time.RFC3339, "2006-01-02 15:04:05", "2006-01-02"} {
+			if t, err := time.ParseInLocation(layout, v, time.Local); err == nil {
+				return t, true
+			}
+		}
+	}
+	return time.Time{}, false
 }
 
 // toFloat64 将值转换为 float64
