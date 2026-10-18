@@ -1,6 +1,7 @@
 package bootstrap
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"os"
@@ -144,30 +145,88 @@ func BadgerDB() Option {
 					panic(err)
 				}
 				return db
-			} else {
-				// 当前为可应对每年10万行数据的吞吐量优化配置
-				opts := badger.DefaultOptions(o.Config.Badger.DataDir).
-					WithValueLogFileSize(256 << 20). // 256 MB
-					WithValueThreshold(2 * 1024).    // 2 KB
-					WithMemTableSize(64 << 20).      // 64 MB
-					WithNumMemtables(2).
-					WithCompression(options.ZSTD) // 或 badger.Snappy
-					// 这是一个针对2万行数据的优化配置
-					// WithValueLogFileSize(64 << 20). // 64 MB
-					// WithValueThreshold(1024).       // 1 KB: 小于该值的 value 存在 LSM
-					// WithNumMemtables(2).
-					// WithMemTableSize(64 << 20).   // 64 MB
-					// WithCompression(options.ZSTD) // 或 badger.Snappy
-
-				db, err := badger.Open(opts)
-				if err != nil {
-					o.Logger.Error("创建BadgerDB实例失败", "error", err)
-					panic(err)
-				}
-				return db
 			}
+
+			valueThreshold := o.Config.Badger.ValueThreshold
+			if valueThreshold <= 0 {
+				valueThreshold = 2 * 1024 // 默认 2 KB：小于该值的 value 存 LSM，大于进 vlog
+			}
+			opts := badger.DefaultOptions(o.Config.Badger.DataDir).
+				WithValueLogFileSize(64 << 20). // 64 MB：vlog 文件越小 GC 资格判定越快（垃圾占比过半即可重写），避免 256MB 半空文件常驻
+				WithValueThreshold(valueThreshold).
+				WithMemTableSize(64 << 20). // 64 MB
+				WithNumMemtables(2).
+				WithCompression(options.ZSTD)
+			if o.Config.Badger.NumCompactors > 0 {
+				opts = opts.WithNumCompactors(o.Config.Badger.NumCompactors) // 接线配置字段，0 = badger 默认压实器数
+			}
+
+			db, err := badger.Open(opts)
+			if err != nil {
+				o.Logger.Error("创建BadgerDB实例失败", "error", err)
+				panic(err)
+			}
+			startBadgerValueLogGC(o, db)
+			return db
 		})
 	}
+}
+
+// badgerGCKeeper 周期触发 Badger vlog 垃圾回收的后台任务。
+// Badger 设计：LSM 压实自动进行，但 value log 回收必须手动周期调用 RunValueLogGC——
+// 不触发则投影覆写留下的死值永久留存，磁盘只增不减（15 服务实测涨至 10GB）。
+type badgerGCKeeper struct {
+	stop chan struct{}
+	done chan struct{}
+}
+
+func (k *badgerGCKeeper) Close(ctx context.Context) error {
+	close(k.stop)
+	select {
+	case <-k.done:
+	case <-ctx.Done():
+	}
+	return nil
+}
+
+// startBadgerValueLogGC 启动自动 vlog 回收：启动 1 分钟后首跑回收存量，此后每 10 分钟一轮；
+// 单轮内连续回收直至 ErrNoRewrite（无文件垃圾占比达 discardRatio）。Debug 内存实例不启动。
+func startBadgerValueLogGC(o *App, db *badger.DB) {
+	if o.Debug {
+		return
+	}
+	keeper := &badgerGCKeeper{stop: make(chan struct{}), done: make(chan struct{})}
+	o.NeedCleanup(keeper)
+	reclaimRound := func() {
+		for {
+			err := db.RunValueLogGC(0.5) // 回收率门槛 50%：垃圾不足半文件不重写，避免无效搬移
+			if err != nil {
+				return // ErrNoRewrite = 本轮无文件可回收，静默结束
+			}
+			o.Logger.Info("BadgerDB vlog 垃圾回收完成")
+		}
+	}
+	go func() {
+		defer close(keeper.done)
+		first := time.NewTimer(time.Minute)
+		defer first.Stop()
+		ticker := time.NewTicker(10 * time.Minute)
+		defer ticker.Stop()
+		select {
+		case <-first.C:
+			reclaimRound()
+		case <-keeper.stop:
+			return
+		}
+		for {
+			select {
+			case <-ticker.C:
+				reclaimRound()
+			case <-keeper.stop:
+				return
+			}
+		}
+	}()
 }
 
 // BoltDB 配置 bbolt 数据库连接
