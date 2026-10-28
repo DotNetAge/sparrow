@@ -62,7 +62,7 @@ func SetDefaults(viper *viper.Viper) {
 	viper.SetDefault("badger.data_dir", "./data/badger/views")   // 作为仓库存储的路径
 	viper.SetDefault("badger.es_dir", "./data/badger/es")        // 作为事件存储时的路径
 	viper.SetDefault("badger.value_threshold", int64(1024*1024)) // 1MB
-	viper.SetDefault("badger.num_compactors", 1)
+	viper.SetDefault("badger.num_compactors", 0) // 0 = 用 badger 默认压实器数；badger 明确拒绝 1（"Cannot have 1 compactor. Need at least 2"）
 	viper.SetDefault("badger.in_memory", false)
 	// viper.SetDefault("badger.mem_table_size", int64(1024*1024)) // 1MB
 	// viper.SetDefault("badger.max_table_size", int64(1024*1024*1024)) // 1GB

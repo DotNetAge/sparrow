@@ -3,6 +3,7 @@ package messaging
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -161,12 +162,23 @@ func (s *JetStreamBus) Start(ctx context.Context) error {
 		return fmt.Errorf("获取流失败: %w", err)
 	}
 
-	consumer, err := stream.CreateOrUpdateConsumer(ctx, cfg)
-	if err != nil {
-		s.logger.Error("创建消费者失败", "consumer", s.consumerName, "stream", s.serviceName, "error", err)
-		s.cleanup()
-		return fmt.Errorf("创建消费者失败: %w", err)
-	}
+	// 已存在即复用（尊重预置起始位与既往消费进度）：deliver policy 等不可变字段
+		// 强行更新会被 NATS 10012 拒绝，导致启动退避重试死循环（2026-10-21 迁移踩坑：
+		// seed 预置 DeliverByStartSequencePolicy 到流尾，服务启动却用 DeliverAllPolicy 更新同名 consumer）
+		consumer, cerr := stream.Consumer(ctx, s.consumerName)
+		if cerr != nil {
+				if !errors.Is(cerr, jetstream.ErrConsumerNotFound) {
+						s.logger.Error("查询消费者失败", "consumer", s.consumerName, "stream", s.serviceName, "error", cerr)
+						s.cleanup()
+						return fmt.Errorf("查询消费者失败: %w", cerr)
+				}
+				consumer, err = stream.CreateOrUpdateConsumer(ctx, cfg)
+				if err != nil {
+						s.logger.Error("创建消费者失败", "consumer", s.consumerName, "stream", s.serviceName, "error", err)
+						s.cleanup()
+						return fmt.Errorf("创建消费者失败: %w", err)
+				}
+		}
 	s.consumer = consumer
 
 	// 3. 异步启动消费
