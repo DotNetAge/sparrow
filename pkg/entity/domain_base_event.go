@@ -77,17 +77,26 @@ const currentSchemaVersion = 1
 
 func UnmarshalEvent[T any](event *BaseEvent) (T, error) {
 	var payload T
+	if event == nil {
+		return payload, fmt.Errorf("unmarshal event: base event is nil")
+	}
 	if event.SchemaVersion > currentSchemaVersion {
 		return payload, fmt.Errorf("unmarshal payload: 事件契约版本 %d 高于当前支持版本 %d，请升级消费方以支持新 schema_version", event.SchemaVersion, currentSchemaVersion)
 	}
-	if event.Payload != nil {
-		data, err := base64.StdEncoding.DecodeString(event.Payload.(string))
-		if err != nil {
-			return payload, fmt.Errorf("decode payload: %w", err)
-		}
-		if err := json.Unmarshal(data, &payload); err != nil {
-			return payload, fmt.Errorf("unmarshal payload: %w", err)
-		}
+	if event.Payload == nil {
+		// 2026-11-27 ray：Payload 缺失显式返回 error，禁止 (nil, nil) 穿透到下游 handler
+		// 之前 Payload=nil 时 payload=T{零值}（对指针类型是 nil），调用方拿到 err=nil 直接
+		// 把 nil event 传给业务 handler → NPE panic 炸进程。
+		// 设计意图：Payload 缺失的事件应该走 handleMessage 的 error 路径 → msg.Nak()
+		// → 增加 JetStream 投递计数 → MaxDeliver 达到后自动转死信流，而不是静默穿透。
+		return payload, fmt.Errorf("unmarshal payload: event %s aggregate=%s payload 缺失（可能是发布端未序列化或版本不匹配）", event.EventType, event.AggregateID)
+	}
+	data, err := base64.StdEncoding.DecodeString(event.Payload.(string))
+	if err != nil {
+		return payload, fmt.Errorf("decode payload: %w", err)
+	}
+	if err := json.Unmarshal(data, &payload); err != nil {
+		return payload, fmt.Errorf("unmarshal payload: %w", err)
 	}
 	return payload, nil
 }

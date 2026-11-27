@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"runtime/debug"
 	"strings"
 	"sync"
 
@@ -116,6 +117,10 @@ func (s *JetStreamSubscriber[T]) Start(ctx context.Context) error {
 		FilterSubject: fmt.Sprintf("%s.*.%s", s.aggType, s.eventType), // 只订阅当前事件类型
 		DeliverPolicy: jetstream.DeliverAllPolicy,                     // 从最早的消息开始投递，支持事件重放
 		ReplayPolicy:  jetstream.ReplayInstantPolicy,                  // 立即重放所有消息
+		MaxDeliver:    5,                                              // 投递 5 次后 JetStream 自动转死信流 {stream}_DLQ
+		// 2026-11-27 ray：之前 MaxDeliver 默认 -1（无限重试）导致僵尸消息 panic 2444 次循环。
+		// 设 5 次 = ack_wait(30s) × 5 = 150s 足够临时故障恢复；超过则转死信暴露问题。
+		// CreateOrUpdateConsumer 显式指定非零值会覆盖旧 consumer 的 -1 配置。
 	}
 
 	// 2. 获取流并创建消费者
@@ -241,6 +246,27 @@ func (s *JetStreamSubscriber[T]) cleanup() {
 
 // handleMessage 处理单条消息（内部方法，继承结构体泛型）
 func (s *JetStreamSubscriber[T]) handleMessage(msg jetstream.Msg) {
+	// 2026-11-27 ray：goroutine 级 panic 隔离（修复 #1 production-service 2444 次崩溃）
+	// 之前 handler panic 直接炸 goroutine → 进程退出 → 消息 pending 不增加投递计数 →
+	// MaxDeliver 永远不触发 → 死信队列完全不生效（因为 JetStream 只看到连接断了，
+	// 不计为"投递失败"）。现在 recover 捕获 panic → Nak 消息 → 投递计数 +1 →
+	// MaxDeliver 达到 5 后 JetStream 自动转死信流，进程继续跑。
+	defer func() {
+		if r := recover(); r != nil {
+			consumerName := fmt.Sprintf("%s-%s-%s", s.serviceName, s.aggType, s.eventType)
+			s.logger.Error("消息处理 panic（已隔离，进程不崩）",
+				"consumer", consumerName,
+				"panic", r,
+				"stack", string(debug.Stack()),
+				"subject", msg.Subject(),
+			)
+			// Nak 增加 JetStream 投递计数（Nak 是 goroutine-safe 的 proto 发送）
+			if err := msg.Nak(); err != nil {
+				s.logger.Warn("panic 后 Nak 消息失败", "consumer", consumerName, "error", err)
+			}
+		}
+	}()
+
 	// 检查消费上下文是否已取消
 	if s.consumeCtx != nil && s.consumeCtx.Err() != nil {
 		// 如果消费已取消，简单确认消息
